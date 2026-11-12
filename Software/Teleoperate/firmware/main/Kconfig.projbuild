@@ -1,0 +1,55 @@
+menu "Teleop robot"
+
+    config TELEOP_NAME
+        string "Robot name"
+        default "PetBot"
+
+    config TELEOP_DXL_TX
+        int "DYNAMIXEL TX GPIO (board pin TX1)"
+        default 43
+
+    config TELEOP_DXL_RX
+        int "DYNAMIXEL RX GPIO (board pin RX0, jumpered to TX1)"
+        default 44
+
+    config TELEOP_DXL_BAUD
+        int "DYNAMIXEL baud rate"
+        default 1000000
+
+    config TELEOP_ID_LEFT
+        int "Left motor ID"
+        default 1
+
+    config TELEOP_ID_RIGHT
+        int "Right motor ID"
+        default 2
+
+    config TELEOP_MAX_RPM
+        int "Top wheel speed (rpm, XL430 limit is about 57 on 3S)"
+        default 55
+
+    config TELEOP_ACCEL
+        int "Motor ramp (Profile Acceleration, 214.6 rev/min^2 per unit, 0 = none)"
+        default 40
+
+    config TELEOP_WATCHDOG_MS
+        int "Stop the wheels after this long without a command (ms)"
+        default 500
+
+    config TELEOP_WIFI_SSID
+        string "Wi-Fi network the robot creates"
+        default "PetBot"
+
+    config TELEOP_WIFI_PASS
+        string "Its password (8 or more characters)"
+        default "petbot123"
+
+    config TELEOP_WIFI_CHANNEL
+        int "Wi-Fi channel"
+        default 6
+
+    config TELEOP_UDP_PORT
+        int "UDP port"
+        default 5005
+
+endmenu
