@@ -1,0 +1,23 @@
+{
+  "joints": [
+    "Frame bracket L to deck",
+    "Servo L to frame bracket",
+    "Frame driven arm L -30 to +10 deg",
+    "Arm L assembly - 07L servo supplied horn - retained spline and pilot holes",
+    "Arm L assembly - V8 Arm L smooth removable flipper cover",
+    "Arm L assembly - Hardware arm L hidden M2x10 Z115",
+    "Arm L assembly - Hardware arm L hidden M2x10 Z119",
+    "Frame bracket R to deck",
+    "Servo R to frame bracket",
+    "Frame driven arm R -30 to +10 deg",
+    "Arm R assembly - 07R servo supplied horn - retained spline and pilot holes",
+    "Arm R assembly - V8 Arm R smooth removable flipper cover",
+    "Arm R assembly - Hardware arm R hidden M2x10 Z115",
+    "Arm R assembly - Hardware arm R hidden M2x10 Z119",
+    "Braced cage clamped to motor plate by four through bolts",
+    "Frame stack - V8 Battery shelf - strap slots and removable standoff stack",
+    "Frame stack - V8 Lower front frame - braced compression supports",
+    "Frame stack - V8 Lower rear frame - braced compression supports",
+    "Neck carrier tied to servo towers and central mast"
+  ]
+}

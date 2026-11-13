@@ -1,0 +1,2009 @@
+{
+  "parts": [
+    {
+      "name": "07L servo - 9g servo envelope 23 x12.2 x24 - verify actual unit:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "07R servo - 9g servo envelope 23 x12.2 x24 - verify actual unit:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V8 Neck diffuser - original geometry:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V8 Head - original exterior and underside neck fasteners:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "R2 07 Recessed black display mask:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "R2 08 Left recessed LED eye graphic:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "R2 08 Right recessed LED eye graphic:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "R2 10 Camera lens outer rim:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "R2 11 Camera glass:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "R2 12 Warm belly lamp dome:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "R2 13 Audio port dark interior -24:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "R2 13 Audio port dark interior 24:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "R2 16 Removable antenna stalk envelope:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "R2 17 Textile pom envelope:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "R2 07A Continuous smoked face cover - optics provisional:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V8 Internal neck carrier - square mast and concealed M3 head screws:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V8 Motor plate - underside seating face and side-loaded M3 nut pockets:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V8 Electronics cage - triangulated walls and full servo foot supports:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V3 Battery envelope - relocated to shelf / Body1:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_PH_U2D2 / Body1:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_PH_Pololu_D24V50F5 / Body1:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_PH_RaspberryPi5 / Body1:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_PH_Pi5_ActiveCooler / Body1:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_DC11_A01_DUMMY / Body1:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_DC11_A01_DUMMY / Body2:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_DX124_SCREW-COVER / Body2:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_B3B-EH / Body1:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_B3B-EH / Body1 (1):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_DC11_A01_CASE_CVR_DUMMY / Body2:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_DC11_A01_IDLER_DUMMY / Body1:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_DC11_A01_IDLER_CAP_DUMMY / Body1:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_DC11_A01_IDLER_SCREW / Body2:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (1):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (2):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (3):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (4):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (5):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (6):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (7):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (1):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (2):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (3):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (4):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (5):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (6):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (7):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_TB3_Wheel_66x18 / Body1:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V8 Front caster cup - rounded underside flange / Body1:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V3 19.05mm ball - front caster repositioned / Body1:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_DC11_A01_DUMMY / Body1 (1):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_DC11_A01_DUMMY / Body2 (1):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_DX124_SCREW-COVER / Body2 (1):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_B3B-EH / Body1 (2):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_B3B-EH / Body1 (3):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_DC11_A01_CASE_CVR_DUMMY / Body2 (1):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_DC11_A01_IDLER_DUMMY / Body1 (1):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_DC11_A01_IDLER_CAP_DUMMY / Body1 (1):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_DC11_A01_IDLER_SCREW / Body2 (1):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (8):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (9):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (10):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (11):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (12):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (13):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (14):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (15):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (8):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (9):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (10):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (11):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (12):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (13):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (14):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (15):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_TB3_Wheel_66x18 (1) / Body1:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_Spacer_M2x6_Hex / Body1:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_Spacer_M2x6_Hex / Body1 (1):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_Spacer_M2_5x6_Hex / Body1:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_Spacer_M2_5x6_Hex / Body1 (1):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_Spacer_M2_5x6_Hex / Body1 (2):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "DDv3_Spacer_M2_5x6_Hex / Body1 (3):1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V8 Battery shelf - strap slots and removable standoff stack:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware hidden head M3x16 X-62 Y-42:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware hidden head M3x16 X-62 Y42:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware hidden head M3x16 X62 Y-42:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware hidden head M3x16 X62 Y42:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V8 Rear anti-tip ball cup left:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V8 Rear anti-tip ball cup right:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware rear anti-tip steel ball 12.7mm:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware rear cup M2x8 X-10.5:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware rear cup M2x8 X10.5:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware captive head M3 nut X-62 Y-42:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware captive head M3 nut X-62 Y42:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware captive head M3 nut X62 Y-42:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware captive head M3 nut X62 Y42:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V8 Central aluminium square mast 10x10x2 L110:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V8 Bottom square locating bushing:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware M4x125 central support screw:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware M4 central square nut:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V8 Servo frame bracket L - bolted to electronics deck:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V8 Servo frame bracket R - bolted to electronics deck:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "07L servo supplied horn - retained spline and pilot holes:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V8 Arm L keyed hub with replaceable clips:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V8 Arm L smooth removable flipper cover:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware arm L hidden M2x10 Z115:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware arm L hidden M2x10 Z119:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "07R servo supplied horn - retained spline and pilot holes:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V8 Arm R keyed hub with replaceable clips:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V8 Arm R smooth removable flipper cover:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware arm R hidden M2x10 Z115:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware arm R hidden M2x10 Z119:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware servo L ear M2x5 Y-14:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware servo L ear M2x5 Y14:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware servo R ear M2x5 Y-14:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware servo R ear M2x5 Y14:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V8 Torso - lower ledges Z7 to Z10 under motor plate:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware shell underside countersunk M3x10 X-40 Y-35:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware shell plate M3 nut X-40 Y-35:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware shell underside countersunk M3x10 X40 Y-35:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware shell plate M3 nut X40 Y-35:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware shell underside countersunk M3x10 X-18 Y59:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware shell plate M3 nut X-18 Y59:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware shell underside countersunk M3x10 X18 Y59:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware shell plate M3 nut X18 Y59:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V8 Lower front frame - braced compression supports:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V8 Lower rear frame - braced compression supports:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware frame through bolt M3x80 X-30 Y-43:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware frame washer M3 X-30 Y-43:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware frame top nut M3 X-30 Y-43:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware frame through bolt M3x80 X-30 Y49:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware frame washer M3 X-30 Y49:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware frame top nut M3 X-30 Y49:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware front frame shelf M3x10 X-30:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware frame through bolt M3x80 X30 Y-43:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware frame washer M3 X30 Y-43:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware frame top nut M3 X30 Y-43:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware frame through bolt M3x80 X30 Y49:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware frame washer M3 X30 Y49:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware frame top nut M3 X30 Y49:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware front frame shelf M3x10 X30:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware frame bracket L M3x12 Y-20:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware frame bracket L M3x12 Y20:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware carrier to servo tower L M3x10 Y-24:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware carrier to servo tower L M3x10 Y24:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware frame bracket R M3x12 Y-20:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware frame bracket R M3x12 Y20:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware carrier to servo tower R M3x10 Y-24:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware carrier to servo tower R M3x10 Y24:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware M3 insert nominal occupied volume deck X-33 Y-20:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware M3 insert nominal occupied volume deck X-33 Y20:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware M3 insert nominal occupied volume deck X33 Y-20:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware M3 insert nominal occupied volume deck X33 Y20:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware M3 insert nominal occupied volume carrier seat X-53 Y-24:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware M3 insert nominal occupied volume carrier seat X-53 Y24:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware M3 insert nominal occupied volume carrier seat X53 Y-24:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware M3 insert nominal occupied volume carrier seat X53 Y24:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware M3 insert nominal occupied volume front brace X-30 Y-12:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "Hardware M3 insert nominal occupied volume front brace X30 Y-12:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V9 Display pedestal and carrier saddle:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V9 Carrier lower clamp jaw:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V9 Display removable top retainer:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V9 Hardware clamp M3x16 X-25 Y-50:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V9 Hardware clamp M3 nut X-25 Y-50:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V9 Hardware clamp M3x16 X-25 Y-36:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V9 Hardware clamp M3 nut X-25 Y-36:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V9 Hardware clamp M3x16 X25 Y-50:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V9 Hardware clamp M3 nut X25 Y-50:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V9 Hardware clamp M3x16 X25 Y-36:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V9 Hardware clamp M3 nut X25 Y-36:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V9 Hardware retainer M3x10 X-27.71:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V9 Hardware retainer M3 nut X-27.71:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V9 Hardware retainer M3x10 X38.79:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V9 Hardware retainer M3 nut X38.79:1",
+      "solids": 1,
+      "valid": true
+    },
+    {
+      "name": "V9 Waveshare ESP32-S3-AMOLED-1.91-M manufacturer STEP reference:1",
+      "solids": 26,
+      "valid": true
+    }
+  ],
+  "total_solids": 201,
+  "retained": [
+    {
+      "name": "07L servo - 9g servo envelope 23 x12.2 x24 - verify actual unit:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "07R servo - 9g servo envelope 23 x12.2 x24 - verify actual unit:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "V8 Neck diffuser - original geometry:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "V8 Head - original exterior and underside neck fasteners:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "R2 07 Recessed black display mask:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "R2 08 Left recessed LED eye graphic:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "R2 08 Right recessed LED eye graphic:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "R2 10 Camera lens outer rim:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "R2 11 Camera glass:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "R2 12 Warm belly lamp dome:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "R2 13 Audio port dark interior -24:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "R2 13 Audio port dark interior 24:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "R2 16 Removable antenna stalk envelope:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "R2 17 Textile pom envelope:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "R2 07A Continuous smoked face cover - optics provisional:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "V8 Internal neck carrier - square mast and concealed M3 head screws:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "V8 Motor plate - underside seating face and side-loaded M3 nut pockets:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "V8 Electronics cage - triangulated walls and full servo foot supports:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "V3 Battery envelope - relocated to shelf / Body1:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_PH_U2D2 / Body1:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_PH_Pololu_D24V50F5 / Body1:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_PH_RaspberryPi5 / Body1:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_PH_Pi5_ActiveCooler / Body1:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_DC11_A01_DUMMY / Body1:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_DC11_A01_DUMMY / Body2:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_DX124_SCREW-COVER / Body2:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_B3B-EH / Body1:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_B3B-EH / Body1 (1):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_DC11_A01_CASE_CVR_DUMMY / Body2:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_DC11_A01_IDLER_DUMMY / Body1:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_DC11_A01_IDLER_CAP_DUMMY / Body1:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_DC11_A01_IDLER_SCREW / Body2:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (1):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (2):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (3):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (4):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (5):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (6):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (7):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (1):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (2):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (3):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (4):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (5):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (6):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (7):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_TB3_Wheel_66x18 / Body1:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "V8 Front caster cup - rounded underside flange / Body1:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "V3 19.05mm ball - front caster repositioned / Body1:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_DC11_A01_DUMMY / Body1 (1):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_DC11_A01_DUMMY / Body2 (1):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_DX124_SCREW-COVER / Body2 (1):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_B3B-EH / Body1 (2):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_B3B-EH / Body1 (3):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_DC11_A01_CASE_CVR_DUMMY / Body2 (1):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_DC11_A01_IDLER_DUMMY / Body1 (1):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_DC11_A01_IDLER_CAP_DUMMY / Body1 (1):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_DC11_A01_IDLER_SCREW / Body2 (1):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (8):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (9):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (10):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (11):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (12):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (13):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (14):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (15):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (8):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (9):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (10):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (11):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (12):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (13):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (14):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (15):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_TB3_Wheel_66x18 (1) / Body1:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_Spacer_M2x6_Hex / Body1:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_Spacer_M2x6_Hex / Body1 (1):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_Spacer_M2_5x6_Hex / Body1:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_Spacer_M2_5x6_Hex / Body1 (1):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_Spacer_M2_5x6_Hex / Body1 (2):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "DDv3_Spacer_M2_5x6_Hex / Body1 (3):1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "V8 Battery shelf - strap slots and removable standoff stack:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware hidden head M3x16 X-62 Y-42:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware hidden head M3x16 X-62 Y42:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware hidden head M3x16 X62 Y-42:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware hidden head M3x16 X62 Y42:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "V8 Rear anti-tip ball cup left:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "V8 Rear anti-tip ball cup right:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware rear anti-tip steel ball 12.7mm:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware rear cup M2x8 X-10.5:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware rear cup M2x8 X10.5:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware captive head M3 nut X-62 Y-42:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware captive head M3 nut X-62 Y42:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware captive head M3 nut X62 Y-42:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware captive head M3 nut X62 Y42:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "V8 Central aluminium square mast 10x10x2 L110:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "V8 Bottom square locating bushing:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware M4x125 central support screw:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware M4 central square nut:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "V8 Servo frame bracket L - bolted to electronics deck:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "V8 Servo frame bracket R - bolted to electronics deck:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "07L servo supplied horn - retained spline and pilot holes:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "V8 Arm L keyed hub with replaceable clips:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "V8 Arm L smooth removable flipper cover:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware arm L hidden M2x10 Z115:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware arm L hidden M2x10 Z119:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "07R servo supplied horn - retained spline and pilot holes:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "V8 Arm R keyed hub with replaceable clips:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "V8 Arm R smooth removable flipper cover:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware arm R hidden M2x10 Z115:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware arm R hidden M2x10 Z119:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware servo L ear M2x5 Y-14:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware servo L ear M2x5 Y14:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware servo R ear M2x5 Y-14:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware servo R ear M2x5 Y14:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "V8 Torso - lower ledges Z7 to Z10 under motor plate:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware shell underside countersunk M3x10 X-40 Y-35:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware shell plate M3 nut X-40 Y-35:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware shell underside countersunk M3x10 X40 Y-35:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware shell plate M3 nut X40 Y-35:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware shell underside countersunk M3x10 X-18 Y59:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware shell plate M3 nut X-18 Y59:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware shell underside countersunk M3x10 X18 Y59:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware shell plate M3 nut X18 Y59:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "V8 Lower front frame - braced compression supports:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "V8 Lower rear frame - braced compression supports:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware frame through bolt M3x80 X-30 Y-43:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware frame washer M3 X-30 Y-43:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware frame top nut M3 X-30 Y-43:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware frame through bolt M3x80 X-30 Y49:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware frame washer M3 X-30 Y49:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware frame top nut M3 X-30 Y49:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware front frame shelf M3x10 X-30:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware frame through bolt M3x80 X30 Y-43:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware frame washer M3 X30 Y-43:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware frame top nut M3 X30 Y-43:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware frame through bolt M3x80 X30 Y49:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware frame washer M3 X30 Y49:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware frame top nut M3 X30 Y49:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware front frame shelf M3x10 X30:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware frame bracket L M3x12 Y-20:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware frame bracket L M3x12 Y20:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware carrier to servo tower L M3x10 Y-24:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware carrier to servo tower L M3x10 Y24:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware frame bracket R M3x12 Y-20:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware frame bracket R M3x12 Y20:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware carrier to servo tower R M3x10 Y-24:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware carrier to servo tower R M3x10 Y24:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware M3 insert nominal occupied volume deck X-33 Y-20:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware M3 insert nominal occupied volume deck X-33 Y20:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware M3 insert nominal occupied volume deck X33 Y-20:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware M3 insert nominal occupied volume deck X33 Y20:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware M3 insert nominal occupied volume carrier seat X-53 Y-24:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware M3 insert nominal occupied volume carrier seat X-53 Y24:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware M3 insert nominal occupied volume carrier seat X53 Y-24:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware M3 insert nominal occupied volume carrier seat X53 Y24:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware M3 insert nominal occupied volume front brace X-30 Y-12:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    },
+    {
+      "name": "Hardware M3 insert nominal occupied volume front brace X30 Y-12:1",
+      "passed": true,
+      "volume_difference_mm3": 0.0,
+      "centroid_difference_mm": 0.0,
+      "bounds_difference_mm": 0.0
+    }
+  ],
+  "all_retained_match": true,
+  "all_topology_valid": true
+}

@@ -1,0 +1,70 @@
+[
+  {
+    "component": "V8 Internal neck carrier - square mast and concealed M3 head screws",
+    "file": "V8_Internal_neck_carrier_-_square_mast_and_concealed_M3_head_screws.stl"
+  },
+  {
+    "component": "V8 Motor plate - underside seating face and side-loaded M3 nut pockets",
+    "file": "V8_Motor_plate_-_underside_seating_face_and_side-loaded_M3_nut_pockets.stl"
+  },
+  {
+    "component": "V8 Electronics cage - triangulated walls and full servo foot supports",
+    "file": "V8_Electronics_cage_-_triangulated_walls_and_full_servo_foot_supports.stl"
+  },
+  {
+    "component": "V8 Front caster cup - rounded underside flange / Body1",
+    "file": "V8_Front_caster_cup_-_rounded_underside_flange_Body1.stl"
+  },
+  {
+    "component": "V8 Battery shelf - strap slots and removable standoff stack",
+    "file": "V8_Battery_shelf_-_strap_slots_and_removable_standoff_stack.stl"
+  },
+  {
+    "component": "V8 Rear anti-tip ball cup left",
+    "file": "V8_Rear_anti-tip_ball_cup_left.stl"
+  },
+  {
+    "component": "V8 Rear anti-tip ball cup right",
+    "file": "V8_Rear_anti-tip_ball_cup_right.stl"
+  },
+  {
+    "component": "V8 Bottom square locating bushing",
+    "file": "V8_Bottom_square_locating_bushing.stl"
+  },
+  {
+    "component": "V8 Servo frame bracket L - bolted to electronics deck",
+    "file": "V8_Servo_frame_bracket_L_-_bolted_to_electronics_deck.stl"
+  },
+  {
+    "component": "V8 Servo frame bracket R - bolted to electronics deck",
+    "file": "V8_Servo_frame_bracket_R_-_bolted_to_electronics_deck.stl"
+  },
+  {
+    "component": "V8 Arm L keyed hub with replaceable clips",
+    "file": "V8_Arm_L_keyed_hub_with_replaceable_clips.stl"
+  },
+  {
+    "component": "V8 Arm L smooth removable flipper cover",
+    "file": "V8_Arm_L_smooth_removable_flipper_cover.stl"
+  },
+  {
+    "component": "V8 Arm R keyed hub with replaceable clips",
+    "file": "V8_Arm_R_keyed_hub_with_replaceable_clips.stl"
+  },
+  {
+    "component": "V8 Arm R smooth removable flipper cover",
+    "file": "V8_Arm_R_smooth_removable_flipper_cover.stl"
+  },
+  {
+    "component": "V8 Torso - lower ledges Z7 to Z10 under motor plate",
+    "file": "V8_Torso_-_lower_ledges_Z7_to_Z10_under_motor_plate.stl"
+  },
+  {
+    "component": "V8 Lower front frame - braced compression supports",
+    "file": "V8_Lower_front_frame_-_braced_compression_supports.stl"
+  },
+  {
+    "component": "V8 Lower rear frame - braced compression supports",
+    "file": "V8_Lower_rear_frame_-_braced_compression_supports.stl"
+  }
+]

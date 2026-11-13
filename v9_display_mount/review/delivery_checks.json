@@ -1,0 +1,1263 @@
+{
+  "source_files": 239,
+  "all_v8_copies_identical": true,
+  "source_manifest": [
+    {
+      "file": "README.md",
+      "sha256": "488b9f29bda15b29b93364544eba39dd8854b78f179d0429d1ed7c1816c0259e",
+      "copy_matches": true
+    },
+    {
+      "file": "VALIDATION.md",
+      "sha256": "d7df1947da5615f2fe39aafa77d539ad4a879e359b5eda86ef27aee18d91f1fc",
+      "copy_matches": true
+    },
+    {
+      "file": "CAD/Orbo_V8_RigidFrame.f3d",
+      "sha256": "9e917aa6edc376358337ec2482fc77baa69936a3312777084789c42b26818793",
+      "copy_matches": true
+    },
+    {
+      "file": "CAD/Orbo_V8_RigidFrame.step",
+      "sha256": "69ea3fee113d2a86137dc66a5d22987ab5c7cec8e6ea8a518f1692d623f03f0c",
+      "copy_matches": true
+    },
+    {
+      "file": "desktop_print_package/01_Motor_plate.stl",
+      "sha256": "1972c1b596d7556e195d04ad3c30a33764cf2adb0586b143347bc37cc3190739",
+      "copy_matches": true
+    },
+    {
+      "file": "desktop_print_package/02_Lower_front_frame.stl",
+      "sha256": "4b682b860cfb5d8ea3121cb47511b0b099e88f3d9c0db6b730e10550f1c48b71",
+      "copy_matches": true
+    },
+    {
+      "file": "desktop_print_package/03_Lower_rear_frame.stl",
+      "sha256": "4ae897307498d1ec6f062c4ca1f4fc437f406694670b7ca5ba357c22982d4fd1",
+      "copy_matches": true
+    },
+    {
+      "file": "desktop_print_package/04_Battery_shelf.stl",
+      "sha256": "f60b414d8f206fa33b675093a92e6e15e5d5f00c472b980a28b88e71b625a15d",
+      "copy_matches": true
+    },
+    {
+      "file": "desktop_print_package/05_Electronics_cage.stl",
+      "sha256": "56c711aa08363481696cd32f8d248c30e45c730d2b544b110c1d9f746fc2254e",
+      "copy_matches": true
+    },
+    {
+      "file": "desktop_print_package/06_Left_servo_holder.stl",
+      "sha256": "8347c7810c3a31e9fe84d289464cfc95357c1f5a402a865167316f9db28fcba6",
+      "copy_matches": true
+    },
+    {
+      "file": "desktop_print_package/07_Right_servo_holder.stl",
+      "sha256": "c90bddd8401dac91c8ab54b2a3f0d47a2ac3625b9fe7fa51b92cc25e38664980",
+      "copy_matches": true
+    },
+    {
+      "file": "desktop_print_package/08_Internal_neck_carrier.stl",
+      "sha256": "cbe560fe1cc6c679189adce5f04d2b56adeb2736b78fc07195f176e68438a7b0",
+      "copy_matches": true
+    },
+    {
+      "file": "desktop_print_package/09_Front_caster_cup.stl",
+      "sha256": "26693d5c2671dd7235b410762b97959e477c067fd064f4d351abc847918f44c2",
+      "copy_matches": true
+    },
+    {
+      "file": "desktop_print_package/10_Rear_caster_cup_left.stl",
+      "sha256": "3cef914c4b18545439cf04f10dc6233395d6850bd5b72faba22095010a2e3884",
+      "copy_matches": true
+    },
+    {
+      "file": "desktop_print_package/11_Rear_caster_cup_right.stl",
+      "sha256": "feefa290e2fef62536283655f66d277a25ee6707f638f49cace9af279b4c4cd6",
+      "copy_matches": true
+    },
+    {
+      "file": "desktop_print_package/12_Mast_locating_bushing.stl",
+      "sha256": "1ebe2db100ee5f12e29710c63f89b7b780644359f3d54d087f6977f7623e0869",
+      "copy_matches": true
+    },
+    {
+      "file": "desktop_print_package/13_Left_arm_hub.stl",
+      "sha256": "84b3b94d0ceba8cc29e9348113ce02896a94ed907269f60b44dc2aab19aae521",
+      "copy_matches": true
+    },
+    {
+      "file": "desktop_print_package/14_Right_arm_hub.stl",
+      "sha256": "38d644cfafb9d0a40193fc92e230c9af0887157469928565915a5f553ff80e78",
+      "copy_matches": true
+    },
+    {
+      "file": "desktop_print_package/FILE_MANIFEST.json",
+      "sha256": "39fa28b4d79ea85c6979170f3dc14fc7e87dcaaec4fa43e3d6fd70011fa67e28",
+      "copy_matches": true
+    },
+    {
+      "file": "desktop_print_package/START_HERE.txt",
+      "sha256": "a95812d077251ae55f0f7acab004f6efe8b50cc26a6eb99f4eee3f008b482f15",
+      "copy_matches": true
+    },
+    {
+      "file": "renders/assembled.png",
+      "sha256": "26d0fd10d619f9be3aab2c28e79ed8d3f8548a41fac902499d80c4e7ffaf0e04",
+      "copy_matches": true
+    },
+    {
+      "file": "renders/frame_draft.png",
+      "sha256": "5859de13ed30a317196269365ea981ca2db3928085179f97245c069b9d0bcd5a",
+      "copy_matches": true
+    },
+    {
+      "file": "renders/open_neck_assembly.png",
+      "sha256": "3366b55d4a4ae88357daca9460ec9a1afc4c95eb6c4e39cc8b37af485c7d11f1",
+      "copy_matches": true
+    },
+    {
+      "file": "renders/reinforced_frame.png",
+      "sha256": "31024612f18034bce486fc8fd4dfdaa89136dffee9f86f7cd47bd2d22b7c5bab",
+      "copy_matches": true
+    },
+    {
+      "file": "renders/servo_tower_connections.png",
+      "sha256": "bbcb22241cffcb3c01777298872693bfee4bdb629b661e0d4851078a0313b2c2",
+      "copy_matches": true
+    },
+    {
+      "file": "renders/structure_and_connections.png",
+      "sha256": "a459fb5fb307c8d58c9883b1660ce80b3181ff9481d903498591556bfcfbd1ac",
+      "copy_matches": true
+    },
+    {
+      "file": "review/assembly_checks.json",
+      "sha256": "b3348971920fdf44ed93904048eda3fff4845754f8a42f3d3a16b518e45bf489",
+      "copy_matches": true
+    },
+    {
+      "file": "review/assembly_status.txt",
+      "sha256": "f46071a2517b05f4439d5eaefa8607269c379bc01400497d6341ebc26551d41c",
+      "copy_matches": true
+    },
+    {
+      "file": "review/audit.json",
+      "sha256": "0c13042bfeae3084599781057f022221560259514926db86713130310b1f270f",
+      "copy_matches": true
+    },
+    {
+      "file": "review/audit_status.txt",
+      "sha256": "da5ba2147515b7ac52f5325d7c063e8104e87a6a67406112af0b08cc058213ca",
+      "copy_matches": true
+    },
+    {
+      "file": "review/bridge_status.txt",
+      "sha256": "92691b1cc5ac775726b8f28076d44703e2aa742cee7773bf257d25a3a2db5e45",
+      "copy_matches": true
+    },
+    {
+      "file": "review/build_status.txt",
+      "sha256": "92691b1cc5ac775726b8f28076d44703e2aa742cee7773bf257d25a3a2db5e45",
+      "copy_matches": true
+    },
+    {
+      "file": "review/changes.json",
+      "sha256": "90dbc44d9bddac40f65f6e6bcc552335a839b5a825e14a51ccc8327d2994efe3",
+      "copy_matches": true
+    },
+    {
+      "file": "review/clearance_status.txt",
+      "sha256": "92691b1cc5ac775726b8f28076d44703e2aa742cee7773bf257d25a3a2db5e45",
+      "copy_matches": true
+    },
+    {
+      "file": "review/delivery_checks.json",
+      "sha256": "039153e00aca17cde0df62f07f6fcf5c371a14604eefe62770a77f9748959cad",
+      "copy_matches": true
+    },
+    {
+      "file": "review/fastener_checks.json",
+      "sha256": "6f383eb92c61c1ad7aa9e679f19d2492f8ffa1d4fc7fe54dbc75c1004532a9dc",
+      "copy_matches": true
+    },
+    {
+      "file": "review/fastener_status.txt",
+      "sha256": "92691b1cc5ac775726b8f28076d44703e2aa742cee7773bf257d25a3a2db5e45",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_status.txt",
+      "sha256": "7e5f2e6941e7a66df8ed5652fefb1ff4d0cd60bb1970996e915522d68fdb0e69",
+      "copy_matches": true
+    },
+    {
+      "file": "review/inventory.json",
+      "sha256": "c0143d88703beec6212db626f14e206bf7d5e53d02a9280b8c22699e72b5c4b6",
+      "copy_matches": true
+    },
+    {
+      "file": "review/joints.json",
+      "sha256": "7ef77fa90eb6164946966672263c3e3719748a032ae03a795b133469072dd27b",
+      "copy_matches": true
+    },
+    {
+      "file": "review/polish_status.txt",
+      "sha256": "bed97e822a12e520d40e60994bd074148144d2d6d797dc910283a6d284125410",
+      "copy_matches": true
+    },
+    {
+      "file": "review/print_parts.json",
+      "sha256": "bb9c1bc71120bec0e1198a154e139cf645639d3c60641bc4735e9332d4e84d47",
+      "copy_matches": true
+    },
+    {
+      "file": "review/refine_status.txt",
+      "sha256": "92691b1cc5ac775726b8f28076d44703e2aa742cee7773bf257d25a3a2db5e45",
+      "copy_matches": true
+    },
+    {
+      "file": "review/retained_geometry_checks.json",
+      "sha256": "dba9fbe57930fa7e03b45b9af87256c17edd6115235c75146d66fb38fac2f90a",
+      "copy_matches": true
+    },
+    {
+      "file": "review/step_check_log.txt",
+      "sha256": "0150905f37fd87ac67316c93bc8b752e18a2b2be540eeaa52517eb829752872a",
+      "copy_matches": true
+    },
+    {
+      "file": "review/step_validation.json",
+      "sha256": "00a707597c7df99aeb7446125f165e969ae451e33d5f4f87b579136a0e74bce9",
+      "copy_matches": true
+    },
+    {
+      "file": "scripts/audit_v8.py",
+      "sha256": "edf2be75bafa8eb50e83bd191080cba39f53eb6aef0809b8618fc7b74a763f46",
+      "copy_matches": true
+    },
+    {
+      "file": "scripts/bridge_tool_passages.py",
+      "sha256": "ca319116ec737002a70da8c894ffe693e45aae5ca14b28e211913149b4e6b105",
+      "copy_matches": true
+    },
+    {
+      "file": "scripts/build_v8.py",
+      "sha256": "842616b4e7bf709912bca87c056bc311a065e7133e2992590f6ce09b462383dd",
+      "copy_matches": true
+    },
+    {
+      "file": "scripts/check_delivery.py",
+      "sha256": "6f43ea96d9ff46926dccfe38814a9e9604e18bf7d39855c596528ad58db4cd71",
+      "copy_matches": true
+    },
+    {
+      "file": "scripts/check_fasteners.py",
+      "sha256": "11b3d5f19dd6334b60e91e043572d1f7adfcba45848514360fdc53f23945b679",
+      "copy_matches": true
+    },
+    {
+      "file": "scripts/check_step.py",
+      "sha256": "6c14f4c8c20fbd5d2022eea0a8bad10e799202ae33c6e74a72ee41203f4c7c13",
+      "copy_matches": true
+    },
+    {
+      "file": "scripts/finish_fastener_clearance.py",
+      "sha256": "7798900c88996d0722f940efd56540d76edeeef1c8e86cfd19a8dbbc272e281c",
+      "copy_matches": true
+    },
+    {
+      "file": "scripts/finish_v8.py",
+      "sha256": "64e643f308de539ab96d3347b47238de62d502b9364be97d5c579a7b0e030a81",
+      "copy_matches": true
+    },
+    {
+      "file": "scripts/package_internal_stls.py",
+      "sha256": "b4de73cbf42ba9c3532bb52968c4398b82fe4a63314790e946ff273bb3ea6fac",
+      "copy_matches": true
+    },
+    {
+      "file": "scripts/polish_views.py",
+      "sha256": "1e1920a103288018199e204a2423a22e12c9c2596b88e416f1b666468356022e",
+      "copy_matches": true
+    },
+    {
+      "file": "scripts/refine_frame.py",
+      "sha256": "165bc4aca95667f56cfe5ba351a0d9a6d0173d8f6bfff230ce2a5f3ae8e33a6e",
+      "copy_matches": true
+    },
+    {
+      "file": "scripts/render_views.py",
+      "sha256": "f686006fe0dee5a34f01ade5fee7867de1e11d8da18ead250fdd18f87315c281",
+      "copy_matches": true
+    },
+    {
+      "file": "scripts/run_refine_validate.py",
+      "sha256": "ed2c956064ef6aa383522fb4d97dcda1ae2db3bbce3e7c420b0a9f09bafcbcd4",
+      "copy_matches": true
+    },
+    {
+      "file": "scripts/save_exports.py",
+      "sha256": "7ca20d44568e7201bc68d42e782b7b73dc9fd6f2e2480904d99a666201b7b31f",
+      "copy_matches": true
+    },
+    {
+      "file": "scripts/validate_assembly.py",
+      "sha256": "0d5f6caae9a749c2f2dc3eb6fde9462e2702e08a2f23e3f3e548c4a97d3b896d",
+      "copy_matches": true
+    },
+    {
+      "file": "STL/V8_Arm_L_keyed_hub_with_replaceable_clips.stl",
+      "sha256": "84b3b94d0ceba8cc29e9348113ce02896a94ed907269f60b44dc2aab19aae521",
+      "copy_matches": true
+    },
+    {
+      "file": "STL/V8_Arm_L_smooth_removable_flipper_cover.stl",
+      "sha256": "abc6dcfdb9440c720006de21c834057012a3388fcfbd192b1af8fa3e6b8f260a",
+      "copy_matches": true
+    },
+    {
+      "file": "STL/V8_Arm_R_keyed_hub_with_replaceable_clips.stl",
+      "sha256": "38d644cfafb9d0a40193fc92e230c9af0887157469928565915a5f553ff80e78",
+      "copy_matches": true
+    },
+    {
+      "file": "STL/V8_Arm_R_smooth_removable_flipper_cover.stl",
+      "sha256": "3374c56d237b9c0076e47a85c068f5f4c210a394c2ab1bb429b722908da66949",
+      "copy_matches": true
+    },
+    {
+      "file": "STL/V8_Battery_shelf_-_strap_slots_and_removable_standoff_stack.stl",
+      "sha256": "f60b414d8f206fa33b675093a92e6e15e5d5f00c472b980a28b88e71b625a15d",
+      "copy_matches": true
+    },
+    {
+      "file": "STL/V8_Bottom_square_locating_bushing.stl",
+      "sha256": "1ebe2db100ee5f12e29710c63f89b7b780644359f3d54d087f6977f7623e0869",
+      "copy_matches": true
+    },
+    {
+      "file": "STL/V8_Electronics_cage_-_triangulated_walls_and_full_servo_foot_supports.stl",
+      "sha256": "56c711aa08363481696cd32f8d248c30e45c730d2b544b110c1d9f746fc2254e",
+      "copy_matches": true
+    },
+    {
+      "file": "STL/V8_Front_caster_cup_-_rounded_underside_flange_Body1.stl",
+      "sha256": "26693d5c2671dd7235b410762b97959e477c067fd064f4d351abc847918f44c2",
+      "copy_matches": true
+    },
+    {
+      "file": "STL/V8_Internal_neck_carrier_-_square_mast_and_concealed_M3_head_screws.stl",
+      "sha256": "cbe560fe1cc6c679189adce5f04d2b56adeb2736b78fc07195f176e68438a7b0",
+      "copy_matches": true
+    },
+    {
+      "file": "STL/V8_Lower_front_frame_-_braced_compression_supports.stl",
+      "sha256": "4b682b860cfb5d8ea3121cb47511b0b099e88f3d9c0db6b730e10550f1c48b71",
+      "copy_matches": true
+    },
+    {
+      "file": "STL/V8_Lower_rear_frame_-_braced_compression_supports.stl",
+      "sha256": "4ae897307498d1ec6f062c4ca1f4fc437f406694670b7ca5ba357c22982d4fd1",
+      "copy_matches": true
+    },
+    {
+      "file": "STL/V8_Motor_plate_-_underside_seating_face_and_side-loaded_M3_nut_pockets.stl",
+      "sha256": "1972c1b596d7556e195d04ad3c30a33764cf2adb0586b143347bc37cc3190739",
+      "copy_matches": true
+    },
+    {
+      "file": "STL/V8_Rear_anti-tip_ball_cup_left.stl",
+      "sha256": "3cef914c4b18545439cf04f10dc6233395d6850bd5b72faba22095010a2e3884",
+      "copy_matches": true
+    },
+    {
+      "file": "STL/V8_Rear_anti-tip_ball_cup_right.stl",
+      "sha256": "feefa290e2fef62536283655f66d277a25ee6707f638f49cace9af279b4c4cd6",
+      "copy_matches": true
+    },
+    {
+      "file": "STL/V8_Servo_frame_bracket_L_-_bolted_to_electronics_deck.stl",
+      "sha256": "8347c7810c3a31e9fe84d289464cfc95357c1f5a402a865167316f9db28fcba6",
+      "copy_matches": true
+    },
+    {
+      "file": "STL/V8_Servo_frame_bracket_R_-_bolted_to_electronics_deck.stl",
+      "sha256": "c90bddd8401dac91c8ab54b2a3f0d47a2ac3625b9fe7fa51b92cc25e38664980",
+      "copy_matches": true
+    },
+    {
+      "file": "STL/V8_Torso_-_lower_ledges_Z7_to_Z10_under_motor_plate.stl",
+      "sha256": "3e6dd570c3228d6fde7d81b3b5ed796465473f2a84845c20b69c28305597d060",
+      "copy_matches": true
+    },
+    {
+      "file": "scripts/__pycache__/build_v8.cpython-313.pyc",
+      "sha256": "083857b8917487f59c4218660877571520638a7a709db053ecf361d1e67917fa",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/00.brep",
+      "sha256": "7e1c1dee5e9b144062702db9915fcbefa0ea3f33b493ec95df67f99e1fcd906b",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/01.brep",
+      "sha256": "f812c7f58148b8a275fd180f75c02a1d10903aaee26f54c6878ad7e46f0c6dad",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/02.brep",
+      "sha256": "17cd45ee890ecd8b0f2389da4a45925d9d1714cf41d8abb5e6b9830d9bda73fd",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/03.brep",
+      "sha256": "d65195031c02bdfdcbf57092bb3e22fc898f06521dad0032b4d2f9cd1f5169e2",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/04.brep",
+      "sha256": "43eb796bda7340f7e51e184433404d98891309c9de80a04833f245c5c5d1fc51",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/05.brep",
+      "sha256": "fd574e6cd4deba3c8247b2d33ce4268d9951754b97500ff47b3693a8badea4fd",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/06.brep",
+      "sha256": "569d005a749f15b5ef9f40c6465b6478d16eaca42080db6ae38ed2e00ea9ecc8",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/07.brep",
+      "sha256": "f870f3f207615ff455e0dfb243dedcc508ef4abf1f7947e236ecc519a07272fe",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/08.brep",
+      "sha256": "1026174ddd1433b07d0dd21d7dca14593c95e3fb27f287a2c18ee39cca5f7ebf",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/09.brep",
+      "sha256": "918d0f10800c06985675f408dda7a9bc7ef6419cf0122c36b1f452bbe7d2c5b8",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/10.brep",
+      "sha256": "7b10df6f5f3f413a539c5cc0a27a2290bf026626e3dd56b91259b54577924315",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/100.brep",
+      "sha256": "46132b3ee86aabc908c7bf7a20cbcd9b8e92e7ca06ffac618940d4f6fd05a627",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/101.brep",
+      "sha256": "4f02afd610fdd8773a5fa4c5bcc6421225e1d31a6da29ac276a7e6c407ccaf33",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/102.brep",
+      "sha256": "39b459165e255d4ffed27a3c634d9b025c393d577082edd27f3fb4b1d9f572ef",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/103.brep",
+      "sha256": "93ad64f4bdfddccf683680b645a1434c7e4af7d93c7a085128f3d5f3948264b5",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/104.brep",
+      "sha256": "8995746accc4eb000635ca84d3e29d389ce3bb3a924dda561adcab37479c0c70",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/105.brep",
+      "sha256": "a1e8e1ed9985dba9f15e33d826f74e7508d6017812af22c00a0338da5839cd76",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/106.brep",
+      "sha256": "e802460269f17a8a7627954a4fe499d6936e0fa3d5d4de99618ec834c3eec733",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/107.brep",
+      "sha256": "ca7ec611748595ce7e88a92fd0d5ea8d7d2b67ec3c2ac9b08d199413806d777d",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/108.brep",
+      "sha256": "22bbd3cd867822932e640ec66fa0de334bb0c8bceb0821c475f4281c33a3716b",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/109.brep",
+      "sha256": "8a0aad301b7dd0b374c5593e79c606aaa3611b8d8b95e14669f7dd46f9e90c76",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/11.brep",
+      "sha256": "287db6454b790f5dfbe64d8e1d5e97b5383154d4fcae521cc0080b68b7cc6008",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/110.brep",
+      "sha256": "7877aed17f138b9df0d086364bc719d78843b4a01cb1aa98306c0ebfbf62775b",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/111.brep",
+      "sha256": "d40f57767a9fc5dd0d85d1119c8624a74aa6a177c4291da0867ae5fb9a7ffe99",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/112.brep",
+      "sha256": "dad4aa5d52800198f7d9b2a1de4a90b2861c5b0f4a5e05feeb85c10dc46e77f8",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/113.brep",
+      "sha256": "1aee0037ab8089d68a114140b40f47b7461966c7eb21d7bc3bed551b28e08d08",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/114.brep",
+      "sha256": "a6a950ed5205920dc9e0cf7e7d723800158f53f621482bac1f9ed1a863d8b1ed",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/115.brep",
+      "sha256": "626be3ba505bf7dde121397a32d9eb6dd4fd6f34b71bec3aca2f3ff22c95d8fb",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/116.brep",
+      "sha256": "35f9cd9e3dd721a097f30469f1dc6386f8ec70c7fe52d8d33b4a3e5a68397bc6",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/117.brep",
+      "sha256": "329ea7b8e35a923869463a01e20d85d01b562e9db53b39483d08ae2c745dab1d",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/118.brep",
+      "sha256": "d7475cd5fa229eaa74ad6219f25726305a7949d68cc2bcb50142f34c3c72f62b",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/119.brep",
+      "sha256": "91db7dd7e7a85db044208ffab154625464ede35de90e74b917649636ce4e77a3",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/12.brep",
+      "sha256": "1715380ba9c64bcbfef940c2dfcdf9ec18a0c8bf104251a5e2eece164b57792d",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/120.brep",
+      "sha256": "da74f98318072c4985ae8d39ed6d3cc5f84c30a6158f8a3401799c160ec2069e",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/121.brep",
+      "sha256": "bc4d97c14da1049a02d1f62990a9ea7e02036330e868e25c6a0c83fff3379618",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/122.brep",
+      "sha256": "8db1da4517001915239e12311e31edc9588dd52e27c8a343396cf42b43f74a9b",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/123.brep",
+      "sha256": "160b97d086768659f22ebc843b5f834c1cdac92afafbd1f1e2defb373a44f7fd",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/124.brep",
+      "sha256": "c264421668a830560e19ab9d657702bcd675aa2b7b044b66067672ba525c5590",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/125.brep",
+      "sha256": "d1aa4312c248c35231be382d44421252e8b8e5f178ec11acb4a0ec013ff523d3",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/126.brep",
+      "sha256": "05751abd77ac2eee5c8669db802987a91719bcb7b32a7a8c42a34d14077c9727",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/127.brep",
+      "sha256": "e2fc7f33deffc772fe8ecd056b035267a5135dd8aa9ec6b66ea67fe6661d7a44",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/128.brep",
+      "sha256": "7b86dbdfabb37e69d3b18ebabcf6244f9e53c9623229b4af110eb250cf429122",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/129.brep",
+      "sha256": "75f8af41dd0e9056c7e9c54223cd67ba008fda55d88ad0bfa1790d03a7b5af42",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/13.brep",
+      "sha256": "f9fce9017098fd9c8dfe8c47d8c10e76e780145e5c201ef71ed5b56dabb4b467",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/130.brep",
+      "sha256": "39e41dbbc260164630be2ffc95e5eddbe3f08c15b0fecc6e4ace4a655cd3c6d8",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/131.brep",
+      "sha256": "c431d9fc6c3bfdc9782545d9fc74a4d1647ee0d73cf24713984a5874d45991fe",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/132.brep",
+      "sha256": "8c35c90eaddc2e30a6ba9d78d734ad95313feb11b3ead9e0685bad9c4011faea",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/133.brep",
+      "sha256": "1918a40d5e92d29de1fe74f9c13a3f8460598d53311da530824edc509296a69e",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/134.brep",
+      "sha256": "2c2ad1648c5a535117a79a0ba70e1b493276df10e19bd8ab4c936371043c7e50",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/135.brep",
+      "sha256": "1cb2cb2cb13655226e17ddcd5005bcf72273d39b682d925ef36ee2098ce6db8d",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/136.brep",
+      "sha256": "dd595ba8a4d1b4e40b7ef67e4263e86b41fd46f30918eca28bde5658cffc6b3e",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/137.brep",
+      "sha256": "9e346f9a2bbc895e690be140b26043ecd28a4f49bd6a3aa537a06313cc973c51",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/138.brep",
+      "sha256": "b9afe2e01b9d85f6dac6fe66f699927e1107b56d7e67a644d80bdb7f1696e1d2",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/139.brep",
+      "sha256": "64ec8d106e7e16005075627f33090a3763c6ca8cae4076dcd54871261464f39d",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/14.brep",
+      "sha256": "96b15bfe7b496583f8e9c4333ea16129e3c53b21e16789b4369f1a6786366156",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/140.brep",
+      "sha256": "1e6c6b7c467c62553e4f9f2e731c6352713f510e314a1b7419d70974fc8d036d",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/141.brep",
+      "sha256": "41b41d6ec78b44d647a724f2c10d634a45043426dc0b046badbec315619d5783",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/142.brep",
+      "sha256": "eea262882cd44959145bbf8f65725dc41cf8cf6b0e78bd79dc4c2dde26869e78",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/143.brep",
+      "sha256": "2050ada5546c97985c77ad853fc06d835305d206b1d7a9925ec2a7b7c95cdb0d",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/144.brep",
+      "sha256": "1851e336237c6f32dc4dad3ca2ad342a6e0afcabc78136e060b6682e358c0a13",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/145.brep",
+      "sha256": "60a08f168b6e0dc5fb3fc83a5de14d150a23a339728f40afef8fb435d176c1be",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/146.brep",
+      "sha256": "6d99ceca49cc6b448e65fe79dfd54fb36108c65a4665810bb0eb4d234fdf39ca",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/147.brep",
+      "sha256": "86b12e5f69bc2515f72185a9f277b5c5c54ff6275421c70fd3a685121a421438",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/148.brep",
+      "sha256": "5e528f396f3fb848f2ec0601475f53e71e438f403f367e30be77598124078730",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/149.brep",
+      "sha256": "9a3f60841e834e7dd38dac5012bae32986c864497d1cd8cfdc5f207630df3c4e",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/15.brep",
+      "sha256": "0e9fc56b3b3a875bf0c9ec7169a2f56c2dbd0cba19a19a94e503a0249cb103ed",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/150.brep",
+      "sha256": "dac9d5568625477b371348b8645be6f13daceb4413093dc8f21541cda101b188",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/151.brep",
+      "sha256": "7b3dcf168dcad572f6643250707666ed194243292e0d0f794147704427cbad5b",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/152.brep",
+      "sha256": "a4ca64c18c8efe8a3bc6148420ea95bca7db825b1641cd8552a33b7bbc480dc8",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/153.brep",
+      "sha256": "e6fe1ff3a11aced6525fcd4e061b2dc7a8bb4d5117b02fa95023200276058aba",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/154.brep",
+      "sha256": "917a0abec612b4df231c806c2d48209a344fb4cb1d7d4cccb7eb5febec17e467",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/155.brep",
+      "sha256": "12b17a92bb628c22a7a451ccb1936760c52c9e15712057dd90eaf180873839a2",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/156.brep",
+      "sha256": "1509b64ceee12d39f2cca83f57f3b54b335075cd19c3cf3ec6ed4d7d49dfaf37",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/157.brep",
+      "sha256": "7f8d509659083d3d06a3b4dee3f9c2659af44ab007d06f1652eb9f0c9da33691",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/158.brep",
+      "sha256": "392d3c16297c58fa32c0508e9348a5073daae49df381e129901655f2c867c9f9",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/159.brep",
+      "sha256": "6ce1bba0be141bcc234b1e0ac3a82f40d5f81458fbc6e3bea5ab7f7cba80fa6e",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/16.brep",
+      "sha256": "08bf675e34de5a40f63b20dcc755bdb5886b69f737ffbe7af3e7878c4fe1bba9",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/17.brep",
+      "sha256": "0290e7be7040c86418b5acf9ff00ab8cb3c6068cd1a233ef830b44b32b22aee9",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/18.brep",
+      "sha256": "ccfcb474bdacb657e2952cdaf58270b83d5a27daab69afc6589462691a0611cc",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/19.brep",
+      "sha256": "bcd20750bd0c705d9f8c81b94922dad7358d0b0b92370c3701b12610c87df781",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/20.brep",
+      "sha256": "6d21ad3c41dad686228801fb62e22c40e1a34385e87e8f082a2f1396cfa340ff",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/21.brep",
+      "sha256": "2f2a47aa89595fd94085b87c3c82612fc63651a02a1cf853c98cd62674ae9d3a",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/22.brep",
+      "sha256": "6d68096a406393702412b032252c24945de51cc2e1481738ba336d1ac6c668c0",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/23.brep",
+      "sha256": "fe115cc51a033b8aea18b9d700772e6dc44596d1a311897709984c9010e667f3",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/24.brep",
+      "sha256": "d100a16cbe7577979088530a42c9f56a5afe3e2aecd56841d3fac8ba4014de68",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/25.brep",
+      "sha256": "8256cfa6f4e40948aa84bdca108f5f7383ca8ec98bcbdbce251324c15e932ddd",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/26.brep",
+      "sha256": "f9e2ec6972316999358c5d0c2d739cf85830362b0671930a4d8ea3de55e257b8",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/27.brep",
+      "sha256": "4d0a02be348d543796f4fab9dd84fedf687e029f35d2e6c1d9073af7adf49909",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/28.brep",
+      "sha256": "996d2c1f6518065e6d0d7fcf2c5707480365614146a226ed71e5d1c18c4b7fa6",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/29.brep",
+      "sha256": "12093546d07bb2cd181370f358531a44b86423c96fb53b389b8eebf19e4665f4",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/30.brep",
+      "sha256": "95f6f8854eec5ae07f61100c577f935e46c02c06d639914937b3565f52002e0d",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/31.brep",
+      "sha256": "43b059cf83138a3dd80a2015f58bcae21f860499845560f4c3a7afc22a2a9ea2",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/32.brep",
+      "sha256": "833afdce29e92e5689d9d85c4556eaa633bbe7568377bd985f8d7d0693721f2f",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/33.brep",
+      "sha256": "97fb557a5e7b55de7359387585845c913500590c24d9c77ee5549cc640dd0e71",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/34.brep",
+      "sha256": "bc36f7ccbdddf8f05ce509ee8729c6c3affc178ad0d2bc41a8a0a6faf26ce1e6",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/35.brep",
+      "sha256": "0733c5aac4bced3daa29e6abe0fa90d7d40904a5f7e76ab38b62d064c0558f3d",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/36.brep",
+      "sha256": "0db7cef06bb5b3713b2b27112fc2c4e9cd98128237f860b081f3473ec6c72154",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/37.brep",
+      "sha256": "b4ee1230b4b8b9890c3712691947b4c7b7511d902abbcc124979300f53d49a19",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/38.brep",
+      "sha256": "9e974718a3630051c222cbb5a09269bfd667d2868ff4cdc92341ea6e597a665f",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/39.brep",
+      "sha256": "f606fe6166e33613b658101b03d116b122daa14828a9e3a7297cc1f9d09f5eca",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/40.brep",
+      "sha256": "1a9841be55a393de4467fc1cc38f2bdf93c1c32f5edc55a75fc189fc66bcc3e9",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/41.brep",
+      "sha256": "9b15e9ab3581707dce8b5c77203bf297c5c34e115b70a3d4409df23a29ee8d63",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/42.brep",
+      "sha256": "7ab4e1840498ecc2cc338d8ffe1e19d2462747347c93199bd15bb6fe84d869af",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/43.brep",
+      "sha256": "9f1c792e8a947bb110276007a3573c3d9160212df3a7e32ffe34ba383f615b9f",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/44.brep",
+      "sha256": "f939e34cf598cd743dc538f356bc0316ea796d8ff3cf7cf668dceeb7ca04b23f",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/45.brep",
+      "sha256": "3a743f821b7e330b0cd44d11c929afde2d252458b6abfa8ed228ae6f8ca9f66e",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/46.brep",
+      "sha256": "f623948c168d8a2c26a5022cda649bc5122a95197c1b73ab00b15629bd620dff",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/47.brep",
+      "sha256": "a1a1b77f16227ef0488f31ab6b50243a2775baf5872910ea2b2e6fa7f1b6d5de",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/48.brep",
+      "sha256": "39a184afa4dfb3483b0d3aa562d16489bfc3bb73ec8a020416776c116e6581aa",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/49.brep",
+      "sha256": "5b3ad832b60fa7805004e29c01cf25d9e3c87f357b1b2f50e9c638355cd6ed86",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/50.brep",
+      "sha256": "5c3bacc06f9b049b2559ff990bfdc08a630256bc82848c098286a7425a505bee",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/51.brep",
+      "sha256": "7f2c3f9d0f10ad459f12cdcb33f63e7d63a2c78ab40c310dac5a340ec0b68881",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/52.brep",
+      "sha256": "7b386a43576d1b4098178e0af26a708da90666b877fa38fdce9700a4bb225877",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/53.brep",
+      "sha256": "2b1b33153efc566f3caeb68a3f930f035dbd2661148bb687bcad521c439de373",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/54.brep",
+      "sha256": "a3d4b8102f8cadbe8830a50fedb9b466beb2d2101761ed6f6b9d68e1723e8441",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/55.brep",
+      "sha256": "11b4ec25f27af675d8d1ee67248e29f2767765eacdb119b7c2f0fda558ae0ff9",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/56.brep",
+      "sha256": "92df48b74444bcf2337ed09abce0ebaddaeeb16ab72a0bcefe29b343f3f34405",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/57.brep",
+      "sha256": "d702726f45eb73e6a0f8c2831f91f16811d2ba4892c96a1a394a6a70a27c258d",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/58.brep",
+      "sha256": "a9135d12bac92f25af9d29b8fe09fd06b42f6e5f20983ffb96a99d9d29f3cd1e",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/59.brep",
+      "sha256": "2633ba7eddf9662561328489e16190fff2965b354943637d16943c0018f863d2",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/60.brep",
+      "sha256": "8e7495055e2009d61d24be8a4b42f45cdd7e8a8212b76d680097e236b6e2fe61",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/61.brep",
+      "sha256": "cf21b60b8a37e1c1f657e6938e35313e66f730018979c1aad6a0b16f3cd17615",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/62.brep",
+      "sha256": "d481819f9e769aa0ab4ecb9e3f6d1fb2b35bae6aeb6f204de750a3d94f55d63b",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/63.brep",
+      "sha256": "75f8206461cf75cba1d2c7ed2bc9c7675ff6ca7b9c750a6412dd3757be0c6f30",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/64.brep",
+      "sha256": "464b80d057ee3437ee2f0c258a84f22e4cf65c3c4a7ac882665f59de6cb79739",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/65.brep",
+      "sha256": "9d416a7e789dff51357edec8ccbc82294c8293cf7f462b6d9200e484ac0a0412",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/66.brep",
+      "sha256": "d2625391141696e5894f83dbaf69837dd8f8a99f16c72854a30874e3eb3ad0df",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/67.brep",
+      "sha256": "91caf783ff24cb67ed06fdbdfa1a5ab14ee040fb65f361b8dfac4223702d70c1",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/68.brep",
+      "sha256": "080b0902752f07de9ac55d947cd1c65689feb06ff0c41f0dcccda63a7ea75de5",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/69.brep",
+      "sha256": "4bddf2a65da9eaf21a509a88517739cc1274efb8f4434ba01d474a8e5a51266d",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/70.brep",
+      "sha256": "f7fc4cd60c9937df7cd847a8be9a2c0bf8f0d3b05a86ff8bc160e746dbf3dd6f",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/71.brep",
+      "sha256": "a34729309b6f4940ed3831a22fb343a016f030df46d58fde736d842d63cb7739",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/72.brep",
+      "sha256": "78982ab0c2705e6780efa30a22287205442f5a67ac598c50d053ca4c4b7dd9d9",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/73.brep",
+      "sha256": "71f5f0b9bbf53eab6c5b153b79728146f3e899ddd52e62ffb248d8c4be7ff442",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/74.brep",
+      "sha256": "c03e5537c923f6df8ae1806cae2a0f2718cc30d050a52026a0897fdc3c9e11d6",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/75.brep",
+      "sha256": "c983c6f6effac7de42da133e9d9c8d0b5c7416b0b2b39748899e8b60ce4207b5",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/76.brep",
+      "sha256": "c17a9cf8a22da84f3c1810a1434d2bea9af9e4c9b0aa9b3e79543d85eb5300f0",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/77.brep",
+      "sha256": "b517e6b7071641320a55ca8169f970ad249580e9da8dbc60c3cf86e97f33c84d",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/78.brep",
+      "sha256": "29b1c4942d71b84d771ee0d4b64c32588188606645e17da0977035adb6341e71",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/79.brep",
+      "sha256": "65d1031d9b0d4f43f5e2ff06ce3591237bd890f619804beb51bd34fe0995265b",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/80.brep",
+      "sha256": "447118d039d93bccaa9d2b5684c1b3702182186aeeddb303572a38e023d91ef3",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/81.brep",
+      "sha256": "acfd46ffb9eb3051b0fb5aec6cfef7da14d929da2d22caeb5e9770f1ea22d02e",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/82.brep",
+      "sha256": "a7973001375ec0ca5495fa82f32b419b736d80ae12ee151f59f168f5d25759c5",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/83.brep",
+      "sha256": "b800befdf5fe83b4ea34923a043b2c0c7e784cfe896f7eabffe5cda7d1e2c5c8",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/84.brep",
+      "sha256": "4d9f87e7b6798285c0cfd18b7d6f74eba04164397200a074e4945185893b8ed8",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/85.brep",
+      "sha256": "5da4318abdc95811c6b1587dc74e9afceb9f6af832edbf126b03ec4fff910371",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/86.brep",
+      "sha256": "a3e7792a145dcce6a9a33c05814e988390bcb1e28587f5da60fb6125b0528103",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/87.brep",
+      "sha256": "835adaa60d72d01abc25e533f7f8f77e8f3f847b7a869cf3bba8ca39bf3c2c7b",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/88.brep",
+      "sha256": "7ebca68bb82337a0188d1715ad1003426a3138bf6d5c8c6611e408da4ce6a696",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/89.brep",
+      "sha256": "d044f3e7cb8d72cf717dc59e33e8750583e9e89be06223e0f9deb52bcd0c0433",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/90.brep",
+      "sha256": "fc013e10f3f8d788b463bf39bcb08c0100763402e9a7775fb57c3655253f6001",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/91.brep",
+      "sha256": "a54bdeabbba2c530a8967fae818e5de96f53b6f1ab6018e144254067df33de53",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/92.brep",
+      "sha256": "4387c6cec13877cfc0a47f96d7aa183794bd9eba71bb5e21d118b2879f24e27b",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/93.brep",
+      "sha256": "e7a48c671302cc4a09ee52ca63cc10b5b6343e400f05325d522ea9544947482a",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/94.brep",
+      "sha256": "6e08bf672f5534c91502a4b8d663a69408ecb9c813af7f74170eb236d4a1c91f",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/95.brep",
+      "sha256": "788a9d885764a68fb32e305bb14fab26ae890c538dcb1b0b50d520937a24dfa9",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/96.brep",
+      "sha256": "ac338d193f8d8d11c747ffabd4ffb2ce712a338c18ac80c9052e269d32c82db0",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/97.brep",
+      "sha256": "ffdc82690cc345d32495305bbe443852eeb85c906be262e932f4662327056348",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/98.brep",
+      "sha256": "deb93f274bfcb9c1e723c53fb985538dd704bb5310ed3f5027e4da8dee05b66a",
+      "copy_matches": true
+    },
+    {
+      "file": "review/final_breps/99.brep",
+      "sha256": "22449f87e8301e2767ac8335dc9968df32af0f0ae317bb937e92975bf11061fd",
+      "copy_matches": true
+    }
+  ],
+  "meshes": [
+    {
+      "file": "01_V9_Display_pedestal_and_carrier_saddle.stl",
+      "watertight": true,
+      "winding_consistent": true,
+      "connected_components": 1,
+      "volume_mm3": 16716.31623167467,
+      "triangles": 2898,
+      "bounds": [
+        [
+          -33.0,
+          -53.0,
+          124.4000015258789
+        ],
+        [
+          42.9900016784668,
+          -33.0,
+          189.25
+        ]
+      ]
+    },
+    {
+      "file": "02_V9_Carrier_lower_clamp_jaw.stl",
+      "watertight": true,
+      "winding_consistent": true,
+      "connected_components": 1,
+      "volume_mm3": 3851.230091778998,
+      "triangles": 1036,
+      "bounds": [
+        [
+          -33.0,
+          -53.0,
+          121.0
+        ],
+        [
+          33.0,
+          -33.0,
+          124.0
+        ]
+      ]
+    },
+    {
+      "file": "03_V9_Display_removable_top_retainer.stl",
+      "watertight": true,
+      "winding_consistent": true,
+      "connected_components": 1,
+      "volume_mm3": 1386.3443259993328,
+      "triangles": 540,
+      "bounds": [
+        [
+          -31.90999984741211,
+          -49.70000076293945,
+          187.8000030517578
+        ],
+        [
+          42.9900016784668,
+          -43.5,
+          192.25
+        ]
+      ]
+    }
+  ]
+}

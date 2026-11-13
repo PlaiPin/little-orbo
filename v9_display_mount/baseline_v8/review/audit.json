@@ -1,0 +1,50 @@
+{
+  "static": [],
+  "contact": [
+    {
+      "joint": "Servo L foot to deck",
+      "area_mm2": 908.2911527948357
+    },
+    {
+      "joint": "Carrier L -24",
+      "area_mm2": 86.14557639770948
+    },
+    {
+      "joint": "Carrier L 24",
+      "area_mm2": 86.14557639770948
+    },
+    {
+      "joint": "Servo R foot to deck",
+      "area_mm2": 908.2911527948356
+    },
+    {
+      "joint": "Carrier R -24",
+      "area_mm2": 86.14557639770948
+    },
+    {
+      "joint": "Carrier R 24",
+      "area_mm2": 86.14557639770948
+    },
+    {
+      "joint": "front frame to plate",
+      "area_mm2": 173.84159446229668
+    },
+    {
+      "joint": "front frame to shelf",
+      "area_mm2": 1055.4806689127702
+    },
+    {
+      "joint": "rear frame to plate",
+      "area_mm2": 152.2319693524357
+    },
+    {
+      "joint": "rear frame to shelf",
+      "area_mm2": 416.21913530678546
+    },
+    {
+      "joint": "Upper cage to shelf",
+      "area_mm2": 926.0868648385637
+    }
+  ],
+  "errors": []
+}

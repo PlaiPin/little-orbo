@@ -1,0 +1,10 @@
+START
+V8 Internal neck carrier - square mast and concealed M3 head screws checked
+V8 Motor plate - underside seating face and side-loaded M3 nut pockets checked
+V8 Electronics cage - triangulated walls and full servo foot supports checked
+V8 Battery shelf - strap slots and removable standoff stack checked
+V8 Servo frame bracket L - bolted to electronics deck checked
+V8 Servo frame bracket R - bolted to electronics deck checked
+V8 Lower front frame - braced compression supports checked
+V8 Lower rear frame - braced compression supports checked
+COMPLETE

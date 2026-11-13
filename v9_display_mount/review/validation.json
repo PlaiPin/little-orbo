@@ -1,0 +1,351 @@
+{
+  "units": "mm",
+  "baseline_bodies": 160,
+  "new_parts": [
+    {
+      "name": "V9 Display pedestal and carrier saddle",
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 16717.70316094349,
+      "bounds": [
+        -33.00000015,
+        -53.00000015,
+        124.39999985,
+        42.99000015000001,
+        -32.99999985,
+        189.25000015
+      ]
+    },
+    {
+      "name": "V9 Carrier lower clamp jaw",
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 3851.0495667735067,
+      "bounds": [
+        -33.0000001,
+        -53.0000001,
+        120.9999999,
+        33.0000001,
+        -32.9999999,
+        124.0000001
+      ]
+    },
+    {
+      "name": "V9 Display removable top retainer",
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 1386.2537833867532,
+      "bounds": [
+        -31.910000150000002,
+        -49.70000015,
+        187.79999985,
+        42.99000015000001,
+        -43.49999985,
+        192.25000015
+      ]
+    },
+    {
+      "name": "V9 Hardware clamp M3x16 X-25 Y-50",
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 184.372218857551,
+      "bounds": [
+        -27.7500001,
+        -52.7500001,
+        117.9999999,
+        -22.2499999,
+        -47.2499999,
+        137.0000001
+      ]
+    },
+    {
+      "name": "V9 Hardware clamp M3 nut X-25 Y-50",
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 45.90884398536551,
+      "bounds": [
+        -28.175426580542943,
+        -52.7500001,
+        130.9999999,
+        -21.824573419457057,
+        -47.2499999,
+        133.40000010000003
+      ]
+    },
+    {
+      "name": "V9 Hardware clamp M3x16 X-25 Y-36",
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 184.372218857551,
+      "bounds": [
+        -27.7500001,
+        -38.7500001,
+        117.9999999,
+        -22.2499999,
+        -33.2499999,
+        137.0000001
+      ]
+    },
+    {
+      "name": "V9 Hardware clamp M3 nut X-25 Y-36",
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 45.90884398536551,
+      "bounds": [
+        -28.175426580542943,
+        -38.7500001,
+        130.9999999,
+        -21.824573419457057,
+        -33.2499999,
+        133.40000010000003
+      ]
+    },
+    {
+      "name": "V9 Hardware clamp M3x16 X25 Y-50",
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 184.372218857551,
+      "bounds": [
+        22.2499999,
+        -52.7500001,
+        117.9999999,
+        27.7500001,
+        -47.2499999,
+        137.0000001
+      ]
+    },
+    {
+      "name": "V9 Hardware clamp M3 nut X25 Y-50",
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 45.9088439853655,
+      "bounds": [
+        21.824573419457057,
+        -52.7500001,
+        130.9999999,
+        28.175426580542943,
+        -47.2499999,
+        133.40000010000003
+      ]
+    },
+    {
+      "name": "V9 Hardware clamp M3x16 X25 Y-36",
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 184.372218857551,
+      "bounds": [
+        22.2499999,
+        -38.7500001,
+        117.9999999,
+        27.7500001,
+        -33.2499999,
+        137.0000001
+      ]
+    },
+    {
+      "name": "V9 Hardware clamp M3 nut X25 Y-36",
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 45.9088439853655,
+      "bounds": [
+        21.824573419457057,
+        -38.7500001,
+        130.9999999,
+        28.175426580542943,
+        -33.2499999,
+        133.40000010000003
+      ]
+    },
+    {
+      "name": "V9 Hardware retainer M3x10 X-27.71",
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 141.9607180340888,
+      "bounds": [
+        -30.460000100000002,
+        -49.3500001,
+        182.2499999,
+        -24.9599999,
+        -43.8499999,
+        195.2500001
+      ]
+    },
+    {
+      "name": "V9 Hardware retainer M3 nut X-27.71",
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 45.9088439853655,
+      "bounds": [
+        -30.885426580542944,
+        -49.3500001,
+        183.14999989999998,
+        -24.534573419457057,
+        -43.8499999,
+        185.5500001
+      ]
+    },
+    {
+      "name": "V9 Hardware retainer M3x10 X38.79",
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 141.9607180340888,
+      "bounds": [
+        36.0399999,
+        -49.3500001,
+        182.2499999,
+        41.5400001,
+        -43.8499999,
+        195.2500001
+      ]
+    },
+    {
+      "name": "V9 Hardware retainer M3 nut X38.79",
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 45.90884398536543,
+      "bounds": [
+        35.61457341945706,
+        -49.3500001,
+        183.1499999,
+        41.96542658054294,
+        -43.8499999,
+        185.55000010000003
+      ]
+    },
+    {
+      "name": "V9 Waveshare ESP32-S3-AMOLED-1.91-M manufacturer STEP reference",
+      "valid": true,
+      "solids": 26,
+      "volume_mm3": 6571.834408245875,
+      "bounds": [
+        -23.21082689600299,
+        -49.0008268960033,
+        164.449173103997,
+        34.79082689600417,
+        -35.099173103997,
+        188.950826896003
+      ]
+    }
+  ],
+  "interference_with_v8": [],
+  "new_part_interference": [],
+  "insertion_samples": [
+    {
+      "part": "pedestal from above, head removed",
+      "dz": 0,
+      "hits": []
+    },
+    {
+      "part": "pedestal from above, head removed",
+      "dz": 2,
+      "hits": []
+    },
+    {
+      "part": "pedestal from above, head removed",
+      "dz": 5,
+      "hits": []
+    },
+    {
+      "part": "pedestal from above, head removed",
+      "dz": 10,
+      "hits": []
+    },
+    {
+      "part": "pedestal from above, head removed",
+      "dz": 20,
+      "hits": []
+    },
+    {
+      "part": "pedestal from above, head removed",
+      "dz": 35,
+      "hits": []
+    },
+    {
+      "part": "pedestal from above, head removed",
+      "dz": 50,
+      "hits": []
+    },
+    {
+      "part": "pedestal from above, head removed",
+      "dz": 75,
+      "hits": []
+    },
+    {
+      "part": "display into cradle",
+      "dz": 0,
+      "hits": []
+    },
+    {
+      "part": "display into cradle",
+      "dz": 1,
+      "hits": []
+    },
+    {
+      "part": "display into cradle",
+      "dz": 3,
+      "hits": []
+    },
+    {
+      "part": "display into cradle",
+      "dz": 8,
+      "hits": []
+    },
+    {
+      "part": "display into cradle",
+      "dz": 15,
+      "hits": []
+    },
+    {
+      "part": "display into cradle",
+      "dz": 25,
+      "hits": []
+    },
+    {
+      "part": "display into cradle",
+      "dz": 35,
+      "hits": []
+    }
+  ],
+  "usb_plug_gauge": {
+    "dimensions_mm": [
+      17,
+      10,
+      12
+    ],
+    "bounds": [
+      34.799999899999996,
+      -45.0000001,
+      170.6999999,
+      51.8000001,
+      -34.9999999,
+      182.70000009999998
+    ],
+    "hits": []
+  },
+  "tool_access": [
+    {
+      "path": "clamp screw from underside on bench",
+      "x": -25,
+      "y": -50,
+      "hits": []
+    },
+    {
+      "path": "clamp screw from underside on bench",
+      "x": -25,
+      "y": -36,
+      "hits": []
+    },
+    {
+      "path": "clamp screw from underside on bench",
+      "x": 25,
+      "y": -50,
+      "hits": []
+    },
+    {
+      "path": "clamp screw from underside on bench",
+      "x": 25,
+      "y": -36,
+      "hits": []
+    }
+  ]
+}

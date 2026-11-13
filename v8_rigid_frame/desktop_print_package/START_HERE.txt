@@ -1,0 +1,81 @@
+ORBO V8 - INTERNAL STRUCTURE FOR PRINTING AND ASSEMBLY
+
+14 separate STL files. Print one of each needed part.
+Units: millimetres. Use 100% scale.
+Import as separate parts, not as one fused object. Choose print orientation
+and supports in your slicer; these exports retain their CAD orientations.
+
+INCLUDED
+01 Motor plate
+02 Lower front frame
+03 Lower rear frame
+04 Battery shelf
+05 Electronics cage (supports Raspberry Pi and servo holders)
+06 Left servo holder
+07 Right servo holder
+08 Internal neck carrier (ties both servo towers together)
+09 Front caster cup
+10 Rear caster cup - left half
+11 Rear caster cup - right half
+12 Mast locating bushing
+13 Left concealed arm hub
+14 Right concealed arm hub
+
+No torso, head shell or exterior arm covers are included.
+Motors, wheels, electronics, metal mast, caster balls, screws, nuts and
+inserts are purchased hardware and are not included as printable shapes.
+The two arm hubs are included for attaching the moving arms to the servos.
+
+FRAME HARDWARE
+- Four M3 x 80 socket screws, four M3 flat washers (modeled 0.5 mm thick)
+  and four M3 hex nuts (modeled 2.4 mm thick) for the main frame stack.
+- Four M3 x 12 socket screws for the servo feet.
+- Four M3 x 10 socket screws for the neck-carrier-to-servo-tower ties.
+- Two M3 x 10 socket screws for the shelf-to-front-frame ties.
+- Ten M3 inserts: four deck, four tower seats, two front-frame seats.
+  The modeled pilots are diameter 4.2 mm with nominal 5 mm insert length.
+  Match the pilots to the actual inserts you use before printing.
+- Servo ears retain the V7 arrangement: four M2 x 5 screws and short inserts.
+- Arm hubs retain four M2 x 10 screws for the provisional horn pilot holes.
+- Retain the existing motor/wheel, caster and mast hardware from the project.
+- The eight old M3 x 30 frame spacers are replaced by this braced frame.
+
+ASSEMBLY ORDER
+1. Prepare the inserts and clear the through-bolt holes in the printed parts.
+2. Attach motors, wheels and casters to the motor plate. Insert the four
+   M3 x 80 frame bolts upward from underneath. Support their heads on the bench.
+3. Lower the front and rear frames over the bolts onto the plate support pads.
+   The front frame's diagonal supports point inward beneath the battery shelf.
+4. Fit the battery shelf. Tighten its two M3 x 10 screws into the front frame.
+   Fit the battery and its retention strap.
+5. Attach the U2D2 and regulator beneath the electronics cage on the bench;
+   connect their cables. Lower the cage over the long bolts onto the shelf.
+   Fit the four top washers/nuts and tighten evenly without distorting prints.
+6. If fitting the outer shell now, raise it from underneath and fasten its
+   underside ledges BEFORE fitting the servo modules, Pi and neck carrier.
+   The shell is deliberately excluded from this print package.
+7. Fit each servo/horn to its holder. Lower each module with its holder
+   6 mm inward from its final position, seat its foot, then slide it outward
+   6 mm and fasten it with two M3 x 12 screws. Leave the Pi and carrier off
+   during this step to keep the screw access clear.
+8. Install the Pi/cooler and connect wiring. Keep cables clear of moving
+   parts, cooling airflow and the concealed screwdriver passages.
+9. Fit the mast/bushing and internal neck carrier. Start all four M3 x 10
+   tower-tie screws and the central support connection before tightening.
+10. Fit the keyed arm hubs to the horns. Install the exterior covers/head
+    later using the existing project instructions.
+
+For later shell installation/removal, first remove the neck carrier, Pi,
+arm hubs and servo modules to restore the checked shell-insertion configuration.
+The completed core can stay assembled while the empty lower shell is fitted.
+
+FIT CHECK
+The accepted servo envelope is provisional: 23 x 12.2 x 24 mm.
+All included meshes are watertight. CAD assembly/tool-access checks passed.
+Check actual servo tabs/horn, inserts, strap/cable clearances and print fit.
+Printed stiffness and insert retention still require a prototype check.
+
+Full source project and detailed assembly/validation:
+C:\Users\sahlu\Documents\Plaipin\Fall 2026\Rpi shell drive\v8_rigid_frame
+
+FILE_MANIFEST.json records source component names, dimensions and file hashes.

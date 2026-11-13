@@ -1,0 +1,146 @@
+[
+  {
+    "name": "V9 Display pedestal and carrier saddle",
+    "color": [
+      0.1,
+      0.48,
+      0.64
+    ],
+    "brep": "new_00.brep"
+  },
+  {
+    "name": "V9 Carrier lower clamp jaw",
+    "color": [
+      0.1,
+      0.48,
+      0.64
+    ],
+    "brep": "new_01.brep"
+  },
+  {
+    "name": "V9 Display removable top retainer",
+    "color": [
+      0.1,
+      0.48,
+      0.64
+    ],
+    "brep": "new_02.brep"
+  },
+  {
+    "name": "V9 Hardware clamp M3x16 X-25 Y-50",
+    "color": [
+      0.5,
+      0.5,
+      0.5
+    ],
+    "brep": "new_03.brep"
+  },
+  {
+    "name": "V9 Hardware clamp M3 nut X-25 Y-50",
+    "color": [
+      0.5,
+      0.5,
+      0.5
+    ],
+    "brep": "new_04.brep"
+  },
+  {
+    "name": "V9 Hardware clamp M3x16 X-25 Y-36",
+    "color": [
+      0.5,
+      0.5,
+      0.5
+    ],
+    "brep": "new_05.brep"
+  },
+  {
+    "name": "V9 Hardware clamp M3 nut X-25 Y-36",
+    "color": [
+      0.5,
+      0.5,
+      0.5
+    ],
+    "brep": "new_06.brep"
+  },
+  {
+    "name": "V9 Hardware clamp M3x16 X25 Y-50",
+    "color": [
+      0.5,
+      0.5,
+      0.5
+    ],
+    "brep": "new_07.brep"
+  },
+  {
+    "name": "V9 Hardware clamp M3 nut X25 Y-50",
+    "color": [
+      0.5,
+      0.5,
+      0.5
+    ],
+    "brep": "new_08.brep"
+  },
+  {
+    "name": "V9 Hardware clamp M3x16 X25 Y-36",
+    "color": [
+      0.5,
+      0.5,
+      0.5
+    ],
+    "brep": "new_09.brep"
+  },
+  {
+    "name": "V9 Hardware clamp M3 nut X25 Y-36",
+    "color": [
+      0.5,
+      0.5,
+      0.5
+    ],
+    "brep": "new_10.brep"
+  },
+  {
+    "name": "V9 Hardware retainer M3x10 X-27.71",
+    "color": [
+      0.5,
+      0.5,
+      0.5
+    ],
+    "brep": "new_11.brep"
+  },
+  {
+    "name": "V9 Hardware retainer M3 nut X-27.71",
+    "color": [
+      0.5,
+      0.5,
+      0.5
+    ],
+    "brep": "new_12.brep"
+  },
+  {
+    "name": "V9 Hardware retainer M3x10 X38.79",
+    "color": [
+      0.5,
+      0.5,
+      0.5
+    ],
+    "brep": "new_13.brep"
+  },
+  {
+    "name": "V9 Hardware retainer M3 nut X38.79",
+    "color": [
+      0.5,
+      0.5,
+      0.5
+    ],
+    "brep": "new_14.brep"
+  },
+  {
+    "name": "V9 Waveshare ESP32-S3-AMOLED-1.91-M manufacturer STEP reference",
+    "color": [
+      0.15,
+      0.15,
+      0.17
+    ],
+    "brep": "new_15.brep"
+  }
+]

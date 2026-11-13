@@ -1,0 +1,731 @@
+{
+  "shell_entry": [
+    {
+      "pose": {
+        "z": -135
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": -130
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": -125
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": -120
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": -115
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": -110
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": -105
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": -100
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": -95
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": -90
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": -85
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": -80
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": -75
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": -70
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": -65
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": -60
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": -55
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": -50
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": -45
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": -40
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": -35
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": -30
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": -25
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": -20
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": -15
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": -10
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": -5
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": -2
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": -1
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": -0.5
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": 0
+      },
+      "hits": []
+    }
+  ],
+  "servo_entry": [
+    {
+      "pose": {
+        "side": "L",
+        "dx": 6,
+        "dz": 80
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "side": "L",
+        "dx": 6,
+        "dz": 60
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "side": "L",
+        "dx": 6,
+        "dz": 40
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "side": "L",
+        "dx": 6,
+        "dz": 20
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "side": "L",
+        "dx": 6,
+        "dz": 10
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "side": "L",
+        "dx": 6,
+        "dz": 5
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "side": "L",
+        "dx": 6,
+        "dz": 0
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "side": "L",
+        "dx": 4,
+        "dz": 0
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "side": "L",
+        "dx": 2,
+        "dz": 0
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "side": "L",
+        "dx": 0,
+        "dz": 0
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "side": "R",
+        "dx": -6,
+        "dz": 80
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "side": "R",
+        "dx": -6,
+        "dz": 60
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "side": "R",
+        "dx": -6,
+        "dz": 40
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "side": "R",
+        "dx": -6,
+        "dz": 20
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "side": "R",
+        "dx": -6,
+        "dz": 10
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "side": "R",
+        "dx": -6,
+        "dz": 5
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "side": "R",
+        "dx": -6,
+        "dz": 0
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "side": "R",
+        "dx": -4,
+        "dz": 0
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "side": "R",
+        "dx": -2,
+        "dz": 0
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "side": "R",
+        "dx": 0,
+        "dz": 0
+      },
+      "hits": []
+    }
+  ],
+  "pi_entry": [
+    {
+      "pose": {
+        "z": 100
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": 80
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": 60
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": 40
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": 20
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": 10
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": 5
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": 0
+      },
+      "hits": []
+    }
+  ],
+  "carrier_entry": [
+    {
+      "pose": {
+        "z": 100
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": 60
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": 30
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": 10
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": 5
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": 2
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": 1
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": 0
+      },
+      "hits": []
+    }
+  ],
+  "cage_entry": [
+    {
+      "pose": {
+        "z": 100
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": 60
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": 30
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": 15
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": 5
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": 1
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": 0
+      },
+      "hits": []
+    }
+  ],
+  "shelf_entry": [
+    {
+      "pose": {
+        "z": 80
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": 40
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": 20
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": 5
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": 1
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "z": 0
+      },
+      "hits": []
+    }
+  ],
+  "tools": [
+    {
+      "pose": {
+        "kind": "frame top nut socket",
+        "x": -30,
+        "y": -43
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "kind": "frame bolt underside driver",
+        "x": -30,
+        "y": -43
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "kind": "frame top nut socket",
+        "x": -30,
+        "y": 49
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "kind": "frame bolt underside driver",
+        "x": -30,
+        "y": 49
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "kind": "shelf to front brace driver",
+        "x": -30
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "kind": "frame top nut socket",
+        "x": 30,
+        "y": -43
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "kind": "frame bolt underside driver",
+        "x": 30,
+        "y": -43
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "kind": "frame top nut socket",
+        "x": 30,
+        "y": 49
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "kind": "frame bolt underside driver",
+        "x": 30,
+        "y": 49
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "kind": "shelf to front brace driver",
+        "x": 30
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "kind": "servo foot driver",
+        "side": "L",
+        "y": -20
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "kind": "servo foot driver",
+        "side": "L",
+        "y": 20
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "kind": "carrier tie driver",
+        "side": "L",
+        "y": -24
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "kind": "carrier tie driver",
+        "side": "L",
+        "y": 24
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "kind": "concealed head driver",
+        "side": "L",
+        "y": -42
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "kind": "concealed head driver",
+        "side": "L",
+        "y": 42
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "kind": "servo foot driver",
+        "side": "R",
+        "y": -20
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "kind": "servo foot driver",
+        "side": "R",
+        "y": 20
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "kind": "carrier tie driver",
+        "side": "R",
+        "y": -24
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "kind": "carrier tie driver",
+        "side": "R",
+        "y": 24
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "kind": "concealed head driver",
+        "side": "R",
+        "y": -42
+      },
+      "hits": []
+    },
+    {
+      "pose": {
+        "kind": "concealed head driver",
+        "side": "R",
+        "y": 42
+      },
+      "hits": []
+    }
+  ],
+  "shell_check_scope": [
+    "V8 Motor plate - underside seating face and side-loaded M3 nut pockets",
+    "V8 Electronics cage - triangulated walls and full servo foot supports",
+    "V8 Battery shelf - strap slots and removable standoff stack",
+    "V8 Lower front frame - braced compression supports",
+    "V8 Lower rear frame - braced compression supports",
+    "Hardware frame through bolt M3x80 X-30 Y-43",
+    "Hardware frame washer M3 X-30 Y-43",
+    "Hardware frame top nut M3 X-30 Y-43",
+    "Hardware frame through bolt M3x80 X-30 Y49",
+    "Hardware frame washer M3 X-30 Y49",
+    "Hardware frame top nut M3 X-30 Y49",
+    "Hardware front frame shelf M3x10 X-30",
+    "Hardware frame through bolt M3x80 X30 Y-43",
+    "Hardware frame washer M3 X30 Y-43",
+    "Hardware frame top nut M3 X30 Y-43",
+    "Hardware frame through bolt M3x80 X30 Y49",
+    "Hardware frame washer M3 X30 Y49",
+    "Hardware frame top nut M3 X30 Y49",
+    "Hardware front frame shelf M3x10 X30"
+  ]
+}

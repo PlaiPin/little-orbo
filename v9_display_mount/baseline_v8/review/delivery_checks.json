@@ -1,0 +1,283 @@
+{
+  "step_parts": 160,
+  "invalid_step_parts": [],
+  "stl": [
+    {
+      "file": "V8_Arm_L_keyed_hub_with_replaceable_clips.stl",
+      "watertight": true,
+      "bounds_mm": [
+        [
+          -97.39945983886719,
+          -5.099459171295166,
+          109.0
+        ],
+        [
+          -84.0,
+          10.399696350097656,
+          122.5
+        ]
+      ]
+    },
+    {
+      "file": "V8_Arm_L_smooth_removable_flipper_cover.stl",
+      "watertight": true,
+      "bounds_mm": [
+        [
+          -109.04729461669922,
+          -32.953857421875,
+          56.5
+        ],
+        [
+          -86.42597961425781,
+          22.525617599487305,
+          130.0
+        ]
+      ]
+    },
+    {
+      "file": "V8_Arm_R_keyed_hub_with_replaceable_clips.stl",
+      "watertight": true,
+      "bounds_mm": [
+        [
+          84.0,
+          -5.099459171295166,
+          109.0
+        ],
+        [
+          97.39945983886719,
+          10.399696350097656,
+          122.5
+        ]
+      ]
+    },
+    {
+      "file": "V8_Arm_R_smooth_removable_flipper_cover.stl",
+      "watertight": true,
+      "bounds_mm": [
+        [
+          86.4249496459961,
+          -32.95508575439453,
+          56.5
+        ],
+        [
+          109.04729461669922,
+          22.525617599487305,
+          130.0
+        ]
+      ]
+    },
+    {
+      "file": "V8_Battery_shelf_-_strap_slots_and_removable_standoff_stack.stl",
+      "watertight": true,
+      "bounds_mm": [
+        [
+          -40.400001525878906,
+          -47.0,
+          49.0
+        ],
+        [
+          40.400001525878906,
+          53.0,
+          55.0
+        ]
+      ]
+    },
+    {
+      "file": "V8_Bottom_square_locating_bushing.stl",
+      "watertight": true,
+      "bounds_mm": [
+        [
+          -8.0,
+          46.0,
+          8.5
+        ],
+        [
+          8.0,
+          62.0,
+          14.0
+        ]
+      ]
+    },
+    {
+      "file": "V8_Electronics_cage_-_triangulated_walls_and_full_servo_foot_supports.stl",
+      "watertight": true,
+      "bounds_mm": [
+        [
+          -49.0,
+          -47.0,
+          52.0
+        ],
+        [
+          49.0,
+          53.0,
+          85.0
+        ]
+      ]
+    },
+    {
+      "file": "V8_Front_caster_cup_-_rounded_underside_flange_Body1.stl",
+      "watertight": true,
+      "bounds_mm": [
+        [
+          -18.5,
+          -49.5,
+          4.0
+        ],
+        [
+          18.5,
+          -25.5,
+          18.75
+        ]
+      ]
+    },
+    {
+      "file": "V8_Internal_neck_carrier_-_square_mast_and_concealed_M3_head_screws.stl",
+      "watertight": true,
+      "bounds_mm": [
+        [
+          -66.80000305175781,
+          -46.7995719909668,
+          112.0
+        ],
+        [
+          66.80000305175781,
+          63.0,
+          132.0
+        ]
+      ]
+    },
+    {
+      "file": "V8_Lower_front_frame_-_braced_compression_supports.stl",
+      "watertight": true,
+      "bounds_mm": [
+        [
+          -36.0,
+          -47.0,
+          19.0
+        ],
+        [
+          36.0,
+          -7.0,
+          49.0
+        ]
+      ]
+    },
+    {
+      "file": "V8_Lower_rear_frame_-_braced_compression_supports.stl",
+      "watertight": true,
+      "bounds_mm": [
+        [
+          -36.0,
+          45.0,
+          19.0
+        ],
+        [
+          36.0,
+          53.0,
+          49.0
+        ]
+      ]
+    },
+    {
+      "file": "V8_Motor_plate_-_underside_seating_face_and_side-loaded_M3_nut_pockets.stl",
+      "watertight": true,
+      "bounds_mm": [
+        [
+          -65.5,
+          -51.29999923706055,
+          10.0
+        ],
+        [
+          65.5,
+          65.36862182617188,
+          21.049999237060547
+        ]
+      ]
+    },
+    {
+      "file": "V8_Rear_anti-tip_ball_cup_left.stl",
+      "watertight": true,
+      "bounds_mm": [
+        [
+          -12.5,
+          28.500146865844727,
+          3.299999952316284
+        ],
+        [
+          -0.05000000074505806,
+          45.49985122680664,
+          14.0
+        ]
+      ]
+    },
+    {
+      "file": "V8_Rear_anti-tip_ball_cup_right.stl",
+      "watertight": true,
+      "bounds_mm": [
+        [
+          0.05000000074505806,
+          28.500146865844727,
+          3.299999952316284
+        ],
+        [
+          12.5,
+          45.49985122680664,
+          14.0
+        ]
+      ]
+    },
+    {
+      "file": "V8_Servo_frame_bracket_L_-_bolted_to_electronics_deck.stl",
+      "watertight": true,
+      "bounds_mm": [
+        [
+          -78.0,
+          -29.0,
+          85.0
+        ],
+        [
+          -29.5,
+          29.0,
+          128.0
+        ]
+      ]
+    },
+    {
+      "file": "V8_Servo_frame_bracket_R_-_bolted_to_electronics_deck.stl",
+      "watertight": true,
+      "bounds_mm": [
+        [
+          29.5,
+          -29.0,
+          85.0
+        ],
+        [
+          78.0,
+          29.0,
+          128.0
+        ]
+      ]
+    },
+    {
+      "file": "V8_Torso_-_lower_ledges_Z7_to_Z10_under_motor_plate.stl",
+      "watertight": true,
+      "bounds_mm": [
+        [
+          -95.9002685546875,
+          -80.68702697753906,
+          7.0
+        ],
+        [
+          95.90270233154297,
+          93.32197570800781,
+          130.0
+        ]
+      ]
+    }
+  ],
+  "source_files_checked": 62,
+  "changed_source_files": [],
+  "native_joint_count": 19,
+  "retained_parts_checked": 120,
+  "retained_part_mismatches": []
+}
