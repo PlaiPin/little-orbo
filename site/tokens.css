@@ -1,0 +1,113 @@
+/* Orbo · design tokens
+ * Every colour, face, size and timing on the site comes from this file.
+ * Palette is lifted from the approved Orbo render (orbo-design.png):
+ * ivory shell, blush backdrop, peach flippers, dark visor, aqua neck ring.
+ */
+:root {
+  /* Surfaces */
+  --color-paper:      oklch(97.6% 0.008 75);   /* warm ivory page */
+  --color-paper-2:    oklch(95.2% 0.012 70);   /* ivory, one step down */
+  --color-blush:      oklch(93.2% 0.022 345);  /* backdrop of the render */
+  --color-blush-2:    oklch(90.2% 0.028 345);  /* stage floor on blush */
+  --color-mint:       oklch(93.5% 0.022 195);  /* workbench tint for Orbo Open */
+  --color-mint-2:     oklch(89.5% 0.03 195);
+  --color-visor:      oklch(19.5% 0.012 70);   /* dark sections = the face glass */
+  --color-visor-2:    oklch(24.5% 0.013 70);
+  --color-visor-3:    oklch(31% 0.014 70);
+
+  /* Ink */
+  --color-ink:        oklch(22% 0.014 60);
+  --color-ink-2:      oklch(38% 0.014 60);
+  --color-muted:      oklch(45% 0.014 60);
+  --color-rule:       oklch(87.5% 0.012 70);
+  --color-rule-blush: oklch(85% 0.026 345);
+  --color-on-visor:   oklch(95.5% 0.01 80);
+  --color-on-visor-2: oklch(76% 0.012 80);
+  --color-rule-visor: oklch(36% 0.014 70);
+
+  /* Brand accents */
+  --color-peach:      oklch(85.5% 0.075 50);   /* flippers */
+  --color-peach-soft: oklch(92.5% 0.04 55);
+  --color-peach-deep: oklch(55% 0.125 42);     /* peach that passes on paper */
+  --color-aqua:       oklch(88% 0.085 190);    /* neck ring */
+  --color-aqua-deep:  oklch(50% 0.085 200);    /* focus ring on light */
+  --color-eye:        oklch(97.5% 0.02 95);    /* eye glow, warm white */
+  --color-danger:     oklch(52% 0.16 28);
+  --color-ok:         oklch(48% 0.09 160);
+
+  /* Ring moods */
+  --mood-calm:        var(--color-aqua);
+  --mood-curious:     oklch(80% 0.105 285);
+  --mood-happy:       oklch(89% 0.125 92);
+  --mood-affection:   oklch(81% 0.115 5);
+
+  /* Puff colours (dress section swatches) */
+  --puff-ivory:       oklch(96% 0.012 85);
+  --puff-peach:       oklch(80% 0.1 48);
+  --puff-aqua:        oklch(82% 0.1 190);
+  --puff-butter:      oklch(88% 0.13 92);
+
+  /* Clip sets (stand-in scenes). Tints of the brand colours only. */
+  --set-desk-wall:    var(--color-peach-soft);
+  --set-desk-floor:   oklch(87% 0.058 52);
+  --set-kitchen-wall: var(--color-mint-2);
+  --set-kitchen-floor:var(--color-mint);
+  --set-shelf-wall:   var(--color-blush);
+  --set-shelf-floor:  var(--color-blush-2);
+  --set-window-wall:  oklch(93.5% 0.018 75);
+  --set-window-floor: oklch(89.5% 0.024 75);
+  --set-night-wall:   var(--color-visor-3);
+  --set-night-floor:  var(--color-visor-2);
+
+  /* Faces */
+  --font-display: "Chillax", "Avenir Next Rounded", "Hiragino Maru Gothic ProN", ui-rounded, sans-serif;
+  --font-body:    "Switzer", "Helvetica Neue", ui-sans-serif, sans-serif;
+  --font-slate:   "JetBrains Mono", ui-monospace, "SF Mono", monospace; /* film slates only */
+
+  /* Type scale. Body runs on three steps only: 22 / 17 / 14, plus the 12px slate. */
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-md:   1.0625rem;
+  --text-xl:   clamp(1.125rem, 0.95rem + 0.8vw, 1.375rem);
+  --text-h:    1.25rem;                                   /* small display headings */
+  --text-2xl:  clamp(1.5rem, 1.2rem + 1.2vw, 2rem);
+  --text-3xl:  clamp(1.75rem, 1.1rem + 2.6vw, 3.25rem);
+  --text-4xl:  clamp(2rem, 1rem + 4.2vw, 4rem);
+  --text-display: clamp(2.25rem, 11.2vw, 5rem);
+
+  /* Space — 4pt scale */
+  --space-3xs: 0.125rem;
+  --space-2xs: 0.25rem;
+  --space-xs:  0.5rem;
+  --space-sm:  0.75rem;
+  --space-md:  1rem;
+  --space-lg:  1.5rem;
+  --space-xl:  2.5rem;
+  --space-2xl: 4rem;
+  --space-3xl: 6rem;
+  --space-4xl: 9rem;
+  --gutter:    clamp(1.25rem, 4.5vw, 4rem);
+  --measure:   60ch;
+  --page:      78rem;
+
+  /* Shape */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2.25rem;
+  --radius-pill: 999px;
+  --rule: 1px;
+
+  /* Motion */
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in:     cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-micro: 120ms;
+  --dur-short: 220ms;
+  --dur-long:  420ms;
+
+  /* Layers */
+  --z-base: 1;
+  --z-raised: 10;
+  --z-sticky: 200;
+}

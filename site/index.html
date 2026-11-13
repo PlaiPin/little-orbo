@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Orbo — a companion robot for your home</title>
+  <meta name="description" content="Orbo is a companion robot that rolls around your home. Join the waitlist, or reserve one with a fully refundable $199 deposit.">
+  <meta name="theme-color" content="#f1e3ea">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=chillax@500,600&display=swap">
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=switzer@400,500,600&display=swap">
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=jet-brains-mono@500&display=swap">
+  <link rel="preload" as="image" href="assets/orbo-front-body.webp?v=6" fetchpriority="high">
+  <link rel="stylesheet" href="tokens.css?v=6">
+  <link rel="stylesheet" href="styles.css?v=6">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <!-- Live layer drawn over the eyeless render: the neck ring, and one set of eyes per expression.
+       All coordinates are in the 535 x 740 box of the front-view image. -->
+  <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+    <defs>
+      <symbol id="orbo-ring" viewBox="0 0 535 740">
+        <path class="ring__glow" d="M59 401 C110 410 190 412.5 268 412.5 C346 412.5 426 410 477 401"/>
+        <path class="ring__core" d="M59 401 C110 410 190 412.5 268 412.5 C346 412.5 426 410 477 401"/>
+      </symbol>
+      <symbol id="eyes-calm" viewBox="0 0 535 740">
+        <g class="eyes"><rect x="201" y="277" width="22" height="59" rx="11"/><rect x="319" y="277" width="23" height="59" rx="11.5"/></g>
+      </symbol>
+      <symbol id="eyes-curious" viewBox="0 0 535 740">
+        <g class="eyes"><rect x="207" y="289" width="22" height="44" rx="11"/><rect x="324" y="266" width="26" height="70" rx="13"/></g>
+      </symbol>
+      <symbol id="eyes-happy" viewBox="0 0 535 740">
+        <g class="eyes eyes--line"><path d="M197 325 Q212 287 227 325"/><path d="M315.5 325 Q330.5 287 345.5 325"/></g>
+      </symbol>
+      <symbol id="eyes-fond" viewBox="0 0 535 740">
+        <g class="eyes eyes--fond">
+          <path d="M212 328 C191 313 190 290 202 290 C208 290 212 296 212 300 C212 296 216 290 222 290 C234 290 233 313 212 328Z"/>
+          <path d="M330.500 328 C309.500 313 308.500 290 320.500 290 C326.500 290 330.500 296 330.500 300 C330.500 296 334.500 290 340.500 290 C352.500 290 351.500 313 330.500 328Z"/>
+        </g>
+      </symbol>
+      <symbol id="eyes-sleepy" viewBox="0 0 535 740">
+        <g class="eyes eyes--line"><path d="M197 304 Q212 319 227 304"/><path d="M315.5 304 Q330.5 319 345.5 304"/></g>
+      </symbol>
+      <symbol id="eyes-right" viewBox="0 0 535 740">
+        <g class="eyes"><rect x="246" y="283" width="21" height="48" rx="10.5"/><rect x="360" y="283" width="22" height="48" rx="11"/></g>
+      </symbol>
+      <symbol id="eyes-left" viewBox="0 0 535 740">
+        <g class="eyes"><rect x="166" y="282" width="21" height="50" rx="10.5"/><rect x="282" y="282" width="22" height="50" rx="11"/></g>
+      </symbol>
+    </defs>
+  </svg>
+
+  <header class="nav" data-nav>
+    <div class="nav__inner">
+      <a class="wordmark" href="#top" aria-label="Orbo, home">
+        <svg class="wordmark__mark" viewBox="0 0 40 30" aria-hidden="true">
+          <path class="wordmark__visor" d="M20 1C31 1 39 8.5 39 17.5 39 25 33.5 29 20 29S1 25 1 17.5C1 8.5 9 1 20 1Z"/>
+          <rect class="wordmark__eye" x="12.2" y="10.5" width="4.2" height="10.5" rx="2.1"/>
+          <rect class="wordmark__eye" x="23.6" y="10.5" width="4.2" height="10.5" rx="2.1"/>
+        </svg>
+        <span class="wordmark__text">orbo</span>
+      </a>
+      <nav class="nav__links" aria-label="Sections">
+        <a href="#meet">Meet Orbo</a>
+        <a href="#film">Film</a>
+        <a href="#home">At home</a>
+        <a href="#reserve">Editions</a>
+        <a href="#faq">Questions</a>
+      </nav>
+      <a class="btn btn--sm" href="#reserve">Reserve</a>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- 1 · HERO -->
+    <section class="hero" id="top">
+      <div class="hero__inner">
+        <div class="hero__copy">
+          <p class="status"><span class="status__dot" aria-hidden="true"></span>In development. Reservations are open.</p>
+          <h1 class="hero__title"><span>Good company,</span> <span>on two wheels.</span></h1>
+          <p class="hero__lede">Orbo is a companion robot for your home. It rolls across the floor, waves its flippers, and shows how it feels with two bright eyes and a&nbsp;ring&nbsp;of&nbsp;light.</p>
+          <div class="hero__actions">
+            <a class="btn" href="#reserve">Reserve for $199</a>
+            <a class="btn btn--ghost" href="#waitlist">Join the waitlist</a>
+          </div>
+          <p class="hero__note">The $199 deposit is fully refundable.</p>
+        </div>
+
+        <figure class="orbo hero__orbo" data-mood="calm" data-wave>
+          <div class="orbo__body orbo__body--sway">
+            <img src="assets/orbo-front-body.webp?v=6" width="1070" height="1480" alt="Orbo, an egg-shaped ivory robot with a dark face, two glowing eyes, peach flippers and a white puff on a stalk." fetchpriority="high">
+            <img class="flipper flipper--l" src="assets/orbo-flipper-l.webp?v=6" width="242" height="400" alt="">
+            <img class="flipper flipper--r" src="assets/orbo-flipper-r.webp?v=6" width="246" height="425" alt="">
+            <svg class="orbo__live orbo__live--blink" viewBox="0 0 535 740" aria-hidden="true">
+              <use href="#orbo-ring"/>
+              <use class="look look--calm" href="#eyes-calm"/>
+              <use class="look look--happy" href="#eyes-happy"/>
+            </svg>
+          </div>
+          <span class="orbo__shadow" aria-hidden="true"></span>
+          <button class="orbo__tap" type="button" aria-label="Make Orbo swing its flippers"></button>
+          <figcaption class="hero__hint">Tap Orbo to say hello</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- 2 · INTRO + TURNAROUND -->
+    <section class="intro" id="meet">
+      <div class="wrap split intro__grid">
+        <h2 class="intro__statement"><span>Not an assistant.</span> <span>Not a speaker.</span> <span>A friend who rolls around your&nbsp;home.</span></h2>
+        <div class="intro__aside">
+          <p>Orbo does not manage your calendar or read you the news. It keeps you company. It rolls over when you come in, potters about while you work, and glows a little when you say&nbsp;hello.</p>
+          <p>The design is final. The robot is still learning. Reserve one now and you will be first to&nbsp;meet&nbsp;it.</p>
+        </div>
+      </div>
+
+      <div class="wrap">
+        <figure class="turn">
+          <div class="turn__views">
+            <div class="turn__view turn__view--front">
+              <img src="assets/orbo-front.webp" width="1070" height="1480" loading="lazy" alt="Orbo from the front.">
+              <span class="turn__label">Front</span>
+            </div>
+            <div class="turn__view">
+              <img src="assets/orbo-side.webp" width="912" height="1480" loading="lazy" alt="Orbo from the right side.">
+              <span class="turn__label">Side</span>
+            </div>
+            <div class="turn__view">
+              <img src="assets/orbo-back.webp" width="1108" height="1480" loading="lazy" alt="Orbo from the back.">
+              <span class="turn__label">Back</span>
+            </div>
+          </div>
+          <figcaption class="turn__caption">
+            <span>Front, side and back of the final design.</span>
+            <span>One covered USB port at the back. Nothing else to see.</span>
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- 3 · FILM (stand-in until the film is cut) -->
+    <section class="film" id="film">
+      <div class="wrap">
+        <div class="film__frame">
+          <!-- Swap the stand-in for: <video controls playsinline preload="none" poster="assets/film-poster.jpg" src="assets/orbo-film.mp4"></video> -->
+          <div class="film__light" aria-hidden="true"></div>
+          <div class="film__copy">
+            <p class="slate film__slate"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5.6v12.8a.6.6 0 0 0 .92.5l9.9-6.4a.6.6 0 0 0 0-1L9.42 5.1a.6.6 0 0 0-.92.5Z"/></svg>Launch film · filming now</p>
+            <h2 class="film__title">See Orbo move.</h2>
+            <p class="film__text">The film is being shot now. People on the waitlist get&nbsp;it&nbsp;first.</p>
+            <a class="btn btn--light" href="#waitlist">Get the film first</a>
+            <p class="film__note">Joins the waitlist. It is free.</p>
+          </div>
+          <figure class="orbo film__orbo" style="--mood: var(--mood-curious)">
+            <div class="orbo__body">
+              <img src="assets/orbo-front-noeyes.webp" width="1070" height="1480" loading="lazy" alt="Orbo in close-up, one eye wide with curiosity.">
+              <svg class="orbo__live" viewBox="0 0 535 740" aria-hidden="true"><use href="#orbo-ring"/><use href="#eyes-curious"/></svg>
+            </div>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 · ANATOMY + MOODS -->
+    <section class="anatomy" id="know">
+      <div class="wrap">
+        <header class="head">
+          <h2 class="head__title">Round body. Plenty to say.</h2>
+          <p class="head__text">Orbo has no voice menu and no app to learn. Everything it feels shows on the outside.</p>
+        </header>
+
+        <div class="anatomy__stage">
+          <svg class="anatomy__lines" viewBox="0 0 1200 780" aria-hidden="true" preserveAspectRatio="none">
+            <path d="M300 300 L462 320"/><circle cx="462" cy="320" r="4"/>
+            <path d="M300 506 L372 514"/><circle cx="372" cy="514" r="4"/>
+            <path d="M300 706 L470 738"/><circle cx="470" cy="738" r="4"/>
+            <path d="M900 84 L634 62"/><circle cx="634" cy="62" r="4"/>
+            <path d="M900 396 L812 420"/><circle cx="812" cy="420" r="4"/>
+            <path d="M900 664 L634 610"/><circle cx="634" cy="610" r="4"/>
+          </svg>
+
+          <figure class="orbo anatomy__orbo" data-mood="calm" data-mood-target>
+            <div class="orbo__body">
+              <img src="assets/orbo-front-noeyes.webp" width="1070" height="1480" loading="lazy" alt="Orbo from the front, with its parts labelled.">
+              <svg class="orbo__live orbo__live--blink" viewBox="0 0 535 740" aria-hidden="true">
+                <use href="#orbo-ring"/>
+                <use class="look look--calm" href="#eyes-calm"/>
+                <use class="look look--curious" href="#eyes-curious"/>
+                <use class="look look--happy" href="#eyes-happy"/>
+                <use class="look look--affection" href="#eyes-fond"/>
+              </svg>
+            </div>
+            <span class="orbo__shadow" aria-hidden="true"></span>
+          </figure>
+
+          <div class="moods">
+            <p class="moods__label" id="moods-label">Try a mood</p>
+            <div class="moods__set" role="group" aria-labelledby="moods-label">
+              <button class="mood" type="button" data-mood="calm" aria-pressed="true"><span class="mood__dot" aria-hidden="true"></span>Calm</button>
+              <button class="mood" type="button" data-mood="curious" aria-pressed="false"><span class="mood__dot" aria-hidden="true"></span>Curious</button>
+              <button class="mood" type="button" data-mood="happy" aria-pressed="false"><span class="mood__dot" aria-hidden="true"></span>Happy</button>
+              <button class="mood" type="button" data-mood="affection" aria-pressed="false"><span class="mood__dot" aria-hidden="true"></span>Fond</button>
+            </div>
+            <p class="moods__caption" data-mood-caption aria-live="polite">Calm. A steady aqua glow, and slow blinks.</p>
+          </div>
+
+          <ul class="parts">
+            <li class="part part--l" style="--y: 300">
+              <h3>A face that changes</h3>
+              <p>Two bright eyes on dark glass. They blink, squint and widen.</p>
+            </li>
+            <li class="part part--l" style="--y: 506">
+              <h3>Flippers that wave</h3>
+              <p>Each one moves on its own. Hello, goodbye, look at this.</p>
+            </li>
+            <li class="part part--l" style="--y: 706">
+              <h3>Wheels, tucked away</h3>
+              <p>Two hidden wheels let Orbo roll and turn on the spot.</p>
+            </li>
+            <li class="part part--r" style="--y: 84">
+              <h3>A puff on a stalk</h3>
+              <p>The stalk pulls out. The puff swaps for another.</p>
+            </li>
+            <li class="part part--r" style="--y: 396">
+              <h3>A ring of light</h3>
+              <p>One thin band around the neck. Its colour is the mood.</p>
+            </li>
+            <li class="part part--r" style="--y: 664">
+              <h3>A belly that sees</h3>
+              <p>A small camera to look around, and a warm lamp below it.</p>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5 · CLIPS (stand-in scenes until the clips are shot) -->
+    <section class="clips" id="home">
+      <div class="wrap">
+        <header class="split clips__head">
+          <h2 class="head__title">Orbo, at home.</h2>
+          <p class="head__text">Five short clips from real rooms are being filmed. Until they land, these scenes show where Orbo will turn up.</p>
+        </header>
+
+        <div class="clips__grid">
+          <figure class="clip clip--a">
+            <div class="set set--desk">
+              <svg class="prop prop--frame" viewBox="0 0 84 64" aria-hidden="true"><rect x="3" y="3" width="78" height="58" rx="4"/><rect x="13" y="13" width="58" height="38" rx="2"/></svg>
+              <svg class="prop prop--plant" viewBox="0 0 90 150" aria-hidden="true"><path d="M45 106C45 72 30 52 14 42c2 26 12 48 31 64Z"/><path d="M45 106c0-40 14-62 32-74 0 30-8 56-32 74Z"/><path d="M45 106c-6-34-2-70 4-98 12 30 10 66-4 98Z"/><path d="M24 104h42l-6 43H30Z"/></svg>
+              <span class="actor" style="--mood: var(--mood-happy)">
+                <img src="assets/orbo-front-noeyes.webp" width="1070" height="1480" loading="lazy" alt="">
+                <svg class="orbo__live" viewBox="0 0 535 740" aria-hidden="true"><use href="#orbo-ring"/><use href="#eyes-happy"/></svg>
+              </span>
+            </div>
+            <figcaption><span class="clip__name">Living room</span><span class="slate">01</span></figcaption>
+          </figure>
+          <figure class="clip clip--b">
+            <div class="set set--kitchen">
+              <svg class="prop prop--cabinet" viewBox="0 0 120 170" aria-hidden="true"><rect x="3" y="3" width="114" height="164" rx="6"/><path d="M3 62h114M96 26v18M96 82v30"/></svg>
+              <span class="actor" style="--mood: var(--mood-calm)">
+                <img src="assets/orbo-hat-front-noeyes.webp" width="1070" height="1480" loading="lazy" alt="">
+                <svg class="orbo__live" viewBox="0 0 535 740" aria-hidden="true"><use href="#orbo-ring"/><use href="#eyes-left"/></svg>
+              </span>
+            </div>
+            <figcaption><span class="clip__name">Kitchen</span><span class="slate">02</span></figcaption>
+          </figure>
+          <figure class="clip clip--c">
+            <div class="set set--shelf">
+              <svg class="prop prop--books" viewBox="0 0 80 96" aria-hidden="true"><rect x="3" y="22" width="18" height="71" rx="2"/><rect x="21" y="8" width="20" height="85" rx="2"/><rect x="41" y="30" width="14" height="63" rx="2"/><rect x="55" y="16" width="22" height="77" rx="2"/></svg>
+              <span class="actor actor--plain"><img src="assets/orbo-side.webp" width="912" height="1480" loading="lazy" alt=""></span>
+            </div>
+            <figcaption><span class="clip__name">By the bookshelf</span><span class="slate">03</span></figcaption>
+          </figure>
+          <figure class="clip clip--d">
+            <div class="set set--window">
+              <svg class="prop prop--window" viewBox="0 0 170 150" aria-hidden="true"><rect x="4" y="4" width="162" height="142" rx="8"/><path d="M85 4v142M4 75h162"/></svg>
+              <span class="actor actor--plain"><img src="assets/orbo-back.webp" width="1108" height="1480" loading="lazy" alt=""></span>
+            </div>
+            <figcaption><span class="clip__name">By the window</span><span class="slate">04</span></figcaption>
+          </figure>
+          <figure class="clip clip--e">
+            <div class="set set--night">
+              <svg class="prop prop--lamp" viewBox="0 0 72 128" aria-hidden="true"><path d="M20 4h32l14 44H6Z"/><path d="M36 48v70M18 124h36"/></svg>
+              <span class="actor" style="--mood: var(--mood-happy)">
+                <img src="assets/orbo-front-noeyes.webp" width="1070" height="1480" loading="lazy" alt="">
+                <svg class="orbo__live" viewBox="0 0 535 740" aria-hidden="true"><use href="#orbo-ring"/><use href="#eyes-sleepy"/></svg>
+              </span>
+            </div>
+            <figcaption><span class="clip__name">Bedside, lights low</span><span class="slate">05</span></figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 · SIMULATION (stand-in until the recording is ready) -->
+    <section class="sim" id="sim">
+      <div class="wrap split split--rev sim__grid">
+        <div class="sim__copy">
+          <h2 class="head__title">Practice makes Orbo.</h2>
+          <p>Before Orbo rolls across your floor, it rolls across a simulated one. Balance, turns and waves are practised there, then carried over to the real robot.</p>
+        </div>
+        <div class="sim__view" role="img" aria-label="Stand-in for the simulation recording: a wireframe Orbo on a grid floor, with its planned path.">
+          <div class="sim__floor" aria-hidden="true"></div>
+          <svg class="sim__path" viewBox="0 0 800 500" aria-hidden="true" preserveAspectRatio="none">
+            <path d="M96 452 C250 474 520 470 700 388"/>
+            <circle cx="96" cy="452" r="5"/>
+            <path class="sim__goal" d="M684 387L700 388L690.3 400.7"/>
+          </svg>
+          <div class="sim__ghost" aria-hidden="true">
+            <svg class="sim__mesh" viewBox="0 0 456 740" preserveAspectRatio="none">
+              <g class="sim__mesh-fine">
+                <path d="M0 190Q228 214 456 190M0 290Q228 318 456 290M0 500Q228 530 456 500M0 600Q228 628 456 600M0 668Q228 690 456 668"/>
+                <path d="M76 0Q40 370 76 740M152 0Q132 370 152 740M228 0V740M304 0Q324 370 304 740M380 0Q416 370 380 740"/>
+              </g>
+              <path d="M111 199C150 240 152 340 44 392"/>
+              <path d="M44 404Q228 420 396 404"/>
+              <ellipse cx="207" cy="504" rx="62" ry="88"/>
+              <path d="M82 700Q240 713 400 700"/>
+            </svg>
+            <span></span>
+          </div>
+          <p class="slate sim__tag">Simulation · recording soon</p>
+          <svg class="sim__axes" viewBox="0 0 60 60" aria-hidden="true">
+            <path class="ax ax--x" d="M14 46 L50 46"/><path class="ax ax--y" d="M14 46 L14 10"/><path class="ax ax--z" d="M14 46 L38 28"/>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7 · DRESS-UP -->
+    <section class="dress" id="dress">
+      <div class="wrap split dress__grid">
+        <div class="dress__views" data-puff-target data-puff="ivory">
+          <span class="actor dress__plain" style="--mood: var(--mood-curious)">
+            <img src="assets/orbo-front-noeyes.webp" width="1070" height="1480" loading="lazy" alt="Orbo with no hat, glancing sideways.">
+            <svg class="orbo__live" viewBox="0 0 535 740" aria-hidden="true"><use href="#orbo-ring"/><use href="#eyes-right"/></svg>
+            <span class="puff" aria-hidden="true"></span>
+          </span>
+          <span class="actor dress__hat" style="--mood: var(--mood-happy)">
+            <img src="assets/orbo-hat-front-noeyes.webp" width="1070" height="1480" loading="lazy" alt="Orbo wearing a yellow bucket hat, eyes smiling.">
+            <svg class="orbo__live" viewBox="0 0 535 740" aria-hidden="true"><use href="#orbo-ring"/><use href="#eyes-happy"/></svg>
+            <span class="puff puff--hat" aria-hidden="true"></span>
+          </span>
+        </div>
+        <div class="dress__copy">
+          <h2 class="head__title">Yours to dress.</h2>
+          <p>Orbo stays Orbo underneath. What goes on top is up to you.</p>
+          <ul class="ticks">
+            <li>The stalk lifts out. No tools.</li>
+            <li>The puff swaps in seconds.</li>
+            <li>Hats and outfits sit over the shell.</li>
+          </ul>
+          <div class="swatches">
+            <p class="swatches__label" id="puff-label">Try a puff</p>
+            <div class="swatches__set" role="group" aria-labelledby="puff-label">
+              <button class="swatch" type="button" data-puff="ivory" aria-pressed="true"><span class="swatch__dot" aria-hidden="true"></span>Ivory</button>
+              <button class="swatch" type="button" data-puff="peach" aria-pressed="false"><span class="swatch__dot" aria-hidden="true"></span>Peach</button>
+              <button class="swatch" type="button" data-puff="aqua" aria-pressed="false"><span class="swatch__dot" aria-hidden="true"></span>Aqua</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8 · EDITIONS + RESERVE -->
+    <section class="reserve" id="reserve">
+      <div class="wrap">
+        <header class="head">
+          <h2 class="head__title">Two ways to bring Orbo&nbsp;home.</h2>
+          <p class="head__text">Reserve a finished Orbo with a refundable $199 deposit. Or build your own from the open-source files, for&nbsp;free.</p>
+        </header>
+
+        <div class="editions">
+          <article class="edition edition--ready">
+            <div class="edition__media">
+              <span class="actor actor--plain"><img src="assets/orbo-front.webp" width="1070" height="1480" loading="lazy" alt="Orbo, fully assembled."></span>
+            </div>
+            <div class="edition__body">
+              <h3 class="edition__name">Orbo</h3>
+              <p class="edition__line">Built by us. Ready to say hello.</p>
+              <dl class="spec">
+                <div><dt>Arrives</dt><dd>Fully assembled and tested</dd></div>
+                <div><dt>Shell</dt><dd>Ivory and peach, fitted</dd></div>
+                <div><dt>You do</dt><dd>Unbox, charge, say hello</dd></div>
+                <div><dt>Software</dt><dd>Set up and ready to go</dd></div>
+                <div><dt>Best for</dt><dd>Anyone who wants a companion</dd></div>
+              </dl>
+              <p class="edition__price"><span class="edition__amount">$199</span> <span class="edition__terms">refundable deposit today</span></p>
+              <div class="edition__actions">
+                <a class="btn" href="#" data-deposit>Reserve Orbo</a>
+                <a class="btn btn--ghost" href="#waitlist">Join the waitlist</a>
+              </div>
+              <p class="edition__trust">Fully refundable. No further charge without your yes.</p>
+            </div>
+          </article>
+
+          <article class="edition edition--open">
+            <div class="edition__media">
+              <span class="actor actor--plain edition__kit"><img src="assets/orbo-inside-mono.webp" width="852" height="1211" loading="lazy" alt="The inside of Orbo without its shell: frame, drive wheels, camera, lamp and light ring."></span>
+              <svg class="edition__arrow" viewBox="0 0 64 24" aria-hidden="true"><path d="M2 12h56M48 3l11 9-11 9"/></svg>
+              <span class="actor actor--plain edition__built"><img src="assets/orbo-front.webp" width="1070" height="1480" loading="lazy" alt="The finished Orbo that the kit becomes."></span>
+            </div>
+            <div class="edition__body">
+              <h3 class="edition__name">Orbo Open</h3>
+              <p class="edition__line">The open-source edition. Built by you.</p>
+              <dl class="spec">
+                <div><dt>Arrives</dt><dd>As files on GitHub</dd></div>
+                <div><dt>Shell</dt><dd>Design files, to make your own</dd></div>
+                <div><dt>You do</dt><dd>Find the parts and build it</dd></div>
+                <div><dt>Software</dt><dd>Open source. Read it, change it</dd></div>
+                <div><dt>Best for</dt><dd>Makers who want a project too</dd></div>
+              </dl>
+              <p class="edition__price"><span class="edition__amount">Free</span> <span class="edition__terms">open source, on GitHub</span></p>
+              <div class="edition__actions">
+                <a class="btn" href="https://github.com/PlaiPin/little-orbo" target="_blank" rel="noopener">View on GitHub</a>
+              </div>
+              <p class="edition__trust">No deposit and no waitlist. Open the repo and start.</p>
+            </div>
+          </article>
+        </div>
+        <p class="reserve__status" data-deposit-status role="status" hidden></p>
+
+        <div class="how">
+          <h3 class="how__title">How the Orbo deposit works</h3>
+          <ol class="steps">
+            <li class="step">
+              <span class="step__n" aria-hidden="true">1</span>
+              <h4>Reserve with $199</h4>
+              <p>Your deposit holds a place in line. It is not the full price.</p>
+            </li>
+            <li class="step">
+              <span class="step__n" aria-hidden="true">2</span>
+              <h4>We confirm price and date</h4>
+              <p>Before anything ships, we write to you with the final price and the delivery window.</p>
+            </li>
+            <li class="step">
+              <span class="step__n" aria-hidden="true">3</span>
+              <h4>Say yes, or take it back</h4>
+              <p>Pay the balance and Orbo ships. Or ask for your $199, and you get all of&nbsp;it.</p>
+            </li>
+          </ol>
+          <p class="how__note">Orbo is designed and built by the team at PlaiPin. Questions about a deposit? <a class="link" href="mailto:hello@example.com">Write to us</a></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9 · FAQ -->
+    <section class="faq" id="faq">
+      <div class="wrap split split--rev faq__grid">
+        <div class="faq__head">
+          <h2 class="head__title faq__title">Fair questions.</h2>
+          <p>Straight answers about the deposit, the price and the wait.</p>
+          <a class="link" href="mailto:hello@example.com">Ask us something else</a>
+        </div>
+        <div class="faq__list">
+          <details class="q" open>
+            <summary>Is the $199 really refundable?</summary>
+            <div class="q__a"><p>Yes. Ask for it back at any time before your Orbo ships and you get the full $199. No fee, no form to argue with.</p></div>
+          </details>
+          <details class="q">
+            <summary>What will Orbo cost in full?</summary>
+            <div class="q__a"><p>The final price is not set yet. We will tell you before we ask for anything more. If the number is not right for you, your deposit goes back.</p></div>
+          </details>
+          <details class="q">
+            <summary>When does it ship?</summary>
+            <div class="q__a"><p>There is no date yet. Orbo is still in development and we would rather be honest than early. People with a reservation hear first and ship first.</p></div>
+          </details>
+          <details class="q">
+            <summary>How do the two editions differ?</summary>
+            <div class="q__a"><p>Orbo arrives assembled and ready, and you reserve it with a refundable $199 deposit. Orbo Open is free. Its design files and code are on GitHub, for people who want to build, repair and reprogram their own. The robot is the same.</p></div>
+          </details>
+          <details class="q">
+            <summary>What does the waitlist do?</summary>
+            <div class="q__a"><p>It is free. You get progress updates, the film when it is done, and a note when orders open. You can leave at any time.</p></div>
+          </details>
+          <details class="q">
+            <summary>How far along is Orbo today?</summary>
+            <div class="q__a"><p>The design is final and a prototype sits on our bench. Its behaviour is still being built. We will show each step as it comes together.</p></div>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 10 · CLOSING STATEMENT / FOOTER -->
+  <footer class="close" id="waitlist">
+    <div class="wrap split close__grid">
+      <div class="close__copy">
+        <h2 class="close__title"><span>Save a place</span> <span>for a new friend.</span></h2>
+        <p class="close__text">Leave your email and we will write when there is news. The waitlist is free.</p>
+
+        <form class="join" data-waitlist-form novalidate>
+          <label class="join__label" for="email">Email address</label>
+          <div class="join__row">
+            <input class="join__input" id="email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" required aria-describedby="join-msg">
+            <button class="btn btn--light" type="submit"><span class="btn__label">Join the waitlist</span></button>
+          </div>
+          <p class="join__msg" id="join-msg" role="status" aria-live="polite"></p>
+        </form>
+
+        <div class="close__alt">
+          <p>Sure already? Hold your place with a refundable deposit.</p>
+          <a class="btn btn--ghost-light" href="#reserve">Reserve for $199</a>
+        </div>
+      </div>
+
+      <figure class="orbo close__orbo" style="--mood: var(--mood-affection)">
+        <div class="orbo__body">
+          <img src="assets/orbo-front-noeyes.webp" width="1070" height="1480" loading="lazy" alt="Orbo, with heart-shaped eyes and a pink ring.">
+          <svg class="orbo__live" viewBox="0 0 535 740" aria-hidden="true"><use href="#orbo-ring"/><use href="#eyes-fond"/></svg>
+        </div>
+        <span class="orbo__shadow" aria-hidden="true"></span>
+      </figure>
+    </div>
+
+    <div class="close__base">
+      <span class="wordmark wordmark--light">
+        <svg class="wordmark__mark" viewBox="0 0 40 30" aria-hidden="true">
+          <path class="wordmark__visor" d="M20 1C31 1 39 8.5 39 17.5 39 25 33.5 29 20 29S1 25 1 17.5C1 8.5 9 1 20 1Z"/>
+          <rect class="wordmark__eye" x="12.2" y="10.5" width="4.2" height="10.5" rx="2.1"/>
+          <rect class="wordmark__eye" x="23.6" y="10.5" width="4.2" height="10.5" rx="2.1"/>
+        </svg>
+        <span class="wordmark__text">orbo</span>
+      </span>
+      <p class="close__legal">© 2026 Orbo, by PlaiPin. Images show the final design. Features may change before shipping.</p>
+      <nav class="close__links" aria-label="Footer">
+        <a href="#top">Back to top</a>
+        <a href="mailto:hello@example.com">Contact</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="main.js?v=6" defer></script>
+</body>
+</html>
