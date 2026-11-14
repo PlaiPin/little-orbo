@@ -542,6 +542,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/osx-arm64/zstd-1.5.7-hf451053_7.conda
       - conda: https://prefix.dev/conda-forge/osx-arm64/zziplib-0.13.69-h57f5043_2.conda
       - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros-jazzy-desktop-0.11.0-h60d57d3_25.conda
+      - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros-jazzy-joy-3.3.0-h60d57d3_25.conda
       - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros-jazzy-nav2-bringup-1.3.13-h60d57d3_25.conda
       - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros-jazzy-ros2-control-4.49.0-h60d57d3_25.conda
       - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros-jazzy-ros2-controllers-4.43.0-h60d57d3_25.conda
@@ -9471,6 +9472,14 @@ packages:
   run_exports: {}
   size: 1999
   timestamp: 1791453519246
+- conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros-jazzy-joy-3.3.0-h60d57d3_25.conda
+  sha256: dbb07023701560446313a30552c23460a3e7adc7837e44c91d1cc3363f101958
+  md5: a88b2b11cb9f880f4970a4d49758e0ee
+  depends:
+  - ros2-joy ==3.3.0
+  run_exports: {}
+  size: 1973
+  timestamp: 1791439409858
 - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros-jazzy-nav2-bringup-1.3.13-h60d57d3_25.conda
   sha256: c7ec4cfd2db908108b6e8a7a7702eee2ec5d7b9a4228719cca3e0a7c751ce55c
   md5: 2bfac2c3e378f062a99e2bfc09287f32

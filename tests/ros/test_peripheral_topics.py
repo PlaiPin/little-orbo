@@ -52,7 +52,8 @@ def terminate(proc):
         proc.wait()
 
 
-async def test_teleop_real_topics_gate_deadman_and_input_loss(tmp_path):
+@pytest.mark.parametrize("input_kind", ["keyboard", "gamepad"])
+async def test_teleop_real_topics_gate_deadman_and_input_loss(tmp_path, input_kind):
     import rclpy
     from rclpy.executors import SingleThreadedExecutor
     from sensor_msgs.msg import Joy
@@ -77,6 +78,28 @@ async def test_teleop_real_topics_gate_deadman_and_input_loss(tmp_path):
     calibration.update(wheels_qualified=True, evidence_record="SYNTHETIC TEST ONLY")
     path = tmp_path / "calibration.yaml"
     path.write_text(yaml.safe_dump(calibration))
+    if input_kind == "gamepad":
+        import tomllib
+        from pathlib import Path
+        from ament_index_python.packages import get_package_share_directory
+
+        mapping = tomllib.loads(
+            (
+                Path(get_package_share_directory("orbo_bringup"))
+                / "config/teleop-gamepad.template.toml"
+            ).read_text()
+        )["robot"]["teleop"]
+        mapping.update(qualified=True, evidence_record="SYNTHETIC")
+    else:
+        mapping = {
+            "qualified": True,
+            "evidence_record": "SYNTHETIC",
+            "linear_axis": 0,
+            "angular_axis": 1,
+            "deadman_button": 0,
+            "linear_scale": 1.0,
+            "angular_scale": 1.0,
+        }
     rclpy.init()
     node = rclpy.create_node("teleop_adapter_test", namespace="/orbo")
     observer = rclpy.create_node("teleop_input_test", namespace="/orbo")
@@ -104,8 +127,10 @@ async def test_teleop_real_topics_gate_deadman_and_input_loss(tmp_path):
         if state["send"]:
             msg = Joy()
             msg.header.stamp = observer.get_clock().now().to_msg()
-            msg.axes = [1.0, 0.0] if state["held"] else [0.0, 0.0]
-            msg.buttons = [int(state["held"])]
+            msg.axes = [0.0] * (6 if input_kind == "gamepad" else 2)
+            msg.axes[mapping["linear_axis"]] = float(state["held"])
+            msg.buttons = [0] * (15 if input_kind == "gamepad" else 1)
+            msg.buttons[mapping["deadman_button"]] = int(state["held"])
             joy.publish(msg)
 
     timer = observer.create_timer(0.02, publish)
@@ -134,15 +159,7 @@ async def test_teleop_real_topics_gate_deadman_and_input_loss(tmp_path):
     teleop = Teleoperation(
         adapter,
         path,
-        {
-            "qualified": True,
-            "evidence_record": "SYNTHETIC",
-            "linear_axis": 0,
-            "angular_axis": 1,
-            "deadman_button": 0,
-            "linear_scale": 1.0,
-            "angular_scale": 1.0,
-        },
+        mapping,
     )
     thread = threading.Thread(target=executor.spin, daemon=True)
     thread.start()

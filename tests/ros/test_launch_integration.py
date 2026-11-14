@@ -34,7 +34,7 @@ def context_for(**values):
     return context
 
 
-def resolve_topics(action, context, monkeypatch):
+def resolve_topics(action, context, monkeypatch, namespace="/orbo"):
     import rclpy
     from launch.actions import ExecuteProcess
 
@@ -49,7 +49,7 @@ def resolve_topics(action, context, monkeypatch):
     ros.init(args=[])
     node = rclpy.create_node(
         "launch_resolution_probe",
-        namespace="/orbo",
+        namespace=namespace,
         context=ros,
         cli_args=args,
         use_global_arguments=False,
@@ -57,7 +57,7 @@ def resolve_topics(action, context, monkeypatch):
     try:
         return {
             topic: node.resolve_topic_name(topic)
-            for topic in ("/tf", "/tf_static", "cmd_vel")
+            for topic in ("/tf", "/tf_static", "cmd_vel", "joy")
         }
     finally:
         node.destroy_node()
@@ -185,3 +185,76 @@ def test_navigation_rejects_nominal_bench_geometry():
         load_launch("orbo_navigation", "navigation.launch.py").setup(
             context_for(calibration=str(profile), map="unused")
         )
+
+
+@pytest.mark.parametrize("driver", ["joy_node", "game_controller_node"])
+def test_remote_joy_is_input_only(driver, monkeypatch):
+    from launch_ros.actions import Node
+
+    context = context_for(device_name="SYNTHETIC GAMEPAD", driver=driver)
+    actions = load_launch("orbo_bringup", "joy.launch.py").setup(context)
+    assert len(actions) == 1 and isinstance(actions[0], Node)
+    node = actions[0]
+    parameters = []
+    create_file = node._create_params_file_from_dict
+
+    def capture_parameters(params):
+        parameters.append(params)
+        return create_file(params)
+
+    monkeypatch.setattr(node, "_create_params_file_from_dict", capture_parameters)
+    resolved = resolve_topics(node, context, monkeypatch, namespace="/orbo/teleop")
+    assert node.node_executable == driver
+    assert node.node_package == "joy"
+    params = parameters[0]
+    assert params["device_name"] == "SYNTHETIC GAMEPAD"
+    assert params["autorepeat_rate"] == 50.0
+    assert params["sticky_buttons"] is False
+    assert params["deadzone"] == 0.1
+    assert params["use_sim_time"] is False
+    assert node.expanded_node_namespace == "/orbo/teleop"
+    assert resolved["joy"] == "/orbo/teleop/joy"
+
+
+@pytest.mark.parametrize("name,driver", [("", "joy_node"), ("pad", "invalid")])
+def test_joy_requires_explicit_device_and_supported_driver(name, driver):
+    with pytest.raises(RuntimeError):
+        load_launch("orbo_bringup", "joy.launch.py").setup(
+            context_for(device_name=name, driver=driver)
+        )
+
+
+@pytest.mark.parametrize("source", ["remote", "keyboard", "joystick"])
+def test_teleop_launch_owns_one_gate(source, tmp_path):
+    import yaml
+    from ament_index_python.packages import get_package_share_directory
+    from launch.actions import ExecuteProcess, IncludeLaunchDescription
+
+    profile = yaml.safe_load(
+        (
+            Path(get_package_share_directory("orbo_description"))
+            / "config/bench-cad.yaml"
+        ).read_text()
+    )
+    profile.update(
+        bench_only=False, wheels_qualified=True, evidence_record="SYNTHETIC TEST ONLY"
+    )
+    path = tmp_path / "calibration.yaml"
+    path.write_text(yaml.safe_dump(profile))
+    actions = load_launch("orbo_bringup", "teleop.launch.py").setup(
+        context_for(
+            calibration=str(path),
+            input=source,
+            device_name="SYNTHETIC GAMEPAD",
+            driver="game_controller_node",
+        )
+    )
+    assert sum(isinstance(a, ExecuteProcess) for a in actions) == 1
+    if source == "joystick":
+        assert len(actions) == 2 and isinstance(actions[1], IncludeLaunchDescription)
+        assert dict(actions[1].launch_arguments) == {
+            "device_name": "SYNTHETIC GAMEPAD",
+            "driver": "game_controller_node",
+        }
+    else:
+        assert len(actions) == 1

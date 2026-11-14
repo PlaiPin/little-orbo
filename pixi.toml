@@ -14,6 +14,7 @@ ros-jazzy-ros2-control = ">=4.49.0,<5"
 ros-jazzy-ros2-controllers = ">=4.43.0,<5"
 ros-jazzy-xacro = ">=2.1.1,<3"
 ros-jazzy-nav2-bringup = ">=1.3,<2"
+ros-jazzy-joy = ">=3.3,<4"
 
 [pypi-dependencies]
 orbo-runtime = { path = ".", editable = true }

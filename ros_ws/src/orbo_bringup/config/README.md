@@ -8,3 +8,9 @@ not a ground-driving calibration. The production calibration template is
 
 Generated parameter files and hardware captures are local runtime data. Do not
 add them to this directory.
+
+`teleop-gamepad.template.toml` supplies the Xbox/SDL left-stick and LB deadman
+mapping for `joy.launch.py driver:=game_controller_node`. Merge it into the
+runtime TOML, replacing the keyboard mapping, then qualify the actual controller.
+It deliberately starts unqualified. See the
+[remote joystick setup](../../../README.md#remote-xbox-joystick-control).

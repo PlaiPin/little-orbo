@@ -36,6 +36,72 @@ exchange. It does not communicate with the ESP32. Rerun that check with
 below is separate. See the [Mac runbook](docs/engineering/runbooks/ros-macos.md)
 for environment troubleshooting and `pixi run orbo-preview` for the RViz model.
 
+### Quick start: Xbox joystick teleoperation
+
+Connect the Xbox controller to the **Mac** by USB or Bluetooth. The Mac publishes
+joystick input over the local network; the **Pi** runs Orbo's runtime and ROS
+controllers. Left stick drives/steers, and **LB must be held to move**. Release LB
+to command zero velocity. The initial mapping uses 25% of calibrated speed limits.
+
+**One-time Mac build**, from this repository:
+
+```bash
+cd /Users/kpatch/startup/opendive/projects/little-orbo
+pixi install --locked
+pixi run --locked ros-build-workspace
+```
+
+**Mac terminal 1 — Xbox input (leave running):**
+
+```bash
+cd /Users/kpatch/startup/opendive/projects/little-orbo
+pixi run --locked bash
+source ros_ws/install/macos/local_setup.bash
+export ROS_DOMAIN_ID=42 RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+export ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET
+unset ROS_LOCALHOST_ONLY
+ros2 run joy joy_enumerate_devices
+```
+
+Copy the exact Xbox device name from the output into this command:
+
+```bash
+ros2 launch orbo_bringup joy.launch.py driver:=game_controller_node \
+  device_name:="EXACT NAME FROM ENUMERATOR"
+```
+
+**Mac terminal 2 — verify input:** open another Pixi shell, source the same
+workspace and set the same environment variables as terminal 1, then run:
+
+```bash
+ros2 topic echo /orbo/teleop/joy
+```
+
+Check that left-stick movement changes axes 0/1 and LB changes button 9 from 0 to
+1 while held. Ctrl-C stops the observer. If enumeration lists no devices, connect
+or pair the controller and rerun it before proceeding.
+
+**Pi — prepare and authorize motion:** follow the
+[robot startup and session commands](ros_ws/README.md#2-pi-configure-and-start-the-robot)
+to configure the Xbox mapping in `/etc/orbo/runtime.toml`, start the agent,
+controllers, runtime and one teleop gate, activate the drive controller, and
+request a bounded owner session. This requires measured wheel calibration and a
+qualified controller mapping. The joystick launch alone publishes input; it does
+not activate controllers or arm motors. Keep LB released while requesting the
+session, then hold it to drive. Sessions last at most 30 seconds.
+
+**Stop**, from a Pi owner terminal:
+
+```bash
+sudo -u orbo /opt/orbo/.venv/bin/orbo request stop
+```
+
+Then Ctrl-C the Mac joystick launch. For network troubleshooting, Pi-connected
+controllers, and qualification steps, see the full
+[Xbox launch guide](ros_ws/README.md#remote-xbox-joystick-control).
+The existing lifted-bench keyboard helper below is a separate control path;
+stop it before using application teleop.
+
 ### Quick start: keyboard control with the updated firmware
 
 With the updated firmware already flashed, keep USB connected, motor power on,

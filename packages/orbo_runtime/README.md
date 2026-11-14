@@ -70,6 +70,13 @@ for the tested terminal sequence and [ROS workspace guide](../../ros_ws/README.m
 for launch integration. The two paths outside the firmware helper have different
 ownership mechanisms; do not run both velocity gates together.
 
+## Xbox joystick control
+
+For Xbox control, use the [joystick launch walkthrough](../../ros_ws/README.md#remote-xbox-joystick-control).
+It covers Mac input, Pi services/controllers, the runtime mapping, owner grants,
+bounded sessions and stopping. The Xbox source uses the same application teleop
+adapter as `orbo-teleop-keyboard`; run only one of these input sources at a time.
+
 ## Validation boundary
 
 Runtime tests use synthetic devices and mocked providers. ROS integration tests

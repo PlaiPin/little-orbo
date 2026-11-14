@@ -1,0 +1,12 @@
+# Merge this section into the robot's runtime TOML, replacing [robot.teleop].
+# For joy.launch.py driver:=game_controller_node (SDL-mapped controllers) only.
+# Verify actual axes, signs, deadman release and disconnect before qualifying.
+# Also set [robot].teleop_enabled = true and navigation_enabled = false.
+[robot.teleop]
+qualified = false
+evidence_record = ""
+linear_axis = 1 # Left stick vertical; forward is positive.
+angular_axis = 0 # Left stick horizontal; left is positive.
+deadman_button = 9 # SDL left shoulder: LB / L1, hold to drive.
+linear_scale = 0.25 # Fraction of commissioned limits, not metres per second.
+angular_scale = 0.25
