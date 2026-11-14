@@ -1,0 +1,47 @@
+[runtime]
+owner = "owner"
+profile = "orbo"
+database = "/var/lib/orbo/journal.db"
+socket = "/run/orbo/runtime.sock"
+
+[robot]
+id = "orbo"
+navigation_enabled = false
+teleop_enabled = false # Mutually exclusive with navigation.
+calibration = "/etc/orbo/calibration.yaml"
+flippers_qualified = false
+attention_pulse_us = [] # Supply both commissioned pulse widths; no assumed 9G calibration.
+
+[voice]
+enabled = false # Enable only after credentials, voice and devices are configured.
+sample_rate = 24000
+aec_qualified = false
+# input_device = "commissioned ALSA or PipeWire input"
+# output_device = "commissioned ALSA or PipeWire output"
+
+[near]
+enabled = false # Text-only reasoning can be enabled independently of voice.
+model = "z-ai/glm-5.3-flash"
+transcription_model = "openai/whisper-large-v3"
+
+[fish]
+model = "s2.1-pro"
+voice = "" # Explicit owner-selected supported reference ID required.
+
+[commons]
+# socket = "/var/lib/orbo/commons/daemon.sock" # Patched owner-local daemon; manual contribution mode only.
+# origin = "https://OWNER_AUTHORIZED_COMMONS_HOST" # Qualified server with task-evidence extension.
+# account = "OWNER_ACCOUNT_LABEL" # Label for separate contributor accounting snapshots.
+
+[reporting]
+# near_organization = "OWNER_ORGANIZATION_UUID" # Separate NEARAI_REPORTING_TOKEN credential.
+
+[robot.teleop]
+qualified = false
+# Keyboard mapping; joystick axes/buttons must be measured and configured.
+linear_axis = 0
+angular_axis = 1
+deadman_button = 0
+linear_scale = 0.25
+angular_scale = 0.25
+evidence_record = ""

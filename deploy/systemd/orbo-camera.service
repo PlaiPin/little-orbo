@@ -1,0 +1,19 @@
+[Unit]
+Description=Orbo explicitly enabled local camera
+After=network.target
+[Service]
+Type=simple
+User=orbo
+Group=orbo
+WorkingDirectory=/opt/orbo
+Environment=ROS_DOMAIN_ID=42
+Environment=ROS_LOG_DIR=/var/lib/orbo/ros-logs
+EnvironmentFile=-/etc/orbo/camera.env
+Environment=PATH=/opt/orbo/.venv/bin:/opt/ros/jazzy/bin:/usr/bin:/bin
+ExecStart=/opt/orbo/deploy/run-ros.sh launch orbo_bringup camera.launch.py config:=/etc/orbo/camera.yaml
+Restart=no
+TimeoutStopSec=5
+UMask=0077
+NoNewPrivileges=true
+[Install]
+WantedBy=multi-user.target

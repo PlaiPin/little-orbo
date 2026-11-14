@@ -1,0 +1,26 @@
+[runtime]
+owner = "owner"
+profile = "booster_k1"
+database = "/var/lib/orbo/k1-journal.db"
+socket = "/run/orbo-k1/runtime.sock"
+
+[robot]
+id = "booster-k1"
+socket = "/var/lib/orbo/k1-bridge/worker.sock" # Owner-private SSH-forwarded on-K1 socket.
+qualified = false
+allowed_actions = ["hand_wave"] # Candidate only. Both ends must explicitly commission it.
+attention_action = "hand_wave"
+
+[voice]
+enabled = false
+sample_rate = 24000
+aec_qualified = false
+
+[near]
+enabled = false # Text-only reasoning can be enabled independently of voice.
+model = "z-ai/glm-5.3-flash"
+transcription_model = "openai/whisper-large-v3"
+
+[fish]
+model = "s2.1-pro"
+voice = ""

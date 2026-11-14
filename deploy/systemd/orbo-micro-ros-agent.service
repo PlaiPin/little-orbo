@@ -1,0 +1,24 @@
+[Unit]
+Description=Orbo wired micro-ROS agent
+After=network.target
+
+[Service]
+Type=simple
+User=orbo
+Group=orbo
+SupplementaryGroups=dialout
+Environment=ROS_DOMAIN_ID=42
+EnvironmentFile=/etc/orbo/agent.env
+Environment=ROS_LOG_DIR=/var/lib/orbo/ros-logs
+StateDirectory=orbo
+ExecStart=/opt/orbo/deploy/run-agent.sh
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/orbo
+
+[Install]
+WantedBy=multi-user.target

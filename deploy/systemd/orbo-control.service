@@ -1,0 +1,19 @@
+[Unit]
+Description=Orbo measured wheel state and ros2_control (initially inactive)
+After=orbo-micro-ros-agent.service
+Requires=orbo-micro-ros-agent.service
+[Service]
+Type=simple
+User=orbo
+Group=orbo
+WorkingDirectory=/opt/orbo
+Environment=ROS_DOMAIN_ID=42
+Environment=ROS_LOG_DIR=/var/lib/orbo/ros-logs
+ExecStart=/opt/orbo/deploy/run-ros.sh launch orbo_bringup control.launch.py calibration:=/etc/orbo/calibration.yaml
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=5
+UMask=0077
+NoNewPrivileges=true
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,31 @@
+[Unit]
+Description=Orbo task, voice and permission coordinator
+After=network-online.target orbo-micro-ros-agent.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=orbo
+Group=orbo
+SupplementaryGroups=audio dialout
+WorkingDirectory=/opt/orbo
+Environment=ROS_DOMAIN_ID=42
+Environment=PYTHONUNBUFFERED=1
+Environment=ROS_LOG_DIR=/var/lib/orbo/ros-logs
+StateDirectory=orbo
+StateDirectoryMode=0700
+RuntimeDirectory=orbo
+RuntimeDirectoryMode=0700
+UMask=0077
+ExecStart=/opt/orbo/deploy/run-runtime.sh
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/orbo /run/orbo
+
+[Install]
+WantedBy=multi-user.target

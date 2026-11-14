@@ -1,0 +1,21 @@
+[Unit]
+Description=Orbo commissioned Nav2 stack (lifecycle startup is explicit)
+After=orbo-control.service
+Requires=orbo-control.service
+Conflicts=orbo-teleop.service
+[Service]
+Type=simple
+User=orbo
+Group=orbo
+WorkingDirectory=/opt/orbo
+Environment=ROS_DOMAIN_ID=42
+Environment=ROS_LOG_DIR=/var/lib/orbo/ros-logs
+Environment=PATH=/opt/orbo/.venv/bin:/opt/ros/jazzy/bin:/usr/bin:/bin
+ExecStart=/opt/orbo/deploy/run-ros.sh launch orbo_navigation navigation.launch.py calibration:=/etc/orbo/calibration.yaml map:=/etc/orbo/map.yaml
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=5
+UMask=0077
+NoNewPrivileges=true
+[Install]
+WantedBy=multi-user.target

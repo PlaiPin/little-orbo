@@ -1,0 +1,20 @@
+[Unit]
+Description=Orbo bounded owner teleoperation gate
+After=orbo-control.service
+Requires=orbo-control.service
+Conflicts=orbo-navigation.service
+[Service]
+Type=simple
+User=orbo
+Group=orbo
+WorkingDirectory=/opt/orbo
+Environment=ROS_DOMAIN_ID=42
+Environment=ROS_LOG_DIR=/var/lib/orbo/ros-logs
+Environment=PATH=/opt/orbo/.venv/bin:/opt/ros/jazzy/bin:/usr/bin:/bin
+ExecStart=/opt/orbo/deploy/run-ros.sh launch orbo_bringup teleop.launch.py calibration:=/etc/orbo/calibration.yaml
+Restart=no
+TimeoutStopSec=5
+UMask=0077
+NoNewPrivileges=true
+[Install]
+WantedBy=multi-user.target
