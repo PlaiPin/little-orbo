@@ -1,6 +1,6 @@
 # Generic Commons review packet
 
-**Source-only handoff complete (2026-11-13); PRs not opened.** The descriptions below are local drafts ready for review, subject to the documented upstream validation limitations. Binary packaging and release-manifest refresh are separate pending work and are not prerequisites for reviewing these patches.
+**Upstream review packet; PRs not opened.** The descriptions below are local drafts ready for review, subject to the stated upstream test limitations. Reproducible patched binary packaging is now available through the [deployment README](../../../deploy/trace-commons/README.md); it is separate from reviewing these patches.
 
 Two independent, product-neutral source patches are prepared for upstream review. They stay in the patch-based Orbo build. This directory contains descriptions and evidence, not published PRs. No upstream branch, fork, push, PR or issue was created.
 
@@ -13,7 +13,7 @@ Each includes production code, standalone regressions and upstream documentation
 
 ## Review bases and reproduction
 
-The recorded upstream review base is `279f1049160bcd14e1fdae851b070d0c5c3c58cc` (release 1.0.8), resolved from upstream `main` on 2026-11-13. The Orbo production dependency stays at `8fcb9e6fbfe1ccac5b781fc80399b7662a61f175` (1.0.7). Both defects are still present in the reviewed 1.0.8 source. See [validation](validation.md) for the actual checked scope; this is not a claim about future upstream revisions or unrun platform/CI jobs.
+The recorded upstream review base is `279f1049160bcd14e1fdae851b070d0c5c3c58cc` (release 1.0.8), resolved from upstream `main` on 2026-11-13. The Orbo production dependency stays at `8fcb9e6fbfe1ccac5b781fc80399b7662a61f175` (1.0.7). Both defects are still present in the reviewed 1.0.8 source. See the [integration README](../README.md#end-to-end-behavior-and-acceptance) for checked scope; this is not a claim about future upstream revisions or unrun platform/CI jobs.
 
 For an independent review, use a fresh Trace Commons checkout at `PR_BASE_REVISION` and apply **one** patch, not the full Orbo series. Example from the little-orbo root, with an existing clean checkout at `.sdk/commons-review-one`:
 

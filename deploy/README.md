@@ -121,7 +121,5 @@ development machine; inspect the failure and stop competing builds before retry.
    digest, dedicated funded account and explicit execution flag. A successful
    swap is not evidence of provider-credit funding.
 
-Only README documentation is committed. Local reports, images, package archives,
-databases and credential files belong in ignored private locations. The five
-README procedures above distinguish software checks from live service and
-physical outcomes.
+Local reports, images, package archives, databases and credential files belong
+in ignored private locations. Keep maintained documentation in READMEs.
