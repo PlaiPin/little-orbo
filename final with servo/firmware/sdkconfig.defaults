@@ -1,0 +1,18 @@
+CONFIG_IDF_TARGET="esp32s3"
+
+# The USB-C port is the ESP32-S3's built-in USB: it carries the wired commands (and boot messages).
+# GPIO43/44 (normally UART0) are the DYNAMIXEL bus.
+CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG=y
+
+# Keep the USB line quiet for the app: only warnings from the system
+CONFIG_LOG_DEFAULT_LEVEL_WARN=y
+CONFIG_BOOTLOADER_LOG_LEVEL_WARN=y
+
+# 1 ms tick for bus timeouts
+CONFIG_FREERTOS_HZ=1000
+
+# Wi-Fi makes the program bigger than the default 1 MB app partition
+CONFIG_PARTITION_TABLE_SINGLE_APP_LARGE=y
+
+# The Waveshare ESP32-S3-Nano has 16 MB flash (avoids a boot warning)
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
