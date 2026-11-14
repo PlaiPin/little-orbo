@@ -9,6 +9,10 @@
 | `orbo_navigation` | Calibration-gated Nav2 configuration and velocity gate |
 
 All these package sources are versioned. Build/install/log directories are local.
+For the combined model/camera/odometry/TF viewer, run
+`ros2 launch orbo_description rviz.launch.py` from a sourced graphical ROS desktop,
+or `pixi run --locked rviz-pi` on the Mac. See the
+[Pi viewer guide](../docs/engineering/runbooks/ros-macos.md#combined-pi-viewer-model-camera-odometry-and-frames).
 Only `meshes/v9` is installed; obsolete `meshes/v05` exports are ignored and excluded
 from installation even if they remain on a developer's disk.
 

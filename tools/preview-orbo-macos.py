@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Give native RViz a local macOS app identity, then launch the CAD preview."""
+"""Give native RViz a macOS app identity and launch a preview or live viewer."""
 
 import os
 import argparse
@@ -13,9 +13,13 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--live', action='store_true', help='View the running domain-42 control stack')
     parser.add_argument('--internal', action='store_true', help='Preview with outer shells hidden')
+    parser.add_argument('--pi', action='store_true', help='Combined remote Pi viewer using subnet discovery')
+    parser.add_argument('launch_args', nargs='*', help='ROS launch arguments for --pi, e.g. domain_id:=42')
     args = parser.parse_args()
-    if args.live and args.internal:
-        parser.error('--internal is a CAD-only preview; use it without --live')
+    if sum((args.live, args.internal, args.pi)) > 1:
+        parser.error('--live, --internal and --pi are mutually exclusive')
+    if args.launch_args and not args.pi:
+        parser.error('ROS launch arguments require --pi')
     root = Path(__file__).resolve().parents[1]
     prefix = Path(os.environ["CONDA_PREFIX"])
     contents = root / ".pixi/Orbo RViz.app/Contents"
@@ -45,6 +49,15 @@ def main():
                 "NSHighResolutionCapable": True,
             },
             stream,
+        )
+    if args.pi:
+        # Let the ROS launch file own domain/discovery settings; preserve static
+        # peers and DDS configuration for the operator's network.
+        os.execvpe(
+            "ros2",
+            ["ros2", "launch", "orbo_description", "rviz.launch.py",
+             f"rviz_executable:={binary}", *args.launch_args],
+            dict(os.environ),
         )
     env = {
         **os.environ,

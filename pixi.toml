@@ -34,6 +34,7 @@ ros-control = "bash tools/run-control-macos.sh"
 ros-base-keyboard = "bash -c 'source ros_ws/install/macos/local_setup.bash && python tools/control-base.py keyboard'"
 ros-base-drive = "bash -c 'source ros_ws/install/macos/local_setup.bash && python tools/control-base.py drive --linear 0.02 --seconds 30'"
 rviz-live = "bash -c 'source ros_ws/install/macos/local_setup.bash && python tools/preview-orbo-macos.py --live'"
+rviz-pi = { cmd = "bash -c 'source ros_ws/install/macos/local_setup.bash && exec python tools/preview-orbo-macos.py --pi \"$@\"' --", depends-on = ["ros-build-description"] }
 ros-test-control = "bash -c 'source ros_ws/install/macos/local_setup.bash && python firmware/orbo/host_tests/test_control_wheels.py && python firmware/orbo/host_tests/test_base_control.py && ROS_DOMAIN_ID=96 ORBO_ROS_TESTS=1 python -m pytest -q tests/ros/test_base_stack.py tests/ros/test_hardware_plugin.py'"
 
 ros-build-workspace = "colcon --log-base ros_ws/log/macos build --base-paths ros_ws/src --build-base ros_ws/build/macos --install-base ros_ws/install/macos --packages-select orbo_embedded_interfaces orbo_hardware orbo_description orbo_bringup orbo_navigation --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo"

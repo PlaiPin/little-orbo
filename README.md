@@ -35,6 +35,11 @@ exchange. It does not communicate with the ESP32. Rerun that check with
 `pixi run --locked ros-check`. Use Pixi's Python for `rclpy`; the `uv` environment
 below is separate. See the [Mac runbook](docs/engineering/runbooks/ros-macos.md)
 for environment troubleshooting and `pixi run orbo-preview` for the RViz model.
+Use `pixi run --locked rviz-pi` for the combined remote Pi model, camera,
+odometry and coordinate-frame viewer. Its standard ROS entry point is
+`ros2 launch orbo_description rviz.launch.py` after sourcing the workspace;
+see the [viewer setup](docs/engineering/runbooks/ros-macos.md#combined-pi-viewer-model-camera-odometry-and-frames)
+for camera topics and network settings.
 
 ### Quick start: Xbox joystick teleoperation
 

@@ -148,6 +148,66 @@ Both the full v9 exterior and shell-hidden structure were visually checked in
 native RViz with model status OK. The earlier two-mesh shell-only preview has
 been replaced.
 
+## Combined Pi viewer: model, camera, odometry and frames
+
+Run from the repository root on the operator Mac:
+
+```bash
+pixi run --locked rviz-pi
+```
+
+The task builds the description package, activates its overlay, and invokes
+`ros2 launch orbo_description rviz.launch.py` with the native macOS app wrapper.
+It opens the full v9 robot model, a docked camera image, measured odometry arrows,
+labelled TF axes and a 5 cm grid. It only starts RViz: the Pi must already publish
+its robot description, transforms, odometry and camera images. It does not start
+capture, activate controllers, arm the robot or command motion.
+
+The same launch is available on any graphical ROS 2 Jazzy desktop with
+`orbo_description` built and sourced. On this Mac, enter the ROS environment first:
+
+```bash
+pixi shell
+source ros_ws/install/macos/local_setup.zsh
+ros2 launch orbo_description rviz.launch.py
+```
+
+Use `local_setup.bash` if your shell is Bash. On Ubuntu, source Jazzy and your
+colcon workspace's `install/setup.bash` instead; Pixi is not required there.
+RViz runs on the machine executing the launch, so a headless Pi should publish
+the data while the operator desktop runs this command.
+
+The viewer defaults to domain 42 (or an existing `ROS_DOMAIN_ID`) and subnet
+discovery, and removes the legacy `ROS_LOCALHOST_ONLY` restriction. Both machines
+must use the same domain and allow DDS traffic on the LAN. Existing static peers
+and custom DDS configuration are preserved; those settings must also allow the
+connection. The older `rviz-live` command remains the localhost bench viewer.
+
+The integrated Pi camera launch publishes `/orbo/camera/image_raw`. If using
+the [standalone OV5647 script](../../../deploy/ros2-camera/README.md), select its
+different topic and explicitly match the Pi's domain:
+
+```bash
+pixi run --locked rviz-pi camera_topic:=/camera/image_raw domain_id:=42
+# Equivalent inside a sourced ROS shell:
+ros2 launch orbo_description rviz.launch.py camera_topic:=/camera/image_raw domain_id:=42
+```
+
+Available options are `camera_topic`, `domain_id`, `fixed_frame` (default `odom`),
+`discovery_range` (`SUBNET` or `LOCALHOST`) and `rviz_executable`:
+
+```bash
+ros2 launch orbo_description rviz.launch.py --show-args
+```
+
+The Image display uses raw transport and Best Effort QoS, and does not require
+intrinsics or a camera mount transform. Missing images leave that panel waiting;
+they do not prevent the model from displaying. If `odom` is not published yet,
+use `fixed_frame:=base_link` to inspect available model transforms and the camera;
+odometry still requires its publisher. Wheel animation requires live joint TF.
+The camera optical axes appear only once a measured camera mount TF is published.
+This layout does not invent camera calibration, flipper feedback, depth or a map.
+
 ## Python and package management
 
 The ROS environment pins Python 3.12 and includes the ROS desktop metapackage and
