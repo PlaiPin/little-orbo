@@ -823,3 +823,147 @@ async def test_evidence_deletion_scrubs_conversation_replay_cache_and_preserves_
         ).fetchone()[0]
         == "resolved"
     )
+
+
+@pytest.mark.parametrize(
+    "mode",
+    [
+        "malformed_json",
+        "invalid_schema",
+        "stale_revision",
+        "permission_revoked",
+        "unverified",
+    ],
+)
+async def test_verified_usage_is_recorded_before_rejected_output_without_private_content(
+    setup, mode
+):
+    store, memory, _ = setup
+    observation = await capture(setup)
+    recorded = []
+
+    def record(owner, task_id, revision, proof, usage):
+        recorded.append((owner, task_id, revision, proof, usage))
+
+    checks = 0
+
+    def fence():
+        nonlocal checks
+        checks += 1
+        if mode == "stale_revision" and checks == 2:
+            raise Rejected("stale revision")
+
+    class Accounted(Reasoner):
+        async def complete(self, messages, tools):
+            reply = await super().complete(messages, tools)
+            content = (
+                "PRIVATE-RESPONSE"
+                if mode == "malformed_json"
+                else json.dumps(dict(output(observation), forbidden="PRIVATE-RESPONSE"))
+            )
+            message = {"content": content}
+            proof = dict(
+                reply.evidence,
+                message_digest=digest(message),
+                verification={"raw": "PRIVATE-RESPONSE"},
+            )
+            if mode == "unverified":
+                proof["signature_kind"] = "gateway"
+            if mode == "permission_revoked":
+                store.grant(
+                    "owner", "observation.infer", "lab", False, store.clock.utc() + 10
+                )
+            return VerifiedReply(message, proof, {"total_tokens": 29})
+
+    vision = VerifiedVision(
+        Accounted(output(observation)), memory, usage_recorder=record
+    )
+    with pytest.raises(Rejected):
+        await vision.inspect(
+            "owner",
+            "lab",
+            "map-a",
+            "task",
+            1,
+            [observation["id"]],
+            "wrench",
+            allowed_viewpoints=["other"],
+            check_revision=fence,
+        )
+    assert len(recorded) == (0 if mode == "unverified" else 1)
+    if recorded:
+        assert recorded[0][:3] == ("owner", "task", 1)
+        assert recorded[0][3]["response_id"] == "fixture"
+        assert recorded[0][4] == {"total_tokens": 29}
+        assert "PRIVATE-RESPONSE" not in json.dumps(recorded)
+        assert "verification" not in recorded[0][3]
+    assert store.db.execute("SELECT COUNT(*) FROM evidence_records").fetchone()[0] == 0
+
+
+async def test_verified_canceled_result_records_usage_but_cannot_become_finding(setup):
+    store, memory, _ = setup
+    observation = await capture(setup)
+    entered, recorded = asyncio.Event(), []
+
+    class Late(Reasoner):
+        async def complete(self, *args):
+            entered.set()
+            try:
+                await asyncio.sleep(100)
+            except asyncio.CancelledError:
+                return await super().complete(*args)
+
+    vision = VerifiedVision(
+        Late(output(observation)),
+        memory,
+        usage_recorder=lambda *args: recorded.append(args),
+    )
+    pending = asyncio.create_task(
+        vision.inspect(
+            "owner",
+            "lab",
+            "map-a",
+            "task",
+            1,
+            [observation["id"]],
+            "wrench",
+            check_revision=lambda: None,
+        )
+    )
+    await entered.wait()
+    pending.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await pending
+    assert len(recorded) == 1
+    assert store.db.execute("SELECT COUNT(*) FROM evidence_records").fetchone()[0] == 0
+
+
+async def test_comparison_usage_recorder_receives_task_context_once(setup):
+    _, memory, _ = setup
+    observation = await capture(setup)
+    finding, _ = await inspect(setup, observation)
+    baseline = memory.accept_baseline("owner", "lab", finding["id"], name="before")
+    current = await capture(setup)
+    recorded = []
+    response = {
+        "task_id": "task",
+        "revision": 1,
+        "status": "unchanged",
+        "reason": "clear_view",
+        "changes": [],
+    }
+    vision = VerifiedVision(
+        Reasoner(response), memory, usage_recorder=lambda *args: recorded.append(args)
+    )
+    await vision.compare(
+        "owner",
+        "lab",
+        "map-a",
+        "task",
+        1,
+        baseline["id"],
+        current["id"],
+        check_revision=lambda: None,
+    )
+    assert len(recorded) == 1
+    assert recorded[0][:3] == ("owner", "task", 1)

@@ -12,6 +12,7 @@ import math
 
 from .contracts import Rejected, canonical, digest
 from .evidence_memory import label
+from .providers import VerifiedReply
 
 
 FINDING_KEYS = {
@@ -37,7 +38,9 @@ POLICY = "bounded_evidence"
 
 
 class VerifiedVision:
-    def __init__(self, reasoner, memory, *, max_observations=4, max_age=10.0):
+    def __init__(
+        self, reasoner, memory, *, max_observations=4, max_age=10.0, usage_recorder=None
+    ):
         if type(max_observations) is not int or not 1 <= max_observations <= 4:
             raise Rejected("one to four observations supported")
         if (
@@ -48,6 +51,9 @@ class VerifiedVision:
             raise Rejected("bounded inference freshness required")
         self.reasoner, self.memory = reasoner, memory
         self.max_observations, self.max_age = max_observations, max_age
+        if usage_recorder is not None and not callable(usage_recorder):
+            raise Rejected("usage recorder must be callable")
+        self.usage_recorder = usage_recorder
         self.busy = False
 
     def _permissions(self, owner, environment):
@@ -100,7 +106,9 @@ class VerifiedVision:
             )
         return parts
 
-    async def _complete(self, messages, owner, environment, check_revision):
+    async def _complete(
+        self, messages, owner, environment, task_id, revision, check_revision
+    ):
         if self.busy:
             raise Rejected("vision worker busy")
         self._permissions(owner, environment)
@@ -108,19 +116,45 @@ class VerifiedVision:
         self.busy = True
         try:
             reply = await self.reasoner.complete(messages, [])
-            # A canceled outer task must not accept a provider swallowing cancellation.
-            if asyncio.current_task().cancelling():
-                raise asyncio.CancelledError
-            check_revision()
-            self._permissions(owner, environment)
+            if not isinstance(reply, VerifiedReply):
+                raise Rejected("verified private response required")
             proof = reply.evidence
             if (
                 proof.get("provider") != "near"
                 or proof.get("e2ee") is not True
                 or proof.get("signature_kind") != "provider_tee"
                 or proof.get("message_digest") != digest(reply.message)
+                or not isinstance(proof.get("model"), str)
+                or not proof["model"]
+                or not isinstance(proof.get("response_id"), str)
+                or not proof["response_id"]
             ):
                 raise Rejected("verified private response required")
+            if self.usage_recorder is not None:
+                # A verified request consumed provider work even if its result is
+                # stale, canceled or malformed. Record usage before result gates,
+                # without persisting private content or treating it as a bill.
+                accounting_proof = {
+                    key: proof[key]
+                    for key in (
+                        "provider",
+                        "model",
+                        "e2ee",
+                        "signature_kind",
+                        "response_id",
+                        "message_digest",
+                    )
+                }
+                if "verified_at" in proof:
+                    accounting_proof["verified_at"] = proof["verified_at"]
+                self.usage_recorder(
+                    owner, task_id, revision, accounting_proof, reply.usage
+                )
+            # A canceled outer task must not accept a provider swallowing cancellation.
+            if asyncio.current_task().cancelling():
+                raise asyncio.CancelledError
+            check_revision()
+            self._permissions(owner, environment)
             if reply.message.get("tool_calls"):
                 raise Rejected("vision tool calls prohibited")
             content = reply.message.get("content")
@@ -238,7 +272,7 @@ class VerifiedVision:
             },
         ]
         result, proof, usage = await self._complete(
-            messages, owner, environment, check_revision
+            messages, owner, environment, task_id, revision, check_revision
         )
         self._validate_finding(
             result, task_id, revision, observation_ids, reference, allowed_viewpoints
@@ -394,7 +428,7 @@ class VerifiedVision:
             },
         ]
         result, proof, usage = await self._complete(
-            messages, owner, environment, check_revision
+            messages, owner, environment, task_id, revision, check_revision
         )
         if (
             set(result) != {"task_id", "revision", "status", "reason", "changes"}
