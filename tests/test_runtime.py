@@ -131,6 +131,11 @@ async def test_cancel_acceptance_is_not_cessation(runtime):
     robot.cancel = cancel
     assert (await b.cancel("owner", action["id"]))["state"] == "cancel_requested"
     assert not b.result(ActionResult(action["id"], "completed", "simulation"))
+    # A later read-only result query can establish the completion/cancel race.
+    assert b.result(
+        ActionResult(action["id"], "completed", "simulation"), reconciliation=True
+    )
+    assert b.command(action["id"])["state"] == "completed"
 
 
 async def test_epoch_and_monotonic_expiry_fence_owner(runtime):

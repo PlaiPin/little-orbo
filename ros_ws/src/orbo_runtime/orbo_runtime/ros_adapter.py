@@ -338,7 +338,10 @@ class OrboAdapter:
 
     async def cancel(self, command_id):
         await self.controlled_stop("cancel")
-        # A request to stop does not establish measured cessation.
+        # A request to stop does not establish measured cessation. Nav2 may
+        # separately acknowledge the durable goal's terminal result.
+        if self.navigation:
+            return await self.navigation.cancel_goal(command_id)
         return ActionResult(command_id, "unknown", "none", {"stop_requested": True})
 
     async def reconcile(self, command_id):
@@ -349,7 +352,7 @@ class OrboAdapter:
             command_id in self.navigation.results
             or command_id in self.navigation.pending_results
         ):
-            return self.navigation.reconcile(command_id)
+            return await self.navigation.query_result(command_id)
         key = uuid.UUID(command_id).int & ((1 << 64) - 1)
         with self.lock:
             observed = self.statuses.get(key)
@@ -369,6 +372,8 @@ class OrboAdapter:
                 "controller_ack",
                 {"physical_observation": False},
             )
+        if self.navigation:
+            return await self.navigation.query_result(command_id)
         return ActionResult(command_id, "unknown", "none")
 
     async def close(self):

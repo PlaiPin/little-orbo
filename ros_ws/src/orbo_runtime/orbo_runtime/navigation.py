@@ -5,6 +5,7 @@ from collections import deque
 import threading
 import math
 import time
+import uuid
 from pathlib import Path
 
 from .commissioning import validate_calibration
@@ -17,6 +18,7 @@ class Navigation:
         from geometry_msgs.msg import TwistStamped
         from nav2_msgs.action import NavigateToPose
         from rclpy.action import ActionClient
+        from action_msgs.srv import CancelGoal
 
         if simulation_waypoints is not None:
             if not getattr(adapter, "simulated", False):
@@ -47,6 +49,13 @@ class Navigation:
                 raise Rejected("invalid surveyed waypoint")
         self.adapter, self.action_type = adapter, NavigateToPose
         self.client = ActionClient(adapter.node, NavigateToPose, "navigate_to_pose")
+        self.result_client = adapter.node.create_client(
+            NavigateToPose.Impl.GetResultService, "navigate_to_pose/_action/get_result"
+        )
+        self.cancel_type = CancelGoal
+        self.cancel_client = adapter.node.create_client(
+            CancelGoal, "navigate_to_pose/_action/cancel_goal"
+        )
         self.lease_pub = adapter.node.create_publisher(
             adapter.session_type, "control/lease", 1
         )
@@ -146,7 +155,11 @@ class Navigation:
         goal_stamp_ns = (
             goal.pose.header.stamp.sec * 1_000_000_000 + goal.pose.header.stamp.nanosec
         )
-        send = self.client.send_goal_async(goal, feedback_callback=self._feedback)
+        send = self.client.send_goal_async(
+            goal,
+            feedback_callback=self._feedback,
+            goal_uuid=self._goal_uuid(action.command_id),
+        )
         try:
             self.active_goal = await self.wait(send)
             if self.active_goal.accepted:
@@ -267,12 +280,23 @@ class Navigation:
         if command_id in self.results:
             return self.results[command_id]
         future = self.pending_results.get(command_id)
-        if (
-            future is None
-            or not future.done()
-            or future.cancelled()
-            or future.exception()
-        ):
+        if future is None and self.result_client.service_is_ready():
+            request = self.action_type.Impl.GetResultService.Request()
+            request.goal_id = self._goal_uuid(command_id)
+            future = self.result_client.call_async(request)
+            self.pending_results[command_id] = future
+            if len(self.pending_results) > 128:
+                self.pending_results.pop(next(iter(self.pending_results)))
+        if future is None:
+            return ActionResult(command_id, "unknown", "none")
+        # rclpy Future.done() excludes the cancelled state.
+        if future.cancelled():
+            self.pending_results.pop(command_id, None)
+            return ActionResult(command_id, "unknown", "none")
+        if not future.done():
+            return ActionResult(command_id, "unknown", "none")
+        if future.exception():
+            self.pending_results.pop(command_id, None)
             return ActionResult(command_id, "unknown", "none")
         response = future.result()
         state = {4: "completed", 5: "cancelled", 6: "failed"}.get(
@@ -284,6 +308,37 @@ class Navigation:
             self.result_evidence if state != "unknown" else "none",
             {"nav2_status": response.status, "physical_observation": False},
         )
-        self.results[command_id] = result
+        if state != "unknown":
+            self.results[command_id] = result
         self.pending_results.pop(command_id, None)
         return result
+
+    @staticmethod
+    def _goal_uuid(command_id):
+        from unique_identifier_msgs.msg import UUID
+
+        return UUID(uuid=list(uuid.UUID(command_id).bytes))
+
+    async def query_result(self, command_id, timeout=0.25):
+        """Read an existing goal's result with no redispatch or motor authority."""
+        deadline = time.monotonic() + timeout
+        while True:
+            result = self.reconcile(command_id)
+            if result.state != "unknown" or time.monotonic() >= deadline:
+                return result
+            future = self.pending_results.get(command_id)
+            if future is None:
+                return result
+            await asyncio.sleep(0.01)
+
+    async def cancel_goal(self, command_id):
+        """Explicit cancellation by the durable UUID also works after restart."""
+        if self.cancel_client.service_is_ready():
+            request = self.cancel_type.Request()
+            request.goal_info.goal_id = self._goal_uuid(command_id)
+            try:
+                async with asyncio.timeout(0.25):
+                    await self.wait(self.cancel_client.call_async(request))
+            except TimeoutError:
+                pass
+        return await self.query_result(command_id)

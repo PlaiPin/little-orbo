@@ -249,6 +249,9 @@ async def test_gazebo_task_navigation_capture_release_and_lease_expiry(tmp_path)
             sample.twist.linear.x = 0.1
             commands.publish(sample)
             await asyncio.sleep(0.05)
+        assert time.monotonic() - body["at"] < 0.25, (
+            "fresh Gazebo body feedback required for drift evidence"
+        )
         drift = math.dist(stopped, (body["x"], body["y"]))
         report["unauthorized_fresh_command_drift_m"] = drift
         assert drift < 0.01

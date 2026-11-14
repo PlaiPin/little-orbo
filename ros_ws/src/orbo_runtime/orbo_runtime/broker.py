@@ -267,11 +267,16 @@ class Broker:
                 return False
             if old == "unknown" and not reconciliation:
                 return False
-            if old == "cancel_requested" and result.state not in {
-                "cancelled",
-                "failed",
-                "unknown",
-            }:
+            if (
+                old == "cancel_requested"
+                and not reconciliation
+                and result.state
+                not in {
+                    "cancelled",
+                    "failed",
+                    "unknown",
+                }
+            ):
                 return False
             if old == "executing" and result.state == "accepted":
                 return False

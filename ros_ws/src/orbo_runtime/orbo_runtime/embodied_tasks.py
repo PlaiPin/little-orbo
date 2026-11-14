@@ -638,6 +638,18 @@ class TaskNavigator:
         ).fetchone()
         if owns_motion:
             await self.broker.stop("task pause/cancel")
+            # Explicit cancellation targets persisted commands even after the
+            # runtime lost its in-memory action handles. Never renew authority.
+            commands = self.tasks.store.db.execute(
+                "SELECT id FROM commands WHERE episode_id=? AND robot=? AND state='unknown'",
+                (task["episode_id"], self.broker.adapter.robot_id),
+            ).fetchall()
+            for command in commands:
+                try:
+                    await self.broker.cancel(owner, command["id"])
+                except (Exception, asyncio.CancelledError):
+                    # Local stop already happened; unknown remains fenced.
+                    pass
         rows = self.tasks.store.db.execute(
             "SELECT id FROM task_operations WHERE task_id=? AND state IN ('admitted','working')",
             (task["id"],),
@@ -703,6 +715,11 @@ class TaskNavigator:
                         "state": command["state"],
                     },
                 )
+        if task["state"] in TERMINAL:
+            try:
+                self.tasks.store.end_episode(task["episode_id"], owner, task["state"])
+            except Rejected:
+                pass  # Other commands may remain uncertain, or episode already ended.
         return self.tasks.get(owner, task_id)
 
     def resume(self, owner, task_id, revision):

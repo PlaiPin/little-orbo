@@ -143,10 +143,10 @@ class GazeboAdapter:
 
     async def cancel(self, command_id):
         await self.controlled_stop("cancel")
-        return self.navigation.reconcile(command_id)
+        return await self.navigation.cancel_goal(command_id)
 
     async def reconcile(self, command_id):
-        return self.navigation.reconcile(command_id)
+        return await self.navigation.query_result(command_id)
 
     def pose(self):
         return self.pose_source.snapshot()

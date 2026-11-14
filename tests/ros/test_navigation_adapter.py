@@ -158,7 +158,8 @@ async def test_nav2_goal_lease_and_cancel_protocol(tmp_path):
                 2,
             )
 
-        result = await nav.dispatch(action(2))
+        completed_action = action(2)
+        result = await nav.dispatch(completed_action)
         assert (
             result.state == "completed"
             and result.detail["physical_observation"] is False
@@ -187,6 +188,39 @@ async def test_nav2_goal_lease_and_cancel_protocol(tmp_path):
         assert nav.reconcile(cancelled_action.command_id).state == "cancelled"
         assert nav.reconcile(cancelled_action.command_id).evidence == "controller_ack"
         assert adapter.stops == 2
+        # New client instance has no original handles; command UUID is durable.
+        restored = Navigation(adapter, str(path))
+        assert not restored.results and not restored.pending_results
+        recovered = await restored.query_result(completed_action.command_id)
+        assert recovered.state == "completed" and recovered.evidence == "controller_ack"
+        assert len(received) == 2, "reconciliation must not submit another goal"
+        from rclpy.task import Future
+
+        failed_query = Future()
+        failed_query.cancel()
+        restored.results.clear()
+        restored.pending_results[completed_action.command_id] = failed_query
+        assert (
+            await restored.query_result(completed_action.command_id)
+        ).state == "unknown"
+        assert (
+            await restored.query_result(completed_action.command_id)
+        ).state == "completed"
+        unknown_started = time.monotonic()
+        assert (await restored.query_result(identity())).state == "unknown"
+        assert time.monotonic() - unknown_started < 0.5
+        outstanding = action(4)
+        active = asyncio.create_task(nav.dispatch(outstanding))
+        async with asyncio.timeout(2):
+            while len(received) < 3:
+                await asyncio.sleep(0.01)
+        query_started = time.monotonic()
+        assert (await restored.query_result(outstanding.command_id)).state == "unknown"
+        assert time.monotonic() - query_started < 0.5
+        cancelled_after_restart = await restored.cancel_goal(outstanding.command_id)
+        assert cancelled_after_restart.state == "cancelled"
+        assert (await active).state == "cancelled"
+        assert len(received) == 3, "cancel/query never redispatch motion"
     finally:
         executor.shutdown(timeout_sec=2)
         thread.join(timeout=2)

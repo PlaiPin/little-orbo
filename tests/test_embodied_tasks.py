@@ -202,7 +202,11 @@ async def test_cancel_local_without_provider_preserves_stop_uncertainty(core):
         entered.set()
         await asyncio.Event().wait()
 
+    async def unconfirmed_cancel(command_id):
+        return ActionResult(command_id, "unknown", "none", {"stop_requested": True})
+
     robot.dispatch = dispatch
+    robot.cancel = unconfirmed_cancel
     nav = TaskNavigator(tasks, broker)
     running = asyncio.create_task(nav.navigate("owner", task["id"], 1, "shelf", "move"))
     await entered.wait()
