@@ -44,14 +44,14 @@ class Ledger:
 
     def observe(self, provider, account, external_id, kind, body, *, provenance):
         if (
-            provider not in {"near", "fish", "commons"}
+            provider not in {"near", "fish", "commons", "openai"}
             or kind not in KINDS
             or provenance not in {"live_service", "fixture", "owner_assertion"}
         ):
             raise Rejected("invalid record classification")
         if not account or not external_id or len(external_id) > 256:
             raise Rejected("account and stable external record identity required")
-        if "amount" in body:
+        if body.get("amount") is not None:
             value = amount(body["amount"])
             if kind != "adjustment" and value < 0:
                 raise Rejected("negative ordinary monetary observation")
@@ -62,8 +62,11 @@ class Ledger:
                 "fish_api_credit",
             }:
                 raise Rejected("explicit instrument required")
-            if provider == "fish" and body["instrument"] == "near_restricted_credit":
-                raise Rejected("NEAR restricted credit cannot fund Fish")
+            if (
+                provider in {"fish", "openai"}
+                and body["instrument"] == "near_restricted_credit"
+            ):
+                raise Rejected("NEAR restricted credit cannot fund Fish or OpenAI")
         if kind == "credit_applied" and not body.get("usage_reference"):
             raise Rejected("applied credit requires actual usage correlation")
         if kind == "credit_received" and not body.get("receipt_reference"):
@@ -137,6 +140,7 @@ class Ledger:
         return {
             "groups": list(groups.values()),
             "fish_funding": "owner_prepaid",
+            "openai_funding": "separate_owner_account",
             "automatic_purchases": False,
             "cost_coverage": "not_established",
             "award_is_received_credit": False,
