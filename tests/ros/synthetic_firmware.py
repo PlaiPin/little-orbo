@@ -14,6 +14,8 @@ def serve(connection):
         WheelCommand,
         Health,
         ControlSession,
+        FlipperCommand,
+        ActuatorStatus,
     )
 
     assert os.environ.get("ROS_DOMAIN_ID") == os.environ.get("ORBO_TEST_DOMAIN", "96")
@@ -26,6 +28,9 @@ def serve(connection):
     )
     hp = firmware.create_publisher(
         Health, "/orbo/embedded/health", qos_profile_sensor_data
+    )
+    sp = firmware.create_publisher(
+        ActuatorStatus, "/orbo/embedded/actuator_status", qos_profile_sensor_data
     )
     state = dict(
         boot=42,
@@ -40,6 +45,14 @@ def serve(connection):
         deadline=None,
         feedback=True,
         stops=0,
+        fault=0,
+        wheels_enabled=False,
+        flipper_active=False,
+        flipper_commands=[],
+        flipper_finishes=[],
+        flipper_deadline=None,
+        reject_flippers=False,
+        status_sequence=0,
     )
 
     timing = {"feedback": [], "command": [], "session": []}
@@ -48,10 +61,17 @@ def serve(connection):
         timing["session"].append([time.monotonic(), msg.operation])
         if msg.operation == 0:
             state["armed"] = False
+            state["flipper_active"] = False
+            state["flipper_deadline"] = None
             state["stops"] += 1
         elif msg.operation == 1:
             state.update(
-                epoch=msg.epoch, armed=True, started=time.monotonic(), deadline=None
+                epoch=msg.epoch,
+                armed=True,
+                started=time.monotonic(),
+                deadline=None,
+                wheels_enabled=msg.enable_wheels,
+                fault=0,
             )
             state["arms"] += 1
 
@@ -67,12 +87,49 @@ def serve(connection):
         ):
             state["deadline"] = (msg.issued_epoch_ms + msg.valid_for_ms) / 1000
 
+    def status(msg, value, reason=0):
+        state["status_sequence"] += 1
+        sp.publish(
+            ActuatorStatus(
+                boot_id=state["boot"],
+                epoch=state["epoch"],
+                command_id=msg.command_id,
+                sequence=state["status_sequence"],
+                mono_us=time.monotonic_ns() // 1000,
+                state=value,
+                reason=reason,
+                evidence=1,
+            )
+        )
+
+    def flipper(msg):
+        state["flipper_commands"].append((time.monotonic(), msg))
+        age = time.time_ns() // 10**6 - msg.issued_epoch_ms
+        if (
+            state["reject_flippers"]
+            or not state["armed"]
+            or state["flipper_active"]
+            or msg.boot_id != state["boot"]
+            or msg.epoch != state["epoch"]
+            or not 0 <= age < msg.valid_for_ms
+            or not 0 < msg.duration_ms <= 5000
+            or not all(1400 <= p <= 1600 for p in msg.pulse_us)
+        ):
+            status(msg, 4, 4)
+            return
+        state["flipper_active"] = True
+        state["flipper_deadline"] = time.monotonic() + msg.duration_ms / 1000
+        status(msg, 1)
+
     # The node retains its subscriptions for the process lifetime.
     firmware.create_subscription(
         ControlSession, "/orbo/embedded/control_session", session, 10
     )
     firmware.create_subscription(
         WheelCommand, "/orbo/embedded/wheel_command", command, 10
+    )
+    firmware.create_subscription(
+        FlipperCommand, "/orbo/embedded/flipper_command", flipper, 10
     )
     previous_tick = time.monotonic()
 
@@ -82,7 +139,20 @@ def serve(connection):
         dt, previous_tick = now_s - previous_tick, now_s
         if state["deadline"] is not None and time.time() >= state["deadline"]:
             state["armed"] = False
-        moving = state["armed"] and now_s - state["started"] > 1
+        if not state["armed"]:
+            state["flipper_active"] = False
+            state["flipper_deadline"] = None
+        elif (
+            state["flipper_deadline"] is not None and now_s >= state["flipper_deadline"]
+        ):
+            state["flipper_active"] = False
+            state["flipper_deadline"] = None
+            msg = state["flipper_commands"][-1][1]
+            state["flipper_finishes"].append(now_s)
+            status(msg, 3)
+        moving = (
+            state["armed"] and state["wheels_enabled"] and now_s - state["started"] > 1
+        )
         if moving:
             for i in range(2):
                 state["position"][i] += state["measured_velocity"][i] * dt
@@ -114,6 +184,8 @@ def serve(connection):
                     epoch=state["epoch"],
                     armed=state["armed"],
                     clock_synced=True,
+                    mono_us=now,
+                    fault=state["fault"],
                     epoch_ms=time.time_ns() // 10**6,
                 )
             )

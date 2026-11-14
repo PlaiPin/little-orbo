@@ -2,6 +2,7 @@
 
 import asyncio
 from collections import deque
+from dataclasses import dataclass
 import threading
 import time
 import uuid
@@ -9,8 +10,16 @@ import uuid
 from .contracts import ActionResult, Capability, Rejected
 
 
+@dataclass(frozen=True)
+class OwnedSession:
+    boot: int
+    epoch: int
+    wheels: bool
+
+
 class OrboAdapter:
     simulated = False
+    shares_motion_session = True
 
     def __init__(self, config):
         import rclpy
@@ -59,7 +68,13 @@ class OrboAdapter:
         self.health_at = 0.0
         self.statuses = {}
         self.command_keys = {}
+        self.command_sessions = {}
         self.sequence = 0
+        # Only the asyncio owner arms/stops; the ROS executor only records feedback.
+        self.session_lock = asyncio.Lock()
+        self.session_generation = 0
+        self.owned_session = None
+        self.flipper_busy = False
         self.node.create_subscription(
             Health, "embedded/health", self._health, qos_profile_sensor_data
         )
@@ -141,24 +156,87 @@ class OrboAdapter:
         msg.valid_for_ms, msg.operation, msg.enable_wheels = 500, operation, wheels
         self.session_pub.publish(msg)
 
-    async def arm(self, epoch, *, wheels=False):
+    def session_health(self, session):
         health = self._snapshot()
-        if epoch <= health.epoch:
-            raise Rejected("lease epoch must fence MCU epoch")
-        # Disarm the previous stationary session before explicit fresh authorization.
-        if health.armed:
-            self._session(0, health.epoch)
-            async with asyncio.timeout(0.7):
-                while self._snapshot().armed:
-                    await asyncio.sleep(0.01)
-        self._session(1, epoch, wheels=wheels)
-        async with asyncio.timeout(0.7):
-            while True:
-                health = self._snapshot()
-                if health.armed and health.epoch == epoch:
-                    break
-                await asyncio.sleep(0.01)
+        if (
+            self.owned_session is not session
+            or health.boot_id != session.boot
+            or health.epoch != session.epoch
+            or not health.armed
+            or health.fault
+        ):
+            raise Rejected("owned MCU session changed, faulted or disarmed")
         return health
+
+    @property
+    def shared_wheel_epoch(self):
+        session = self.owned_session
+        if session is None or not session.wheels:
+            return None
+        self.session_health(session)
+        return session.epoch
+
+    async def arm(self, epoch, *, wheels=False):
+        async with self.session_lock:
+            health = self._snapshot()
+            if epoch <= health.epoch:
+                raise Rejected("lease epoch must fence MCU epoch")
+            if self.owned_session and self.owned_session.wheels:
+                raise Rejected(
+                    "wheel session already owned; stop before starting another"
+                )
+            if wheels and self.flipper_busy:
+                raise Rejected(
+                    "flipper command in progress; cannot replace its session"
+                )
+            if health.armed and (
+                self.owned_session is None
+                or health.boot_id != self.owned_session.boot
+                or health.epoch != self.owned_session.epoch
+            ):
+                raise Rejected("MCU armed by another owner")
+            generation = self.session_generation
+            boot = health.boot_id
+
+            def current():
+                if generation != self.session_generation:
+                    raise Rejected("session stopped during arming")
+                health = self._snapshot()
+                if health.boot_id != boot:
+                    raise Rejected("MCU restarted during arming")
+                return health
+
+            try:
+                # Only an idle, locally owned stationary session may be replaced.
+                if health.armed:
+                    self._session(0, health.epoch)
+                    async with asyncio.timeout(0.7):
+                        while current().armed:
+                            await asyncio.sleep(0.01)
+                current()
+                self._session(1, epoch, wheels=wheels)
+                async with asyncio.timeout(0.7):
+                    while True:
+                        health = current()
+                        if health.armed and health.epoch == epoch and not health.fault:
+                            break
+                        await asyncio.sleep(0.01)
+                self.owned_session = OwnedSession(health.boot_id, epoch, wheels)
+                return health
+            except BaseException:
+                await self.stop_session()
+                raise
+
+    async def gesture_session(self, epoch):
+        async with self.session_lock:
+            session = self.owned_session
+            if session and session.epoch == epoch:
+                self.session_health(session)
+                return session
+            if session and session.wheels:
+                raise Rejected("gesture must use the active wheel session epoch")
+        await self.arm(epoch)
+        return self.owned_session
 
     async def dispatch(self, action):
         if action.capability == "teleop.session" and self.teleoperation:
@@ -171,8 +249,18 @@ class OrboAdapter:
             raise Rejected("unsupported Orbo action")
         if not self.capabilities[action.capability].qualified:
             raise Rejected("flippers not commissioned")
+        if self.flipper_busy:
+            raise Rejected("flipper command already in progress")
+        self.flipper_busy = True
+        try:
+            return await self.dispatch_gesture(action)
+        finally:
+            self.flipper_busy = False
+
+    async def dispatch_gesture(self, action):
         started = time.monotonic()
-        health = await self.arm(action.epoch)
+        session = await self.gesture_session(action.epoch)
+        health = self.session_health(session)
         remaining = min(
             action.deadline - time.time(),
             action.duration - (time.monotonic() - started),
@@ -182,7 +270,12 @@ class OrboAdapter:
         key = uuid.UUID(action.command_id).int & ((1 << 64) - 1)
         if key in self.command_keys and self.command_keys[key] != action.command_id:
             raise Rejected("embedded command identity collision")
+        if key not in self.command_keys and len(self.command_keys) >= 128:
+            oldest = next(iter(self.command_keys))
+            self.command_keys.pop(oldest)
+            self.command_sessions.pop(oldest, None)
         self.command_keys[key] = action.command_id
+        self.command_sessions[key] = session
         self.sequence += 1
         msg = self.flipper_type()
         msg.boot_id, msg.epoch, msg.sequence, msg.command_id = (
@@ -191,19 +284,23 @@ class OrboAdapter:
             self.sequence,
             key,
         )
-        msg.issued_epoch_ms = time.time_ns() // 1_000_000
+        msg.issued_epoch_ms = time.time_ns() // 1_000_000 - 20
         msg.valid_for_ms = min(200, int(remaining * 1000))
         msg.duration_ms = min(5000, max(1, int((remaining - 0.1) * 1000)))
         msg.pulse_us = self.pulses
         self.flipper_pub.publish(msg)
         async with asyncio.timeout(remaining):
             while True:
-                self._snapshot()
+                self.session_health(session)
                 with self.lock:
                     observed = self.statuses.get(key)
                 if observed and observed[0].epoch == action.epoch:
                     state = observed[0].state
                     if state in {3, 4, 5, 6}:
+                        if observed[0].evidence != 1 or (
+                            state == 3 and observed[0].reason
+                        ):
+                            raise Rejected("invalid gesture completion evidence")
                         return ActionResult(
                             action.command_id,
                             {
@@ -216,6 +313,7 @@ class OrboAdapter:
                             {
                                 "physical_observation": False,
                                 "mcu_reason": observed[0].reason,
+                                "shared_wheel_session": session.wheels,
                             },
                         )
                 await asyncio.sleep(0.01)
@@ -228,6 +326,10 @@ class OrboAdapter:
         await self.stop_session()
 
     async def stop_session(self):
+        # Invalidate both streams immediately, even before MCU feedback arrives.
+        # A pending arm cannot resume after this stop.
+        self.session_generation += 1
+        self.owned_session = None
         # Stop is allowed even if health is stale; no new motion is authorized.
         self.sequence += 1
         msg = self.session_type()
@@ -248,7 +350,16 @@ class OrboAdapter:
         key = uuid.UUID(command_id).int & ((1 << 64) - 1)
         with self.lock:
             observed = self.statuses.get(key)
-        if observed and observed[0].state == 3:
+        session = self.command_sessions.get(key)
+        if (
+            observed
+            and session
+            and observed[0].state == 3
+            and observed[0].evidence == 1
+            and observed[0].reason == 0
+            and observed[0].boot_id == session.boot
+            and observed[0].epoch == session.epoch
+        ):
             return ActionResult(
                 command_id,
                 "completed",

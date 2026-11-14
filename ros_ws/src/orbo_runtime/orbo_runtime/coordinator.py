@@ -313,7 +313,11 @@ class Coordinator:
         elif name in {"request_attention", "navigate_to_waypoint"}:
             if hasattr(self.broker.adapter, "inspect"):
                 await self.broker.adapter.inspect()
-            epoch = self.broker.acquire(owner)
+            epoch = (
+                self.broker.gesture_epoch(owner)
+                if name == "request_attention"
+                else self.broker.acquire(owner)
+            )
             command = await self.broker.dispatch(
                 owner,
                 episode_id,
@@ -362,7 +366,7 @@ class Coordinator:
             )
             return None
         try:
-            epoch = self.broker.acquire(due["owner"])
+            epoch = self.broker.gesture_epoch(due["owner"])
             command = await self.broker.dispatch(
                 due["owner"],
                 due["episode_id"],

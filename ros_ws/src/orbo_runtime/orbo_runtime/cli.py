@@ -353,6 +353,24 @@ class LocalService:
                 },
             )
             return await self.broker.reconcile(args["command_id"])
+        if method == "robot.gesture":
+            if set(args) - {"episode_id", "key", "duration"}:
+                raise Rejected("gesture accepts a duration, not arbitrary servo pulses")
+            duration = args.get("duration", 2)
+            finite(duration, 0.2, 5)
+            if not isinstance(args.get("key"), str) or not 1 <= len(args["key"]) <= 128:
+                raise Rejected("bounded gesture request key required")
+            self.store.require_episode(args["episode_id"], self.owner)
+            epoch = self.broker.gesture_epoch(self.owner)
+            return await self.broker.dispatch(
+                self.owner,
+                args["episode_id"],
+                args["key"],
+                "attention.gesture",
+                {"gesture": "attention"},
+                epoch,
+                duration=duration,
+            )
         if method == "robot.teleop":
             spec = self.broker.adapter.capabilities.get("teleop.session")
             if not spec or not spec.qualified:

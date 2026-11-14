@@ -121,7 +121,7 @@ class Teleoperation:
             Joy, "teleop/joy", self.receive, qos_profile_sensor_data
         )
         adapter.capabilities["teleop.session"] = Capability(
-            "teleop.session", ("wheels", "flippers"), 30, ("controller_ack",), True
+            "teleop.session", ("wheels",), 30, ("controller_ack",), True
         )
 
     def receive(self, message):

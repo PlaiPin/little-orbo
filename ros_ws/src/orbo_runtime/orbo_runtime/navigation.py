@@ -52,7 +52,7 @@ class Navigation:
         self.results = {}
         adapter.capabilities["navigation.named_goal"] = Capability(
             "navigation.named_goal",
-            ("wheels", "flippers"),
+            ("wheels",),
             30,
             ("controller_ack",),
             True,

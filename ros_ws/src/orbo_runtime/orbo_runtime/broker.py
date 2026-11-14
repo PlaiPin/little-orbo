@@ -24,6 +24,15 @@ class Broker:
         self.store.permission(owner, "robot.command", self.adapter.robot_id)
         now = self.store.clock.utc()
         with self.store.transaction() as db:
+            if (
+                getattr(self.adapter, "shares_motion_session", False)
+                and db.execute(
+                    "SELECT 1 FROM commands WHERE robot=? AND state IN "
+                    "('pending','accepted','executing','cancel_requested','unknown') LIMIT 1",
+                    (self.adapter.robot_id,),
+                ).fetchone()
+            ):
+                raise Rejected("robot action active; join its session or stop it first")
             old = db.execute(
                 "SELECT * FROM leases WHERE robot=?", (self.adapter.robot_id,)
             ).fetchone()
@@ -65,6 +74,24 @@ class Broker:
             or self.lease_deadline <= self.store.clock.mono()
         ):
             raise Rejected("expired or fenced lease")
+
+    def gesture_epoch(self, owner):
+        """Join this owner's driving lease without extending or replacing it."""
+        if getattr(self.adapter, "shares_motion_session", False):
+            epoch = self.adapter.shared_wheel_epoch
+            if epoch is not None:
+                self.check_lease(owner, epoch)
+                return epoch
+            # Planning/arming/stopping and uncertain actions must not be fenced
+            # by a new stationary gesture lease. The caller can retry when ready.
+            busy = self.store.db.execute(
+                "SELECT 1 FROM commands WHERE robot=? AND state IN "
+                "('pending','accepted','executing','cancel_requested','unknown') LIMIT 1",
+                (self.adapter.robot_id,),
+            ).fetchone()
+            if busy:
+                raise Rejected("existing robot action has no joinable wheel session")
+        return self.acquire(owner)
 
     async def dispatch(
         self, owner, episode_id, key, capability, parameters, epoch, duration=2

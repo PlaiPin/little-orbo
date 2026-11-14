@@ -598,7 +598,47 @@ ros2 run orbo_runtime runtime request robot.teleop \
 ```
 
 Use a new key each time. Space commands neutral; Q exits keyboard input. Sessions
-last at most 30 seconds. From another owner terminal, stop early with:
+last at most 30 seconds.
+
+### Move the flippers while driving
+
+After configuring the [flipper firmware limits](firmware/orbo/README.md#flippers-on-d7-and-d10),
+set `robot.flippers_qualified = true` and `robot.attention_pulse_us` to the two
+commissioned pulse targets in the runtime TOML. Restart the runtime to load the
+profile, then authorize the driving session above. Left is GPIO10/D7 and right
+is GPIO21/D10.
+
+While that session is armed, use another terminal on the Pi:
+
+```bash
+ros2 run orbo_runtime runtime request robot.gesture \
+  --args '{"episode_id":"YOUR_EPISODE_ID","key":"flipper-001","duration":2}'
+```
+
+Both terminal clients talk to the **same runtime owner**. The gesture joins its
+existing wheel session and lease; it does not rearm, change the epoch, or extend
+the driving budget. Wheel commands continue through the velocity gate and
+`ros2_control`; flipper targets use a separate micro-ROS message over the same
+agent/USB link. No additional service or ROS message definition is needed.
+
+`robot.gesture` runs the configured attention gesture, with a 0.2–5 second request
+budget; a small portion is reserved for acknowledgment. It accepts no raw pulse
+or velocity arguments. A second overlapping gesture is rejected without
+interrupting driving. Retry the same key for the same request; use a new key for
+a new gesture. Completion means the MCU finished the PWM timer and returned the
+flippers to rest, not that motion was independently measured.
+
+The same session sharing applies during an active `robot.navigate` action and to
+runtime attention/reminder gestures. Requests during planning or arming, before
+a wheel session is ready, are rejected without replacing its lease. When no
+driving action is active, a gesture uses a stationary session.
+
+Driving-session completion, source loss, lease expiry, cancellation or a fault
+ends the shared session, including any unfinished gesture. A gesture that ends
+normally leaves driving active. The standalone `flipper_bench` executable remains
+for stationary commissioning; use `robot.gesture` for combined runtime control.
+
+From another owner terminal, stop both streams early with:
 
 ```bash
 ros2 run orbo_runtime runtime request stop

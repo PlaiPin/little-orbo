@@ -45,5 +45,18 @@ int main(void) {
     orbo_tick(&s,1100000,false);assert(!s.armed && s.fault==ORBO_EXPIRED);
     s=ready();s.pulse_min[0]=0;
     assert(!orbo_flippers(&s,42,1,1,5,1000,100,1000,0,p,500));
+    // Both command streams share one arm, but retain independent sequences.
+    s=ready();p[0]=1500;
+    assert(orbo_flippers(&s,42,1,1,8,1000,100,1000,0,p,300));
+    for(int tick=0;tick<=8;tick++){
+        uint64_t ms=1000+(uint64_t)tick*50,us=(uint64_t)tick*50000;
+        assert(orbo_wheels(&s,42,1,(uint64_t)tick+1,9,ms,100,ms,us,v));
+        assert(orbo_tick(&s,us,true)==(tick==6));
+        assert(s.armed && s.wheels_enabled && s.velocity[0]==v[0]);
+    }
+    assert(!s.flipper_active && s.pulse[0]==1450 && s.wheel_sequence==9);
+    assert(orbo_flippers(&s,42,1,2,10,1400,100,1400,400000,p,500));
+    assert(!orbo_tick(&s,500000,true)); // Wheel expiry cancels the unfinished gesture.
+    assert(!s.armed && !s.flipper_active && s.velocity[0]==0 && s.fault==ORBO_EXPIRED);
     puts("embedded admission/expiry/recovery assertions passed (host, no hardware)");
 }

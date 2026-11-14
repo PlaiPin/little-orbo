@@ -8,6 +8,7 @@ implementation used by the standalone application wheel built from the root
 |---|---|
 | `base_bench` | Lifted-wheel session owner through gate and ros2_control; checks measured odometry |
 | `wheel_bench` | Direct MCU bench session owner; checks encoder feedback |
+| `flipper_bench` | Stationary PWM commissioning; separate from the application owner |
 | `teleop_keyboard` | Input-only Joy publisher; application owner authorization is separate |
 | `velocity_gate` | Source selection, expiring authority and stamped velocity validation |
 | `camera_monitor` | Camera stream and calibration metadata health |
@@ -34,6 +35,24 @@ compatibility; the installed executables do not read those source scripts.
 `orbo_description` package. It retains fresh-feedback checks, competing-publisher
 rejection, epoch fencing, speed/duration limits, lease expiry, and confirmed
 stop/disarm behavior. No watchdog thresholds changed in the packaging refactor.
+
+## Shared wheel and flipper session
+
+The application runtime can execute `robot.gesture` during `robot.teleop` or an
+active `robot.navigate` session. The broker checks the existing owner's permission
+and lease, reserves the flippers separately from the wheels, and reuses the owned
+MCU boot ID/epoch. It does not renew the lease or create another session owner.
+Teleop/Nav2 velocity processing continues while the asynchronous gesture waits for
+its correlated MCU acknowledgment. Attention tools and reminders use this path too.
+
+Only an already armed session belonging to this runtime can be joined. Starting
+a competing driving action is rejected before changing the lease. Stop invalidates
+both streams immediately in the owner, including an arm awaiting acknowledgment;
+MCU disarm, reboot, stale health, and wrong-epoch feedback cannot finish a gesture.
+A normal gesture completion leaves the wheel session intact. An unfinished gesture
+ends when its driving session ends. Existing MCU watchdogs and PWM limits remain.
+
+See [Pi simultaneous-control commands](../../../PI5_QUICKSTART.md#move-the-flippers-while-driving).
 
 ## Dependencies and interpreter
 

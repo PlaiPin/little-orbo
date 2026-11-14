@@ -77,6 +77,13 @@ in the deployed runtime TOML profile using actual integer pulse targets. The
 existing `OrboAdapter` uses the same session and command topics. Do not run the
 bench command alongside that runtime.
 
+For simultaneous driving and gestures, use the runtime's `robot.gesture` request
+while its teleop or navigation session is active. The runtime reuses that session's
+boot ID and epoch, sending independent `WheelCommand` and `FlipperCommand`
+messages. Gesture completion returns the PWM targets to rest while wheel updates
+continue. Explicit stop and qualifying faults disarm both. See the
+[Pi combined-control instructions](../../PI5_QUICKSTART.md#move-the-flippers-while-driving).
+
 Host verification (no connected servos required):
 
 ```bash
