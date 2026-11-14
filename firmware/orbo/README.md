@@ -1,14 +1,69 @@
 # Orbo ESP32-S3 micro-ROS firmware
 
 This firmware publishes ROS 2 telemetry over native USB CDC0 and accepts bounded
-control messages. CDC1 carries text logs. It boots disarmed; wheel and flipper
-commissioning flags are disabled in the bare-board image.
+control messages. CDC1 carries text logs. It boots disarmed. The checked-in
+`sdkconfig` now enables wheel arming for the lifted-base XL430 bench, with a
+1.2 rad/s maximum, left ID 1/right ID 2, 1 Mbps, and signs +1/-1. Flippers remain
+disabled. The generic Kconfig defaults still disable both commissioning flags.
+Enabling wheel arming does not arm at boot or on reconnection and does not qualify
+ground driving, geometry, or navigation.
 
 The commands below target the Waveshare ESP32-S3-Nano on an Apple silicon Mac.
 **Run commands from the repository root**, including commands shown in this file.
 If currently in `firmware/orbo`, run `cd ../..` first. The checkout must include
 the root `pixi.toml`, `pixi.lock`, `tools/`, `deploy/`, `ros_ws/`, and the referenced
 bench scripts under `artifacts/test-evidence/`.
+
+## Current lifted-wheel test
+
+After the Mac/agent setup below, use the maintained wheel check for the current
+wheel-enabled image. Keep the base lifted and the motor supply on. The motors
+must report valid feedback with zero hardware errors before motion is attempted.
+
+From the repository root, with the agent running in another terminal:
+
+```bash
+pixi run --locked bash
+source ros_ws/install/macos/local_setup.bash
+# Default: each wheel in both directions, then both wheels and expiry.
+python firmware/orbo/bench_tests/check_wheels.py
+# Optional read-only feedback and timestamp check:
+python firmware/orbo/bench_tests/check_wheels.py --observe-only
+```
+
+The script uses domain 42, fresh arm epochs and timestamps, increasing command
+sequences, +/-1.2 rad/s setpoints held for 8 seconds per direction, and 300 ms
+command validity. Motion is the default; `--observe-only` skips arming and motion. It verifies
+encoder direction/velocity and stopping, aborts on invalid or stale feedback,
+and requests stop on completion/failure. It prints an automatically created JSON
+result path; an explicit output path can optionally be passed as the first argument.
+It refuses to overwrite existing output.
+Physical chassis direction and independent stopping latency still need measurement.
+
+Physical encoder tests on 13 November 2026 passed individual positive/negative
+wheel commands and simultaneous positive commands, explicit stop, and command
+expiry. At 0.3 rad/s, settled measured speeds in the final run were approximately
+0.299 rad/s; each 8-second forward phase moved about 140 degrees. The timestamp
+fix stamps the completed feedback snapshot after any agent ping, eliminating the
+previous enclosing/motor timestamp inversion in the captured tests.
+
+The earlier 0.3 rad/s test's first long run aborted during simultaneous motion after one right
+motor feedback error (`ORBO_FEEDBACK`); the following full run passed. A separate
+read-only interval retained a health delivery age of 185 ms, so the existing
+100 ms delivery qualification remains unresolved. These failures are retained,
+not overwritten. See the [wheel-control evidence](../../artifacts/test-evidence/esp32s3-wheel-control-2026-11-13/README.md).
+
+The subsequent 1.2 rad/s test (four times the previous command speed) passed all
+five motion phases on its second run, with settled speeds of 1.184–1.187 rad/s.
+Explicit stop and command expiry both stopped and disarmed the wheels. Its first
+run stopped on one left motor-feedback error during reverse; the repeat added no
+read errors. It also recorded a 329 ms health-delivery age; the 100 ms delivery
+qualification and intermittent feedback failure remain unresolved. See the
+[1.2 rad/s evidence](../../artifacts/test-evidence/esp32s3-wheel-speed-1p2-2026-11-13/README.md).
+
+Do not run the old bare-board `check-rejections.py` against this wheel-enabled
+image: its wheel-arm rejection case can now enable torque. That script belongs
+to the wheel-disabled profile described in section 5.
 
 ## 1. Set up Pixi and ROS 2 on the Mac
 
@@ -141,6 +196,10 @@ Status values are 1 accepted, 3 controller-finished, 4 rejected, 5 stopped, and
 
 ## 5. Run the automated bare-board checks
 
+These historical bare-board checks require both commissioning flags disabled;
+they are not the test sequence for the currently selected wheel-enabled image.
+Use the lifted-wheel test above for that image.
+
 With Terminal A's agent running, execute in a configured ROS terminal. Use a new
 output directory for every run to preserve failures as well as passes:
 
@@ -206,36 +265,67 @@ python -m pip install --require-hashes -r firmware/orbo/host-build-requirements.
 python -m serial.tools.list_ports -v
 ```
 
-Stop the agent and serial monitors before flashing. Enter ROM download mode by
-connecting B1 to GND while resetting or reconnecting USB. Once the bootloader
-enumerates, remove the bridge without resetting. Identify the actual bootloader
-port and back up existing flash using the
-[board procedure](../../docs/engineering/runbooks/esp32s3-nano.md#build-and-connect).
-Then flash all three images (replace the example port if needed):
+Stop the agent and serial monitors before flashing. With this firmware installed,
+leave B1 disconnected and run this from the repository root in the IDF terminal:
+
+```bash
+./tools/flash-firmware.sh
+```
+
+The Mac helper sets the logging interface (CDC1) to 1200 baud. Firmware latches
+a disarm request, rejects further arms, and lets the motor task send zero velocity
+and torque-off before rebooting into ROM download mode. It leaves 150 ms without
+motor traffic for the configured 100 ms motor watchdog, then detaches USB and
+switches the internal PHY to hardware USB Serial/JTAG. CDC0 ROS traffic and normal
+115200-baud logging do not trigger a reboot. Do not open CDC1 at 1200 baud for logs.
+
+The helper follows the same physical USB location into the bootloader, flashes
+the three images, verifies them, restarts via watchdog, and waits for both
+application ports. It refuses ambiguous boards and ports held by an agent or
+monitor. For multiple boards, select one with `--port /dev/cu.usbmodem1234563`.
+Automatic application-port discovery currently targets macOS. Direct `idf.py flash`
+does not send this CDC1 trigger; use the helper for the complete automatic cycle.
+The helper flashes the existing `build-locked` output; it does not rebuild it.
+Use `--build-dir /absolute/path/to/build` for a different build directory. Stop on
+a failed hash verification or missing application ports and inspect the error
+before retrying. The bridge procedure below remains available for recovery.
+
+For the **first installation**, or recovery from firmware that cannot process USB,
+connect B1 to GND and press/release RST. Keep the bridge connected while flashing
+(replace the example bootloader port with the actual one):
 
 ```bash
 cd build-locked
 python -m esptool --chip esp32s3 --port /dev/cu.usbmodem1301 \
-  --before no-reset --after watchdog-reset write-flash @flash_args
+  --before no-reset --after no-reset write-flash @flash_args
 cd ..
-python -m serial.tools.list_ports -v
 ```
 
-Expect three verified hashes and both application CDC ports after reset. The
-watchdog reset was needed on this Mac because the default RTS reset left the
-flasher stub running. Keep both commissioning flags disabled for bare-board tests.
+After three verified hashes, remove B1–GND and press/release RST once. Subsequent
+updates use the helper without a bridge or button press. The current `sdkconfig`
+permits wheel arming; disable
+`CONFIG_ORBO_WHEELS_CALIBRATED` explicitly when building an actual bare-board test
+image. Do not confuse either setting with an automatic arm command.
 
 ## Results and troubleshooting
 
-On 13 November 2026, the rebuilt image passed flash verification, live ROS message
+Automatic bootloader entry was tested on 13 November 2026: after the initial
+bridge-assisted install, the helper reflashed all three images and restarted the
+application with B1 disconnected and no button presses. Normal logging and the
+busy-port refusal passed. ROS feedback passed after an initial discovery timeout;
+both observations are retained locally under
+`artifacts/test-evidence/esp32s3-auto-bootloader-2026-11-13/`. Generated reports
+and hardware captures are ignored by Git; they are not repository deliverables.
+
+Earlier on 13 November 2026, the wheel-disabled image passed flash verification, live ROS message
 exchange, rejection/software-session tests, three agent restarts, and power-cycle
 recovery. USB logs were clean. A subsequent 30-second telemetry run **failed the
 100 ms delivery budget**: 3 of 129 health messages were late, up to 326 ms, with
 two session recreations and `ORBO_BUS` (6). The board stayed disarmed and its
 sequence numbers remained increasing. Timing/connection stability remains
 unresolved; do not interpret the suite as entirely passing or increase safety
-timeouts to hide the failure. Physical actuators and full ros2_control/Nav2
-operation have not been qualified. See the
+timeouts to hide the failure. Later raised-wheel tests are recorded above; ground
+driving and full ros2_control/Nav2 operation have not been qualified. See the
 [final report](../../artifacts/test-evidence/esp32s3-usb-fix-2026-11-13/final/board-validation.json).
 
 - Missing `rclpy` or message types: use Pixi, build interfaces, and source the

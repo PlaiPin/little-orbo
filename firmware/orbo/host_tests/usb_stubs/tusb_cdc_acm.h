@@ -2,6 +2,16 @@
 #include "tinyusb.h"
 typedef enum { TINYUSB_CDC_ACM_0, TINYUSB_CDC_ACM_1 } tinyusb_cdcacm_itf_t;
 #define TINYUSB_USBDEV_0 0
+typedef struct { uint32_t bit_rate; } cdc_line_coding_t;
+typedef enum { CDC_EVENT_RX, CDC_EVENT_LINE_CODING_CHANGED } cdcacm_event_type_t;
+typedef struct {
+    cdcacm_event_type_t type;
+    struct { const cdc_line_coding_t *p_line_coding; } line_coding_changed_data;
+} cdcacm_event_t;
+typedef void (*tusb_cdcacm_callback_t)(int, cdcacm_event_t *);
+esp_err_t tinyusb_cdcacm_register_callback(tinyusb_cdcacm_itf_t port,
+    cdcacm_event_type_t event, tusb_cdcacm_callback_t callback);
+bool tud_disconnect(void);
 typedef struct {
     int usb_dev;
     tinyusb_cdcacm_itf_t cdc_port;

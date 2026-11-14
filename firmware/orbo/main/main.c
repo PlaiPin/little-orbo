@@ -1,6 +1,7 @@
 #include <string.h>
 #include "actuators.h"
 #include "control.h"
+#include "usb_bootloader.h"
 #include "esp_heap_caps.h"
 #include "esp_system.h"
 #include "esp_random.h"
@@ -31,6 +32,15 @@ static uint64_t link_seen_us=0;
 static TaskHandle_t control_task_handle,transport_task_handle;
 static uint64_t status_seq=0,stop_generation=0;
 static bool io_ready=false;
+static bool bootloader_requested=false; // Protected by state_lock; latched until reset.
+
+static void request_bootloader(void){
+    portENTER_CRITICAL(&state_lock);
+    bootloader_requested=true;
+    stop_generation++;
+    orbo_disarm(&control,ORBO_DISARMED);
+    portEXIT_CRITICAL(&state_lock);
+}
 
 static void status(uint64_t command,uint8_t state,uint16_t reason){
     orbo_embedded_interfaces__msg__ActuatorStatus msg={0};
@@ -103,11 +113,25 @@ static void motor_task(void *unused){
     bool previously_enabled=false;
     for(;;){
         esp_task_wdt_reset();
+        portENTER_CRITICAL(&state_lock);
+        bool download=bootloader_requested;
+        portEXIT_CRITICAL(&state_lock);
+        if(download){
+            xQueueReset(session_queue);
+            // The motor task owns all bus access, including an in-flight arm.
+            // No queued/new arm can pass the latched request below.
+            if(io_ready)wheels_disable();
+            flippers_disable();
+            // Also allow the configured 100 ms motor bus watchdog to expire
+            // if a stop/torque-off write failed. No more motor traffic is sent.
+            vTaskDelay(pdMS_TO_TICKS(150));
+            usb_bootloader_restart();
+        }
         orbo_embedded_interfaces__msg__ControlSession request;
         if(xQueueReceive(session_queue,&request,0)==pdTRUE){
             portENTER_CRITICAL(&state_lock);
             uint64_t arm_generation=stop_generation;
-            bool eligible=!control.armed && request.boot_id==control.boot && request.epoch>control.epoch;
+            bool eligible=!bootloader_requested && !control.armed && request.boot_id==control.boot && request.epoch>control.epoch;
             portEXIT_CRITICAL(&state_lock);
             bool prepared=eligible && io_ready;
             if(prepared && request.enable_wheels)prepared=wheels_prepare(true)==ESP_OK;
@@ -116,7 +140,7 @@ static void motor_task(void *unused){
                 if(request.enable_wheels){wheels_sample(&measured);prepared=measured.valid[0]&&measured.valid[1];}
                 portENTER_CRITICAL(&state_lock);
                 if(request.enable_wheels)feedback=measured;
-                prepared=prepared && arm_generation==stop_generation && orbo_arm(&control,request.boot_id,request.epoch,request.sequence,
+                prepared=prepared && !bootloader_requested && arm_generation==stop_generation && orbo_arm(&control,request.boot_id,request.epoch,request.sequence,
                     request.issued_epoch_ms,request.valid_for_ms,rmw_uros_epoch_millis(),request.enable_wheels,prepared);
                 portEXIT_CRITICAL(&state_lock);
             }
@@ -185,7 +209,7 @@ static void transport_task(void *unused){
             uint64_t now=esp_timer_get_time();
             if(now-last_ping>200000){
                 if(rmw_uros_ping_agent(50,1)!=RMW_RET_OK)goto cleanup;
-                portENTER_CRITICAL(&state_lock);link_seen_us=now;portEXIT_CRITICAL(&state_lock);
+                portENTER_CRITICAL(&state_lock);link_seen_us=esp_timer_get_time();portEXIT_CRITICAL(&state_lock);
                 last_ping=now;
             }
             orbo_embedded_interfaces__msg__WheelState sample={0};
@@ -202,13 +226,16 @@ static void transport_task(void *unused){
             memcpy(sample.hardware_error,feedback.hardware_error,sizeof(feedback.hardware_error));
             health.interface_version=1;health.boot_id=control.boot;health.epoch=control.epoch;
             health.armed=control.armed;health.clock_synced=control.clock_synced;health.fault=control.fault;
+            // Stamp the completed snapshot, not the time before a blocking agent ping.
+            // Every copied motor reading must precede this enclosing sample timestamp.
+            sample.sample_mono_us=esp_timer_get_time();
             portEXIT_CRITICAL(&state_lock);
-            sample.sequence=++sequence;sample.sample_mono_us=now;sample.epoch_ms=rmw_uros_epoch_millis();
+            sample.sequence=++sequence;sample.epoch_ms=rmw_uros_epoch_millis();
             CHECK(rcl_publish(&pubs[0],&sample,NULL));
             orbo_embedded_interfaces__msg__ActuatorStatus event;
             while(xQueueReceive(status_queue,&event,0)==pdTRUE)CHECK(rcl_publish(&pubs[1],&event,NULL));
             if(sequence%10==0){
-                health.mono_us=now;health.epoch_ms=sample.epoch_ms;
+                health.mono_us=sample.sample_mono_us;health.epoch_ms=sample.epoch_ms;
                 health.free_heap=esp_get_free_heap_size();health.minimum_free_heap=esp_get_minimum_free_heap_size();
                 health.control_stack_watermark=uxTaskGetStackHighWaterMark(control_task_handle);
                 health.transport_stack_watermark=uxTaskGetStackHighWaterMark(NULL);
@@ -246,6 +273,7 @@ void app_main(void){
     status_queue=xQueueCreate(16,sizeof(orbo_embedded_interfaces__msg__ActuatorStatus));
     configASSERT(session_queue && status_queue);
     io_ready=actuators_init()==ESP_OK;
+    ESP_ERROR_CHECK(usb_bootloader_init(request_bootloader));
     configASSERT(xTaskCreate(motor_task,"motor_io",6144,NULL,8,&control_task_handle)==pdPASS);
     configASSERT(xTaskCreate(safety_task,"expiry_pwm",3072,NULL,12,NULL)==pdPASS);
     configASSERT(xTaskCreate(transport_task,"micro_ros",16384,NULL,5,&transport_task_handle)==pdPASS);

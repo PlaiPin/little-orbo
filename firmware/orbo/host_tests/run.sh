@@ -18,4 +18,10 @@ for tick in 1000 10000; do
     "$ORBO_FIRMWARE/components/esp_usbcdc_logging/esp_usbcdc_logging.c" \
     "$ORBO_FIRMWARE/host_tests/test_usbcdc.c" -o "$ORBO_TEST_BUILD/usbcdc-$tick"
   "$ORBO_TEST_BUILD/usbcdc-$tick"
+  "$ORBO_CC" "${FLAGS[@]}" -DTEST_TICK_US="$tick" \
+    -I"$ORBO_FIRMWARE/host_tests/usb_stubs" -I"$ORBO_FIRMWARE/main" \
+    "$ORBO_FIRMWARE/main/usb_bootloader.c" \
+    "$ORBO_FIRMWARE/host_tests/test_usb_bootloader.c" \
+    -o "$ORBO_TEST_BUILD/usb-bootloader-$tick"
+  "$ORBO_TEST_BUILD/usb-bootloader-$tick"
 done

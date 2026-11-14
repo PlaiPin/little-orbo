@@ -25,6 +25,21 @@ to the host. An empty read timeout returns zero bytes with
 no I/O error; a write with no queue capacity returns `ESP_USBCDC_ERR_WOULD_BLOCK`.
 Queued writes do not prove remote delivery.
 
+`test_usb_bootloader.c` compiles the production bootloader module with USB and
+register mocks. It checks that ordinary logging and CDC0 do not request reset,
+CDC1 at 1200 baud only queues a request, registration errors propagate, and reset
+follows USB detachment and selection of ROM download mode. It does not exercise
+motor-task concurrency or prove physical stopping.
+
+With the ESP-IDF Python environment active, also run:
+
+```sh
+python firmware/orbo/host_tests/test_flash_firmware.py
+```
+
+These host-helper tests cover logging-port selection, already-in-ROM detection,
+ambiguous-device rejection, and matching USB location across re-enumeration.
+
 These tests do not simulate USB enumeration, endpoint interrupts, or real RTOS
 scheduling. Rebuild and flash the ESP32, then check telemetry, absent-agent logs,
 agent restart, and a physical power cycle to validate those paths.
