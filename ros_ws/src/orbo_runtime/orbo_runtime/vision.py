@@ -299,6 +299,11 @@ class VerifiedVision:
             raise Rejected("invalid or stale vision finding")
         if len(result["matched_attributes"]) > 16:
             raise Rejected("too many matching attributes")
+        if any(
+            attribute not in (reference["attributes"] if reference else [])
+            for attribute in result["matched_attributes"]
+        ):
+            raise Rejected("matching attribute outside supplied reference")
         if result["identity"] == "exact":
             if (
                 not reference

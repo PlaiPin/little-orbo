@@ -216,6 +216,7 @@ async def test_verified_finding_release_minimizes_outbound_and_preserves_uncerta
         {"next_viewpoint": "arbitrary-coordinate"},
         {"occluded": "false"},
         {"matched_attributes": [42]},
+        {"matched_attributes": ["invented attribute"]},
     ],
 )
 async def test_bad_findings_never_persist_or_release(setup, changes):
@@ -761,3 +762,64 @@ async def test_deletion_scrubs_task_result_remote_and_voice_delivery_copies(setu
         assert "DELETE-DELIVERY" not in str(
             [tuple(row) for row in store.db.execute(f"SELECT {column} FROM {table}")]
         )
+
+
+async def test_exposure_screen_uses_all_color_channels(setup):
+    _, _, source = setup
+    source.latest = dataclasses.replace(source.latest, data=bytes([0, 140, 200]) * 256)
+    observation = await capture(setup)
+    assert observation["quality"]["exposure_usable"] is True
+    assert 100 < observation["quality"]["exposure_mean_sample"] < 120
+
+
+async def test_evidence_deletion_scrubs_conversation_replay_cache_and_preserves_key(
+    setup,
+):
+    from orbo_runtime.contracts import canonical
+    from orbo_runtime.embodied_conversation import SCHEMA as CONVERSATION_SCHEMA
+
+    store, memory, _ = setup
+    observation = await capture(setup)
+    reference = memory.reference(
+        "owner", "lab", "private reference", observation_id=observation["id"]
+    )
+    store.db.executescript(CONVERSATION_SCHEMA)
+    store.db.execute(
+        "INSERT INTO conversation_requests VALUES(?,?,?,?,?,?,?)",
+        (
+            "owner",
+            "stable-request",
+            "original-digest",
+            "resolved",
+            canonical(
+                {"reference_id": reference["id"], "target": "DELETE-CONVERSATION"}
+            ),
+            canonical({"text": "DELETE-CONVERSATION", "task_id": "task"}),
+            store.clock.utc(),
+        ),
+    )
+    store.db.execute(
+        "INSERT INTO conversation_requests VALUES(?,?,?,?,?,?,?)",
+        (
+            "other-owner",
+            "stable-request",
+            "other-digest",
+            "resolved",
+            canonical({"reference_id": reference["id"]}),
+            canonical({"text": "other-owner-copy"}),
+            store.clock.utc(),
+        ),
+    )
+    memory.delete_observation("owner", "lab", observation["id"])
+    record = store.db.execute(
+        "SELECT * FROM conversation_requests WHERE owner='owner'"
+    ).fetchone()
+    assert record["key"] == "stable-request" and record["digest"] == "original-digest"
+    assert record["state"] == "unknown"
+    assert "DELETE-CONVERSATION" not in record["proposal"] + record["result"]
+    assert (
+        store.db.execute(
+            "SELECT state FROM conversation_requests WHERE owner='other-owner'"
+        ).fetchone()[0]
+        == "resolved"
+    )

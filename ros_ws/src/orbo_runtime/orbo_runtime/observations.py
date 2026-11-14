@@ -42,8 +42,12 @@ def encode_png(frame):
     ):
         raise Rejected("invalid bounded RGB8 frame")
     # Fast sampled exposure test. This does not certify focus or object visibility.
-    pixels = frame.data[:: max(3, (len(frame.data) // 4096 // 3) * 3)]
-    average = sum(pixels) / len(pixels)
+    step = max(1, (frame.width * frame.height + 4095) // 4096) * 3
+    samples = range(0, len(frame.data), step)
+    average = sum(
+        0.2126 * frame.data[i] + 0.7152 * frame.data[i + 1] + 0.0722 * frame.data[i + 2]
+        for i in samples
+    ) / len(samples)
     if average < 8 or average > 247:
         raise Rejected("unsuitable frame exposure")
 

@@ -123,7 +123,13 @@ class EvidenceMemory:
         if path.is_symlink():
             raise Rejected("invalid image path")
         try:
-            content = path.read_bytes()
+            if (
+                path.stat().st_size != record["image_bytes"]
+                or path.stat().st_size > 2_000_000
+            ):
+                raise Rejected("image size mismatch")
+            with path.open("rb") as stream:
+                content = stream.read(2_000_001)
         except OSError as error:
             raise Rejected("image unavailable") from error
         if hashlib.sha256(content).hexdigest() != record["image_hash"]:

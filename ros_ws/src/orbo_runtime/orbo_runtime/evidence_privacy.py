@@ -57,6 +57,20 @@ def scrub_derivatives(store, owner, environment, identifiers, task_ids=()):
         if _contains(row["result"], identifiers):
             task_ids.add(row["id"])
     needles = identifiers | task_ids
+    if "conversation_requests" in tables:
+        for request in db.execute(
+            "SELECT key,proposal,result FROM conversation_requests WHERE owner=?",
+            (owner,),
+        ).fetchall():
+            if _contains(request["proposal"], needles) or _contains(
+                request["result"], needles
+            ):
+                # Preserve the request key/digest so replay stays fenced instead
+                # of treating deletion as permission to reinterpret/reexecute it.
+                db.execute(
+                    "UPDATE conversation_requests SET proposal=?,result=?,state='unknown' WHERE owner=? AND key=?",
+                    (tombstone, tombstone, owner, request["key"]),
+                )
     exports = [
         dict(row)
         for row in db.execute(
