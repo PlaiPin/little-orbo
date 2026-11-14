@@ -1,0 +1,1 @@
+<library path="orbo_hardware"><class name="orbo_hardware/System" type="orbo_hardware::System" base_class_type="hardware_interface::SystemInterface"><description>Measured feedback, fenced wheel commands, no automatic arming</description></class></library>

@@ -1,0 +1,14 @@
+uint64 boot_id
+uint64 epoch
+uint64 sequence
+uint64 sample_mono_us
+uint64 epoch_ms
+uint64[2] motor_sample_mono_us
+float64[2] position_rad
+float64[2] velocity_rad_s
+float32[2] voltage
+bool[2] valid
+uint32[2] read_errors
+uint8[2] hardware_error
+uint64 last_command_sequence
+bool armed

@@ -1,0 +1,2 @@
+<?xml version="1.0"?>
+<package format="3"><name>orbo_hardware</name><version>0.1.0</version><description>Measured XL430 ros2_control interface over bounded micro-ROS topics</description><maintainer email="maintainers@orbo.invalid">Orbo maintainers</maintainer><license>Apache-2.0</license><buildtool_depend>ament_cmake</buildtool_depend><depend>hardware_interface</depend><depend>pluginlib</depend><depend>rclcpp</depend><depend>rclcpp_lifecycle</depend><depend>orbo_embedded_interfaces</depend><export><build_type>ament_cmake</build_type></export></package>
