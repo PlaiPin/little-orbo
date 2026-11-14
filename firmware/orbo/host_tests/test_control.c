@@ -31,5 +31,19 @@ int main(void) {
     assert(s.pulse[0]==1450 && !s.flipper_active);
     s=ready(); p[0]=2000; assert(!orbo_flippers(&s,42,1,1,5,1000,100,1000,0,p,1000));
     s=ready(); s.clock_synced=false; orbo_tick(&s,1,true);assert(!s.armed);
+    // A flipper-only session needs no wheel feedback and rejects wheel commands.
+    s=ready();orbo_disarm(&s,ORBO_DISARMED);
+    assert(orbo_arm(&s,42,2,2,1000,100,1000,false,true));
+    assert(!orbo_wheels(&s,42,2,1,1,1000,100,1000,0,v));
+    p[0]=1500;
+    assert(orbo_flippers(&s,42,2,1,5,1000,100,1000,0,p,500));
+    assert(!orbo_flippers(&s,42,2,2,6,1000,100,1000,0,p,500));
+    assert(!orbo_tick(&s,499999,false) && s.armed);
+    assert(orbo_tick(&s,500000,false) && s.pulse[0]==1450);
+    assert(!orbo_flippers(&s,42,2,1,5,1000,100,1000,0,p,500));
+    assert(orbo_flippers(&s,42,2,2,6,1000,100,1000,500000,p,500));
+    orbo_tick(&s,1100000,false);assert(!s.armed && s.fault==ORBO_EXPIRED);
+    s=ready();s.pulse_min[0]=0;
+    assert(!orbo_flippers(&s,42,1,1,5,1000,100,1000,0,p,500));
     puts("embedded admission/expiry/recovery assertions passed (host, no hardware)");
 }

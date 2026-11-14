@@ -37,9 +37,9 @@ def test_python_executables_are_installed_and_resolve_packaged_modules(tmp_path)
     # This lane uses a copy install: imports must not fall back to editable source.
     assert Path(orbo_runtime.__file__).resolve().is_relative_to(prefix)
     names = {line.split()[1] for line in run(tmp_path, "pkg", "executables", "orbo_runtime").splitlines()}
-    assert {"runtime", "audio_check", "base_bench", "wheel_bench",
+    assert {"runtime", "audio_check", "base_bench", "wheel_bench", "flipper_bench",
             "teleop_keyboard", "velocity_gate", "camera_monitor", "installed_smoke"} <= names
-    for name in ("base_bench", "wheel_bench", "audio_check", "runtime"):
+    for name in ("base_bench", "wheel_bench", "flipper_bench", "audio_check", "runtime"):
         output = run(tmp_path, "run", "orbo_runtime", name, "--help", "--ros-args", "-r", "__node:=packaging_probe")
         assert "usage:" in output
     # Non-hardware CLI validates dependency visibility through the installed shebang.

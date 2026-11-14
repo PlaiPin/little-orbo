@@ -27,11 +27,11 @@ config ORBO_PROFILE_ACCEL
     int "XL430 Profile Acceleration raw value"
     default 40
 config ORBO_FLIPPER_LEFT_GPIO
-    int "Commissioned left PWM GPIO (-1 disabled)"
-    default -1
+    int "Left PWM native GPIO (Nano D7 = GPIO10; -1 disabled)"
+    default 10
 config ORBO_FLIPPER_RIGHT_GPIO
-    int "Commissioned right PWM GPIO (-1 disabled)"
-    default -1
+    int "Right PWM native GPIO (Nano D10 = GPIO21; -1 disabled)"
+    default 21
 config ORBO_FLIPPER_MIN_US
     int "Measured minimum safe pulse (0 uncommissioned)"
     default 0

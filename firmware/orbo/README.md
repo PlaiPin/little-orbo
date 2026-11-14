@@ -14,6 +14,81 @@ If currently in `firmware/orbo`, run `cd ../..` first. The checkout must include
 the root `pixi.toml`, `pixi.lock`, `tools/`, `deploy/`, `ros_ws/`, and the referenced
 bench scripts under `artifacts/test-evidence/`.
 
+## Flippers on D7 and D10
+
+The confirmed little-orbo wiring is **left D7 = GPIO10**, **right D10 = GPIO21**
+on the Waveshare ESP32-S3-Nano. ESP-IDF uses the native GPIO numbers, not the
+printed D numbers. See the [Nano pin mapping](https://support.arduino.cc/hc/en-us/articles/10483225565980-Select-pin-numbering-for-Nano-ESP32-in-Arduino-IDE)
+and [Waveshare board documentation](https://docs.waveshare.com/ESP32-S3-Nano).
+Both pins are now configured in `sdkconfig` and Kconfig defaults.
+
+The two 9g servos use 50 Hz LEDC PWM. Connect their signal wires to the pins
+above and connect servo-supply ground to ESP32 ground. Use a supply rated for the
+actual servo voltage and combined load; the GPIOs carry signal, not servo power.
+The exact model, supply voltage, and mounted pulse/rest limits have not yet been
+recorded. Consequently `CONFIG_ORBO_FLIPPERS_CALIBRATED` remains off and limits
+remain zero: the checked-in image rejects flipper targets until commissioned.
+
+To commission, source the pinned IDF environment described below, then run:
+
+```bash
+export ORBO_MICROROS_COMPONENT="$PWD/.sdk/locked-build/micro_ros_espidf_component"
+idf.py -C firmware/orbo -B build-locked menuconfig
+```
+
+Under **Orbo production controller**, retain left GPIO10/right GPIO21, set
+`ORBO_FLIPPER_MIN_US`, `ORBO_FLIPPER_MAX_US`, and `ORBO_FLIPPER_REST_US` to
+verified values, and enable `ORBO_FLIPPERS_CALIBRATED`. These are shared pulse
+limits/rest for both servos; use a range safe for both mountings. Targets are
+independent `[left, right]` pulse widths. Do not assume that opposite mounts have
+the same motion direction or that a generic 9g servo supports a full 180° sweep.
+Arming applies the rest pulse; verify that position before testing attached horns.
+Build with `bash tools/build-firmware.sh`, then flash with
+`bash tools/flash-firmware.sh` after stopping the agent/serial monitors.
+
+The firmware starts with PWM off. A flipper-only session uses
+`enable_wheels: false`. A command holds its two targets for 1–5000 ms, then
+returns to the configured rest pulse. Explicit stop, link loss or a fault
+disables PWM. Disabling the signal does not switch off servo power or establish
+that the mechanism has physically stopped.
+
+With the micro-ROS Agent running and other runtime/teleop/bench owners stopped:
+
+```bash
+pixi run --locked ros-build-control
+pixi run --locked bash
+source ros_ws/install/macos/local_setup.bash
+# Set these to two verified pulse targets before running:
+ROS_DOMAIN_ID=42 ros2 run orbo_runtime flipper_bench \
+  --left-us "$LEFT_PULSE_US" --right-us "$RIGHT_PULSE_US" --duration-ms 500
+```
+
+On the Pi, source `/opt/ros/jazzy/setup.bash` and the deployed workspace's
+`install/setup.bash`, then use the same `ros2 run` command. The bench command
+checks fresh MCU health and exclusive command publishers, arms a fresh session,
+publishes `/orbo/embedded/flipper_command`, waits for the matching
+`/orbo/embedded/actuator_status`, and confirms disarm on exit. It never enables
+wheel torque. A completed PWM duration is **controller evidence**, not measured
+joint position; no synthetic flipper angles are published to `/joint_states`.
+
+For the existing runtime's `attention.gesture`, after physical commissioning set
+`robot.flippers_qualified = true` and `robot.attention_pulse_us = [LEFT, RIGHT]`
+in the deployed runtime TOML profile using actual integer pulse targets. The
+existing `OrboAdapter` uses the same session and command topics. Do not run the
+bench command alongside that runtime.
+
+Host verification (no connected servos required):
+
+```bash
+bash firmware/orbo/host_tests/run.sh
+pixi run --locked bash -c 'source ros_ws/install/macos/local_setup.bash && ROS_DOMAIN_ID=96 ORBO_ROS_TESTS=1 python -m pytest -q tests/ros/test_flippers.py'
+```
+
+These cover PWM routing, conversion, disabled configuration, failure shutdown,
+bounded admission/expiry, and actual DDS command/acknowledgment/stop exchange
+with a synthetic MCU. Physical travel, current draw and stop behavior still need
+checking on the connected robot.
+
 ## Current lifted-wheel test
 
 After the Mac/agent setup below, use the maintained wheel check for the current

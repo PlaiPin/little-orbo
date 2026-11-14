@@ -1,7 +1,6 @@
 #include "actuators.h"
 #include "dxl_bus.h"
 #include "wheel_bus.h"
-#include "driver/ledc.h"
 #include "esp_timer.h"
 #include "esp_log.h"
 #include <math.h>
@@ -9,7 +8,7 @@
 
 static const uint8_t ids[2]={CONFIG_ORBO_LEFT_ID,CONFIG_ORBO_RIGHT_ID};
 static const int signs[2]={CONFIG_ORBO_LEFT_SIGN,CONFIG_ORBO_RIGHT_SIGN};
-static bool pwm_ready=false, wheel_torque=false;
+static bool wheel_torque=false;
 static bool previous_valid[2]={false,false};
 static double previous_position[2];
 static uint64_t previous_time[2];
@@ -28,24 +27,9 @@ esp_err_t actuators_init(void){
     if(result!=ESP_OK)return result;
     // Startup never enables wheel torque; legacy UDP and text-command code is not linked.
     wheels_disable();
-#ifdef CONFIG_ORBO_FLIPPERS_CALIBRATED
-    if(CONFIG_ORBO_FLIPPER_LEFT_GPIO<0 || CONFIG_ORBO_FLIPPER_RIGHT_GPIO<0 ||
-       CONFIG_ORBO_FLIPPER_MIN_US<=0 || CONFIG_ORBO_FLIPPER_MAX_US>=20000 ||
-       CONFIG_ORBO_FLIPPER_REST_US<CONFIG_ORBO_FLIPPER_MIN_US ||
-       CONFIG_ORBO_FLIPPER_REST_US>CONFIG_ORBO_FLIPPER_MAX_US)return ESP_ERR_INVALID_ARG;
-    ledc_timer_config_t timer={.speed_mode=LEDC_LOW_SPEED_MODE,.duty_resolution=LEDC_TIMER_14_BIT,
-        .timer_num=LEDC_TIMER_0,.freq_hz=50,.clk_cfg=LEDC_AUTO_CLK};
-    result=ledc_timer_config(&timer);if(result!=ESP_OK)return result;
-    const int pins[2]={CONFIG_ORBO_FLIPPER_LEFT_GPIO,CONFIG_ORBO_FLIPPER_RIGHT_GPIO};
-    for(int i=0;i<2;i++){
-        ledc_channel_config_t channel={.gpio_num=pins[i],.speed_mode=LEDC_LOW_SPEED_MODE,
-            .channel=(ledc_channel_t)i,.timer_sel=LEDC_TIMER_0,.duty=0,.hpoint=0};
-        result=ledc_channel_config(&channel);if(result!=ESP_OK)return result;
-    }
-    pwm_ready=true;
-#endif
     return ESP_OK;
 }
+
 esp_err_t wheels_prepare(bool enable){
     wheels_disable();
 #ifndef CONFIG_ORBO_WHEELS_CALIBRATED
@@ -124,21 +108,4 @@ void wheels_sample(orbo_feedback_t *state){
         state->sample_us[i]=now;state->valid[i]=true;
         previous_position[i]=pos;previous_time[i]=now;previous_valid[i]=true;
     }
-}
-esp_err_t flippers_set(const uint16_t p[2]){
-#ifndef CONFIG_ORBO_FLIPPERS_CALIBRATED
-    (void)p;return ESP_ERR_INVALID_STATE;
-#else
-    if(!pwm_ready)return ESP_ERR_INVALID_STATE;
-    for(int i=0;i<2;i++){
-        if(p[i]<CONFIG_ORBO_FLIPPER_MIN_US || p[i]>CONFIG_ORBO_FLIPPER_MAX_US)return ESP_ERR_INVALID_ARG;
-        uint32_t duty=(uint32_t)p[i]*16384/20000;
-        esp_err_t e=ledc_set_duty(LEDC_LOW_SPEED_MODE,(ledc_channel_t)i,duty);
-        if(e==ESP_OK)e=ledc_update_duty(LEDC_LOW_SPEED_MODE,(ledc_channel_t)i);
-        if(e!=ESP_OK)return e;
-    }return ESP_OK;
-#endif
-}
-void flippers_disable(void){
-    if(pwm_ready)for(int i=0;i<2;i++)ledc_stop(LEDC_LOW_SPEED_MODE,(ledc_channel_t)i,0);
 }

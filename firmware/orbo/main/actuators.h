@@ -16,5 +16,6 @@ esp_err_t wheels_prepare(bool enable);
 esp_err_t wheels_set(const double velocity[2]);
 void wheels_disable(void);
 void wheels_sample(orbo_feedback_t *);
+esp_err_t flippers_init(void);
 esp_err_t flippers_set(const uint16_t pulse[2]);
 void flippers_disable(void);

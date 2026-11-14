@@ -9,6 +9,16 @@ FLAGS=(-std=c11 -Wall -Wextra -Werror -fsanitize=address,undefined)
   "$ORBO_FIRMWARE/main/control.c" "$ORBO_FIRMWARE/host_tests/test_control.c" \
   -o "$ORBO_TEST_BUILD/control"
 "$ORBO_TEST_BUILD/control"
+for profile in enabled disabled; do
+  EXTRA=()
+  if [ "$profile" = disabled ]; then EXTRA=(-DTEST_DISABLED); fi
+  "$ORBO_CC" "${FLAGS[@]}" ${EXTRA[@]+"${EXTRA[@]}"} \
+    -I"$ORBO_FIRMWARE/host_tests/flipper_stubs" \
+    -I"$ORBO_FIRMWARE/host_tests/usb_stubs" -I"$ORBO_FIRMWARE/main" \
+    "$ORBO_FIRMWARE/main/flippers.c" "$ORBO_FIRMWARE/host_tests/test_flippers.c" \
+    -o "$ORBO_TEST_BUILD/flippers-$profile"
+  "$ORBO_TEST_BUILD/flippers-$profile"
+done
 "$ORBO_CC" "${FLAGS[@]}" \
   -I"$ORBO_FIRMWARE/host_tests/bus_stubs" -I"$ORBO_FIRMWARE/host_tests/usb_stubs" \
   -I"$ORBO_FIRMWARE/main" -I"$ORBO_FIRMWARE/../../Software/Teleoperate/firmware/main" \

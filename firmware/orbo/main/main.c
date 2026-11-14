@@ -31,7 +31,7 @@ static QueueHandle_t session_queue,status_queue;
 static uint64_t link_seen_us=0;
 static TaskHandle_t control_task_handle,transport_task_handle;
 static uint64_t status_seq=0,stop_generation=0;
-static bool io_ready=false;
+static bool io_ready=false,flipper_io_ready=false;
 static bool bootloader_requested=false; // Protected by state_lock; latched until reset.
 
 static void request_bootloader(void){
@@ -98,7 +98,10 @@ static void safety_task(void *unused){
         portEXIT_CRITICAL(&state_lock);
         if(armed){
 #ifdef CONFIG_ORBO_FLIPPERS_CALIBRATED
-            if(flippers_set(pulses)!=ESP_OK)fault(ORBO_BUS);
+            if(flippers_set(pulses)!=ESP_OK){
+                fault(ORBO_BUS);flippers_disable();
+                done=false;armed=false;reason=ORBO_BUS;
+            }
 #endif
         }else flippers_disable();
         if(done)status(command,3,ORBO_OK); // PWM timing only; no encoder on the 9G servo.
@@ -133,7 +136,8 @@ static void motor_task(void *unused){
             uint64_t arm_generation=stop_generation;
             bool eligible=!bootloader_requested && !control.armed && request.boot_id==control.boot && request.epoch>control.epoch;
             portEXIT_CRITICAL(&state_lock);
-            bool prepared=eligible && io_ready;
+            // Stationary flipper sessions do not require a powered wheel bus.
+            bool prepared=eligible && flipper_io_ready && (!request.enable_wheels || io_ready);
             if(prepared && request.enable_wheels)prepared=wheels_prepare(true)==ESP_OK;
             if(prepared){
                 orbo_feedback_t measured={0};
@@ -265,14 +269,17 @@ void app_main(void){
     ESP_ERROR_CHECK(esp_usbcdc_logging_init());
     uint64_t boot=((uint64_t)esp_random()<<32)|esp_random();
     orbo_control_init(&control,boot,CONFIG_ORBO_MAX_MRAD_S/1000.0);
+#ifdef CONFIG_ORBO_FLIPPERS_CALIBRATED
     for(int i=0;i<2;i++){
         control.pulse_min[i]=CONFIG_ORBO_FLIPPER_MIN_US;control.pulse_max[i]=CONFIG_ORBO_FLIPPER_MAX_US;
         control.pulse_rest[i]=CONFIG_ORBO_FLIPPER_REST_US;control.pulse[i]=control.pulse_rest[i];
     }
+#endif
     session_queue=xQueueCreate(1,sizeof(orbo_embedded_interfaces__msg__ControlSession));
     status_queue=xQueueCreate(16,sizeof(orbo_embedded_interfaces__msg__ActuatorStatus));
     configASSERT(session_queue && status_queue);
     io_ready=actuators_init()==ESP_OK;
+    flipper_io_ready=flippers_init()==ESP_OK;
     ESP_ERROR_CHECK(usb_bootloader_init(request_bootloader));
     configASSERT(xTaskCreate(motor_task,"motor_io",6144,NULL,8,&control_task_handle)==pdPASS);
     configASSERT(xTaskCreate(safety_task,"expiry_pwm",3072,NULL,12,NULL)==pdPASS);

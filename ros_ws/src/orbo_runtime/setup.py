@@ -21,6 +21,7 @@ setup(
             "installed_smoke = orbo_runtime.installed_smoke:main",
             "base_bench = orbo_runtime.bench.base:main",
             "wheel_bench = orbo_runtime.bench.wheels:main",
+            "flipper_bench = orbo_runtime.bench.flippers:main",
             "teleop_keyboard = orbo_runtime.teleop_keyboard:main",
             "velocity_gate = orbo_runtime.velocity_gate:main",
             "camera_monitor = orbo_runtime.camera:main",
