@@ -1,12 +1,13 @@
-"""Run with ORBO_ROS_TESTS=1 under Ubuntu/Jazzy; synthetic DDS only, no devices."""
+"""Run with ORBO_ROS_TESTS=1 under Jazzy; synthetic DDS only, no devices."""
 
 import os
-import signal
 import subprocess
 import threading
 import time
 
 import pytest
+
+from process_cleanup import stop_process_group
 
 pytestmark = pytest.mark.skipif(
     os.getenv("ORBO_ROS_TESTS") != "1", reason="explicit Jazzy integration lane"
@@ -24,6 +25,9 @@ def test_real_plugin_load_activation_and_stale_feedback_fault(tmp_path):
     )
     from orbo_embedded_interfaces.msg import WheelState
     import yaml
+
+    assert os.environ.get("ROS_DOMAIN_ID") == os.environ.get("ORBO_TEST_DOMAIN", "96")
+    assert os.environ.get("ROS_DOMAIN_ID") in {"96", "97", "98", "99"}
 
     # All geometry is explicitly synthetic and never installed as calibration.
     urdf = """<robot name="synthetic_orbo"><link name="base_link"/>
@@ -160,12 +164,7 @@ def test_real_plugin_load_activation_and_stale_feedback_fault(tmp_path):
         component = next(c for c in future.result().component if c.name == "OrboWheels")
         assert component.state.id != 3, "stale measured feedback must leave ACTIVE"
     finally:
-        os.killpg(process.pid, signal.SIGTERM)
-        try:
-            process.wait(timeout=5)
-        except subprocess.TimeoutExpired:
-            os.killpg(process.pid, signal.SIGKILL)
-            process.wait()
+        stop_process_group(process, timeout=5)
         executor.shutdown(timeout_sec=2)
         thread.join(timeout=2)
         node.destroy_node()
