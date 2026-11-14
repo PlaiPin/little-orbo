@@ -13,6 +13,7 @@ import tty
 
 import rclpy
 from rclpy.qos import QoSProfile, ReliabilityPolicy
+from rclpy.executors import SingleThreadedExecutor
 from rclpy.signals import SignalHandlerOptions
 from orbo_embedded_interfaces.msg import ActuatorStatus, ControlSession, Health, WheelCommand, WheelState
 
@@ -64,6 +65,7 @@ class KeyboardCommand:
 class WheelPublisher:
     def __init__(self, node, *, direct_wheels=True):
         self.node = node
+        self.executor = None
         self.wheel = self.health = None
         self.wheel_received = self.health_received = -math.inf
         self.health_delivery_ms = math.inf
@@ -124,10 +126,21 @@ class WheelPublisher:
         print(f'Publisher: sent={self.sequence}, max_publish_gap_ms={self.max_publish_gap * 1000:.1f}, '
               f'read_errors_at_arm={self.read_errors_at_arm}', file=sys.stderr)
 
+    def close(self):
+        if self.executor is not None:
+            self.executor.remove_node(self.node)
+            self.executor.shutdown(timeout_sec=2)
+            self.executor = None
+
     def spin(self, seconds):
+        # Keep the node attached; the convenience rclpy.spin_once(node) adds
+        # and removes it for every callback, repeatedly rebuilding wait sets.
+        if self.executor is None:
+            self.executor = SingleThreadedExecutor(context=self.node.context)
+            self.executor.add_node(self.node)
         until = time.monotonic() + seconds
         while time.monotonic() < until:
-            rclpy.spin_once(self.node, timeout_sec=min(0.01, max(0.0, until - time.monotonic())))
+            self.executor.spin_once(timeout_sec=min(0.01, max(0.0, until - time.monotonic())))
 
     def check(self, armed=False):
         now = time.monotonic()
@@ -302,6 +315,7 @@ def main():
         finally:
             for signum, handler in old_handlers.items():
                 signal.signal(signum, handler)
+            controller.close()
             node.destroy_node()
             rclpy.shutdown()
     return result

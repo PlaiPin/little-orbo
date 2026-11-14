@@ -204,6 +204,7 @@ def main():
             if result:controller.describe_failure()
         finally:
             for s,h in old.items():signal.signal(s,h)
+            controller.close()
             node.destroy_node();rclpy.shutdown()
     return result
 
