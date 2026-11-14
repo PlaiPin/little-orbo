@@ -292,6 +292,11 @@ The integration tests use synthetic inputs in domain 96. Physical driving and
 Pi peripheral/navigation acceptance remain separate. Old v05 meshes and generated
 evidence are excluded from source commits.
 
+For standalone OV5647 camera setup on the Pi, use the
+[ROS 2 camera setup guide](deploy/ros2-camera/README.md). Its script checks the
+working libcamera installation, builds `camera_ros`, and publishes `/camera/*`
+topics for an initial image test.
+
 ### Python application development
 
 The Orbo Python application workflow requires Python 3.12 and `uv`. Run from this repository:
