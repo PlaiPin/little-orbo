@@ -140,6 +140,8 @@ class EmbodiedAssistant:
                     "usage",
                     "baseline_id",
                     "changes",
+                    "mode",
+                    "visible_details",
                 )
                 self.store.event(
                     task["episode_id"],
@@ -294,7 +296,11 @@ class EmbodiedAssistant:
                         f"{attempt}-view-{step}-infer",
                         "infer",
                         {"observation_id": capture["id"]},
-                        lambda: self.vision.inspect(
+                        lambda: (
+                            self.vision.describe
+                            if request["kind"] == "describe"
+                            else self.vision.inspect
+                        )(
                             owner,
                             task["environment"],
                             task["map_version"],
@@ -437,6 +443,9 @@ class EmbodiedAssistant:
             f = self.memory.get("finding", owner, task["environment"], fid)
             recalls.append(
                 {
+                    "finding_id": f["id"],
+                    "source_type": f["source_type"],
+                    "model": f.get("proof", {}).get("model"),
                     "observed_at": f["observed_at"],
                     "age_seconds": max(0, self.store.clock.utc() - f["observed_at"]),
                     "coverage": f["coverage"],
@@ -449,6 +458,8 @@ class EmbodiedAssistant:
             c = self.memory.get("comparison", owner, task["environment"], cid)
             comparisons.append(
                 {
+                    "baseline_id": c["baseline_id"],
+                    "source_type": c["source_type"],
                     "status": c["status"],
                     "reason": c["reason"],
                     "changes": c["changes"],

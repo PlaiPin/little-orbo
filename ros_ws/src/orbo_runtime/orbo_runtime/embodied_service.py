@@ -158,6 +158,16 @@ class EmbodiedService:
                 "revision": result.revision,
                 "kind": result.kind,
             }
+        if method == "task.metrics":
+            from .embodied_metrics import report
+
+            return report(
+                self.store,
+                self.owner,
+                environment=self.environment,
+                task_ids=args.get("task_ids"),
+                max_tasks=args.get("max_tasks", 100),
+            )
         if method == "task.get":
             return tasks.get(self.owner, args["task_id"])
         if method == "task.result":
@@ -256,6 +266,7 @@ class EmbodiedService:
                     voice=config.get("voice", "marin"),
                     sample_rate=config.get("sample_rate", 24000),
                     idle_seconds=config.get("idle_seconds", 60),
+                    max_session_seconds=config.get("max_session_seconds", 900),
                     account=config.get("account", "owner"),
                 ),
                 current_revision=lambda task_id: tasks.get(self.owner, task_id)[

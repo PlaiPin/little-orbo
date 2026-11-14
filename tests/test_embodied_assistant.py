@@ -83,6 +83,12 @@ class Reasoner:
                 "reason": "clear_view",
                 "changes": [],
             }
+        if isinstance(messages[1]["content"], list):
+            context = json.loads(messages[1]["content"][0]["text"])
+            if "visible_details" in context.get("required_json", {}):
+                body["visible_details"] = [
+                    {"item": "shirt", "color": "blue", "count": "one"}
+                ]
         message = {"content": json.dumps(body)}
         return VerifiedReply(
             message,

@@ -38,6 +38,7 @@ model = "gpt-live-1"
 voice = "marin"
 sample_rate = 24000
 idle_seconds = 60
+max_session_seconds = 900
 account = "owner"
 aec_qualified = false
 # input_device = "commissioned input"
