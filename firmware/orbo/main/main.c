@@ -8,6 +8,7 @@
 #include "esp_timer.h"
 #include "esp_usbcdc_transport.h"
 #include "esp_usbcdc_logging.h"
+#include "tinyusb.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "freertos/task.h"
@@ -145,6 +146,7 @@ static void cleanup_result(rcl_ret_t result){if(result!=RCL_RET_OK)rcl_reset_err
 static void transport_task(void *unused){
     (void)unused;
     static tinyusb_cdcacm_itf_t cdc=TINYUSB_CDC_ACM_0;
+    uint64_t sequence=0; // Monotonic within a boot, including session reconnects.
     if(rmw_uros_set_custom_transport(true,&cdc,esp_usbcdc_open,esp_usbcdc_close,esp_usbcdc_write,esp_usbcdc_read)!=RMW_RET_OK){fault(ORBO_BUS);vTaskDelete(NULL);return;}
     for(;;){
         // Discovery, synchronization and reconnection never arm actuators.
@@ -176,7 +178,7 @@ static void transport_task(void *unused){
         CHECK(rclc_executor_add_subscription(&executor,&subs[2],&flipper,flipper_callback,ON_NEW_DATA));
         if(rmw_uros_sync_session(1000)!=RMW_RET_OK)goto cleanup;
         portENTER_CRITICAL(&state_lock);control.clock_synced=true;link_seen_us=esp_timer_get_time();portEXIT_CRITICAL(&state_lock);
-        uint64_t sequence=0,last_ping=0;
+        uint64_t last_ping=0;
         for(;;){
             rcl_ret_t spin=rclc_executor_spin_some(&executor,RCL_MS_TO_NS(2));
             if(spin!=RCL_RET_OK && spin!=RCL_RET_TIMEOUT)goto cleanup;
@@ -229,6 +231,10 @@ cleanup:
     }
 }
 void app_main(void){
+    // Driver/PHY lifetime is the boot lifetime, independent of XRCE sessions.
+    const tinyusb_config_t usb_config={.external_phy=false};
+    ESP_ERROR_CHECK(tinyusb_driver_install(&usb_config));
+    ESP_ERROR_CHECK(esp_usbcdc_transport_init());
     ESP_ERROR_CHECK(esp_usbcdc_logging_init());
     uint64_t boot=((uint64_t)esp_random()<<32)|esp_random();
     orbo_control_init(&control,boot,CONFIG_ORBO_MAX_MRAD_S/1000.0);

@@ -1,2 +1,3 @@
 micro-ROS/micro_ros_espidf_component 5cd71f525eedc1e59a48e3a12184ba75b60b05b7
 Apache-2.0
+Orbo change: initialize CDC1 after app_main installs the shared USB driver.

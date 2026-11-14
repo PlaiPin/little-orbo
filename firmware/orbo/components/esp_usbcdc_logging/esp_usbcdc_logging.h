@@ -7,17 +7,18 @@
 #include "tusb_console.h"
 #include "sdkconfig.h"
 
-#if (CONFIG_TINYUSB_CDC_COUNT < 2) 
+#if (CONFIG_TINYUSB_CDC_COUNT < 2)
     #warning "Define CONFIG_TINYUSB_CDC_COUNT to 2 in menuconfig if you want log over USBCDC. Otherwise, disable log output in menuconfig."
 #endif
 
 #if defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 
 #ifdef __cplusplus
-extern "C" 
+extern "C"
 {
 #endif
 
+// Caller installs the shared TinyUSB driver once before initializing logging.
 esp_err_t esp_usbcdc_logging_init(void);
 esp_err_t esp_usbcdc_logging_deinit(void);
 
