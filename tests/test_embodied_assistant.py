@@ -64,7 +64,9 @@ class Reasoner:
                 "task_id": context["task_id"],
                 "revision": context["revision"],
                 "status": status,
-                "identity": "unconfirmed"
+                "identity": "visual_similarity"
+                if status == "similar"
+                else "unconfirmed"
                 if status in ("present", "unknown")
                 else "not_applicable",
                 "observation_ids": context["required_json"]["observation_ids"],
@@ -288,3 +290,14 @@ async def test_owner_ipc_composes_actual_pipeline(tmp_path, monkeypatch):
         r[0] for r in events
     ]
     await service.close()
+
+
+async def test_search_retains_earlier_similar_sighting_when_last_view_empty(system):
+    _, assistant, _, _, reasoner, request = system
+    reasoner.statuses = ["similar", "not_visible"]
+    task = await execute(assistant, request | {"kind": "find"})
+    result = assistant.release("owner", task, "local")
+    assert task["state"] == "completed" and result["partial"]
+    assert result["coverage"] == ["front", "side"]
+    assert result["findings"][0]["identity"] == "visual_similarity"
+    assert "similar" in result["text"].lower()

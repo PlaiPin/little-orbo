@@ -10,6 +10,7 @@ from dataclasses import dataclass
 import hashlib
 import hmac
 import json
+import math
 
 from .contracts import Rejected, canonical, identity
 
@@ -27,7 +28,18 @@ class Principal:
             not self.name
             or not self.owner
             or not self.environments
+            or not isinstance(self.token_sha256, str)
             or len(self.token_sha256) != 64
+            or any(c not in "0123456789abcdef" for c in self.token_sha256)
+            or type(self.expires) not in {int, float}
+            or not math.isfinite(self.expires)
+            or self.expires <= 0
+            or len(self.name) > 128
+            or not all(c.isalnum() or c in "_.-" for c in self.name)
+            or any(
+                not isinstance(e, str) or not e or len(e) > 256
+                for e in self.environments
+            )
         ):
             raise Rejected(
                 "explicit remote identity, environments and token hash required"
@@ -53,6 +65,13 @@ class RemoteTasks:
           revision INTEGER NOT NULL, content TEXT NOT NULL, created REAL NOT NULL,
           acknowledged REAL, UNIQUE(task_id,revision,content));
         """)
+
+    def _event(self, task_id, kind, payload):
+        task = self.store.db.execute(
+            "SELECT episode_id FROM embodied_tasks WHERE id=?", (task_id,)
+        ).fetchone()
+        if task:
+            self.store.event(task["episode_id"], kind, dict(payload, task_id=task_id))
 
     def authenticate(self, request):
         principal = self.principals.get(request.get("principal"))
@@ -129,7 +148,7 @@ class RemoteTasks:
         if method == "delivery.ack":
             with self.store.transaction() as db:
                 result = db.execute(
-                    "UPDATE remote_task_deliveries SET acknowledged=? WHERE id=? AND task_id=?",
+                    "UPDATE remote_task_deliveries SET acknowledged=COALESCE(acknowledged,?) WHERE id=? AND task_id=?",
                     (
                         self.store.clock.utc(),
                         args.get("delivery_id"),
@@ -138,6 +157,11 @@ class RemoteTasks:
                 )
                 if result.rowcount != 1:
                     raise Rejected("unknown requester delivery")
+            self._event(
+                binding["task_id"],
+                "task.remote_delivery_acknowledged",
+                {"delivery_id": args["delivery_id"], "requester": principal.name},
+            )
             return {"acknowledged": True}
         if method != "task.get":
             raise Rejected("unsupported remote method")
@@ -155,27 +179,45 @@ class RemoteTasks:
         if len(content.encode()) > 32768:
             raise Rejected("remote result exceeds release bound")
         with self.store.transaction() as db:
-            db.execute(
-                "INSERT OR IGNORE INTO remote_task_deliveries VALUES(?,?,?,?,?,NULL)",
-                (
-                    identity(),
-                    task["id"],
-                    task["revision"],
-                    content,
-                    self.store.clock.utc(),
-                ),
-            )
             row = db.execute(
-                "SELECT id,acknowledged FROM remote_task_deliveries WHERE task_id=? AND revision=? AND content=?",
-                (task["id"], task["revision"], content),
+                "SELECT id,content,created,acknowledged FROM remote_task_deliveries WHERE task_id=? AND revision=? ORDER BY created LIMIT 1",
+                (task["id"], task["revision"]),
             ).fetchone()
+            if row is None:
+                delivery_id = identity()
+                db.execute(
+                    "INSERT INTO remote_task_deliveries VALUES(?,?,?,?,?,NULL)",
+                    (
+                        delivery_id,
+                        task["id"],
+                        task["revision"],
+                        content,
+                        self.store.clock.utc(),
+                    ),
+                )
+                row = db.execute(
+                    "SELECT id,content,created,acknowledged FROM remote_task_deliveries WHERE id=?",
+                    (delivery_id,),
+                ).fetchone()
+        self._event(
+            task["id"],
+            "task.remote_delivery_selected",
+            {
+                "delivery_id": row["id"],
+                "revision": task["revision"],
+                "requester": principal.name,
+                "state": "selected_for_response",
+                "acknowledged": row["acknowledged"] is not None,
+            },
+        )
         return {
             "task_id": task["id"],
             "revision": task["revision"],
             "state": task["state"],
             "delivery_id": row["id"],
             "acknowledged": row["acknowledged"] is not None,
-            "result": released,
+            "released_at": row["created"],
+            "result": json.loads(row["content"]),
         }
 
     async def handle(self, reader, writer):

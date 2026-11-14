@@ -162,9 +162,23 @@ class EmbodiedService:
             return tasks.get(self.owner, args["task_id"])
         if method == "task.result":
             task = tasks.get(self.owner, args["task_id"])
-            return self.assistant.release(
+            released = self.assistant.release(
                 self.owner, task, task["request"]["destination"]
             )
+            if released:
+                self.store.event(
+                    task["episode_id"],
+                    "task.result_released",
+                    {
+                        "task_id": task["id"],
+                        "revision": task["revision"],
+                        "destination": task["request"]["destination"],
+                        "text": released["text"],
+                        "state": "selected_for_owner_response",
+                        "played": False,
+                    },
+                )
+            return released
         if method == "task.revise":
             return await self.assistant.revise(
                 self.owner, args["task_id"], args["revision"], args["changes"]
@@ -187,6 +201,14 @@ class EmbodiedService:
             return self.memory.accept_baseline(self.owner, self.environment, **args)
         if method == "memory.recall":
             return self.memory.recall(self.owner, self.environment, **args)
+        if method == "memory.delete_record":
+            removed = self.memory.delete_record(
+                args["kind"], self.owner, self.environment, args["record_id"]
+            )
+            return {
+                "deleted_record_ids": removed,
+                "delivered_recipient_copies": "not_recalled",
+            }
         if method == "memory.delete_observation":
             self.memory.delete_observation(
                 self.owner, self.environment, args["observation_id"]

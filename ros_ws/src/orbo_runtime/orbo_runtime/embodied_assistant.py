@@ -19,6 +19,8 @@ class EmbodiedAssistant:
         self.navigator = TaskNavigator(self.tasks, broker)
         self.observations, self.vision, self.notify = observations, vision, notify
         self.jobs = {}
+        self.closing = False
+        self.vision.usage_recorder = self.record_usage
         store.db.executescript("""
         CREATE TABLE IF NOT EXISTS embodied_results(
           task_id TEXT NOT NULL REFERENCES embodied_tasks(id), revision INTEGER NOT NULL,
@@ -26,12 +28,16 @@ class EmbodiedAssistant:
         """)
 
     async def submit(self, owner, key, request):
+        if self.closing:
+            raise Rejected("assistant shutting down")
         task = self.tasks.admit(owner, key, request)
         if task["state"] == "accepted" and task["id"] not in self.jobs:
             self.start(owner, task)
         return task
 
     def start(self, owner, task):
+        if self.closing:
+            raise Rejected("assistant shutting down")
         if task["id"] in self.jobs:
             raise Rejected("task already running")
         self.tasks.check_revision(owner, task["id"], task["revision"])
@@ -41,6 +47,28 @@ class EmbodiedAssistant:
             lambda done: self.jobs.pop(task["id"], None)
             if self.jobs.get(task["id"]) is done
             else None
+        )
+
+    def record_usage(self, owner, task_id, revision, proof, usage):
+        """Account verified usage even when subsequent interpretation is rejected."""
+        from .economics import Ledger
+
+        task = self.tasks.get(owner, task_id)
+        Ledger(self.store).observe(
+            "near",
+            owner,
+            proof["response_id"],
+            "usage",
+            {
+                "task_id": task_id,
+                "revision": revision,
+                "model": proof["model"],
+                "usage": usage,
+                "amount_known": False,
+            },
+            provenance="fixture"
+            if task["request"]["provenance"] != "physical"
+            else "live_service",
         )
 
     async def _effect(
@@ -123,25 +151,6 @@ class EmbodiedAssistant:
                     }[capability],
                     {key: result[key] for key in fields if key in result},
                 )
-                if result.get("proof", {}).get("response_id"):
-                    from .economics import Ledger
-
-                    Ledger(self.store).observe(
-                        "near",
-                        owner,
-                        result["proof"]["response_id"],
-                        "usage",
-                        {
-                            "task_id": task["id"],
-                            "revision": task["revision"],
-                            "model": result["proof"]["model"],
-                            "usage": result.get("usage", {}),
-                            "amount_known": False,
-                        },
-                        provenance="fixture"
-                        if task["request"]["provenance"] != "physical"
-                        else "live_service",
-                    )
             return result
         except BaseException as exc:
             self.tasks.finish_operation(
@@ -317,10 +326,20 @@ class EmbodiedAssistant:
                         partial=True, reason=result["reason"] or "no_usable_evidence"
                     )
                 elif result["finding_ids"]:
-                    last = self.memory.get(
-                        "finding", owner, task["environment"], result["finding_ids"][-1]
+                    observed = [
+                        self.memory.get("finding", owner, task["environment"], fid)
+                        for fid in result["finding_ids"]
+                    ]
+                    strongest = max(
+                        observed,
+                        key=lambda f: {
+                            "present": 4,
+                            "similar": 3,
+                            "unknown": 2,
+                            "not_visible": 1,
+                        }[f["status"]],
                     )
-                    if last["status"] in {"unknown", "similar"}:
+                    if strongest["status"] in {"unknown", "similar"}:
                         result.update(
                             partial=True, reason="identity_or_visibility_uncertain"
                         )
@@ -500,6 +519,7 @@ class EmbodiedAssistant:
         return task
 
     async def close(self):
+        self.closing = True
         for task_id, worker in list(self.jobs.items()):
             row = self.store.db.execute(
                 "SELECT owner FROM embodied_tasks WHERE id=?", (task_id,)

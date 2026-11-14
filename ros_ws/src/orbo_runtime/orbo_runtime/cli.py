@@ -302,13 +302,23 @@ class LocalService:
                 args["expires"],
             )
             if not args["enabled"]:
-                if args["scope"] in {
+                scope = args["scope"]
+                if self.embodied and scope in {"cloud.voice", "speech.play"}:
+                    if self.embodied.live:
+                        await self.embodied.live.close()
+                    # A speech permission change does not revoke the durable task.
+                    if self.voice:
+                        await self.voice.interrupt()
+                elif scope in {
                     "audio.capture",
                     "cloud.transcription",
                     "cloud.reasoning",
                     "cloud.speech",
                     "speech.play",
                     "robot.command",
+                    "task.execute",
+                    "observation.capture",
+                    "observation.infer",
                 }:
                     await self.interrupt()
             return {"updated": True}
@@ -322,6 +332,8 @@ class LocalService:
                 args["key"],
             )
         if method == "conversation.text":
+            if self.embodied:
+                return dict(await self.embodied.call("task.text", args), played=False)
             return {
                 "text": await self.coordinator.converse(
                     self.owner, args["episode_id"], args["text"]
