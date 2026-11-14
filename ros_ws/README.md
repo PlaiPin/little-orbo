@@ -14,7 +14,7 @@ For the combined model/camera/odometry/TF viewer, run
 `ros2 launch orbo_description rviz.launch.py` from a sourced graphical ROS desktop,
 or `pixi run --locked rviz-pi` on the Mac. See the
 [Pi viewer guide](../docs/engineering/runbooks/ros-macos.md#combined-pi-viewer-model-camera-odometry-and-frames).
-Only `meshes/v9` is installed; obsolete `meshes/v05` exports are ignored and excluded
+Meshes from `../cad/meshes/v9` are installed as `orbo_description/meshes/v9`; obsolete `meshes/v05` exports are ignored and excluded
 from installation even if they remain on a developer's disk.
 
 ## Native Pi workflow

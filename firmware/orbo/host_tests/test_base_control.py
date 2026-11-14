@@ -71,11 +71,11 @@ class BaseTests(unittest.TestCase):
     def test_v9_meshes_and_static_flippers_are_present(self):
         import hashlib,json
         root=ROOT/'ros_ws/src/orbo_description'
-        manifest=json.loads((root/'meshes/v9/manifest.json').read_text())
+        manifest=json.loads((ROOT/'cad/meshes/v9/manifest.json').read_text())
         self.assertEqual(len(manifest['parts']),176)
         self.assertEqual(hashlib.sha256((ROOT/manifest['source']).read_bytes()).hexdigest(),manifest['source_sha256'])
         for g in manifest['groups']:
-            mesh=root/'meshes/v9'/(g['group']+'.stl')
+            mesh=ROOT/'cad/meshes/v9'/(g['group']+'.stl')
             self.assertEqual(hashlib.sha256(mesh.read_bytes()).hexdigest(),g['sha256'])
         full=ET.parse(root/'config/orbo-preview.urdf').getroot()
         internal=ET.parse(root/'config/orbo-preview-internal.urdf').getroot()
@@ -84,6 +84,6 @@ class BaseTests(unittest.TestCase):
         self.assertNotIn('cad_head_shell',{l.get('name') for l in internal.findall('link')})
         for robot in (full,internal):
             for mesh in robot.findall('.//mesh'):
-                self.assertTrue((root/mesh.get('filename').split('package://orbo_description/')[1]).is_file())
+                self.assertTrue((ROOT/'cad'/mesh.get('filename').split('package://orbo_description/')[1]).is_file())
 
 if __name__=='__main__':unittest.main()

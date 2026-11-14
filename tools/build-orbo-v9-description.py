@@ -28,7 +28,7 @@ from OCP.StlAPI import StlAPI_Writer
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'ros_ws/src/orbo_description'
-SOURCE = ROOT / 'v9_display_mount/CAD/Orbo_V9_DisplayMount.step'
+SOURCE = ROOT / 'cad/v9_display_mount/CAD/Orbo_V9_DisplayMount.step'
 XACRO = 'http://www.ros.org/wiki/xacro'
 ET.register_namespace('xacro', XACRO)
 
@@ -99,7 +99,7 @@ def main():
     for i in range(1, roots.Length()+1): visit(roots.Value(i), TopLoc_Location())
     if len(parts) != 176 or any(len(groups.get(s+'_wheel', [])) != 1 for s in ('left', 'right')):
         raise RuntimeError('V9 assembly changed: review body count and wheel selection')
-    destination = OUT/'meshes/v9'; destination.mkdir(parents=True, exist_ok=True)
+    destination = ROOT/'cad/meshes/v9'; destination.mkdir(parents=True, exist_ok=True)
     records=[]
     for name, members in sorted(groups.items()):
         builder=BRep_Builder(); compound=TopoDS_Compound(); builder.MakeCompound(compound)

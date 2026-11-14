@@ -1,5 +1,5 @@
 {
-  "source": "v9_display_mount/CAD/Orbo_V9_DisplayMount.step",
+  "source": "cad/v9_display_mount/CAD/Orbo_V9_DisplayMount.step",
   "source_sha256": "a452fcfd4f22bf502e153534a83d64d9a2d2935dbf379a409926a835684e0560",
   "units": "millimetres",
   "transform": "ROS=(8-CAD_Y, CAD_X, CAD_Z-33); wheel meshes additionally centered on their axle",

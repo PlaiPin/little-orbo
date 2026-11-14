@@ -1,7 +1,7 @@
 # Operator-selected lifted-wheel profile, NOT physical ground calibration.
 bench_only: true
 wheels_qualified: false
-evidence_record: "CAD: v9_display_mount/CAD/Orbo_V9_DisplayMount.step; lifted bench only"
+evidence_record: "CAD: cad/v9_display_mount/CAD/Orbo_V9_DisplayMount.step; lifted bench only"
 wheel_radius: 0.033
 wheel_separation: 0.1018
 wheel_width: 0.0182

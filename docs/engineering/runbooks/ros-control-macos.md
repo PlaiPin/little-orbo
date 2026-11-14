@@ -219,14 +219,14 @@ source-loss/recovery checks before qualifying ground driving.
 
 The old preview referenced v05, while the installation rule copied only two
 unrelated STL files. The updated description exports the complete
-`v9_display_mount/CAD/Orbo_V9_DisplayMount.step`: all 176 STEP assembly leaves
+`cad/v9_display_mount/CAD/Orbo_V9_DisplayMount.step`: all 176 STEP assembly leaves
 (including a compound display reference), grouped into 13 meshes. V9 preserves
 the V8 chassis, flippers and shells and adds the display mount. Both preview and
 live robot description now use these meshes; CMake installs the mesh directory.
 
 CAD millimetres are converted to ROS metres, with forward +X, left +Y, up +Z,
 and the origin at the wheel-axle midpoint. Source hash and part-to-mesh mapping
-are in `ros_ws/src/orbo_description/meshes/v9/manifest.json`.
+are in `cad/meshes/v9/manifest.json`.
 
 Full visual preview, independent of the robot, in isolated domain 94:
 

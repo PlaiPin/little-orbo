@@ -16,6 +16,11 @@ live-provider behavior or navigation acceptance. Existing CAD and
 `Software/Teleoperate` remain intact; the ROS firmware does not use legacy UDP/text
 motion handlers.
 
+CAD models, printable STL files, versioned design packages, and ROS mesh exports
+are consolidated under [`cad/`](cad/). Version folders retain their supporting
+scripts, renders, and validation records. ROS builds install `cad/meshes/v9`
+under the existing `orbo_description/meshes/v9` package path.
+
 ## Development commands
 
 ### Gazebo room simulation on the Mac
