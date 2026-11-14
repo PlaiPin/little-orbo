@@ -43,7 +43,11 @@ class JoyInput:
                 if not 0 <= now_ns - stamp < 200_000_000 or (
                     self.last and stamp <= self.last.stamp_ns
                 ):
-                    raise Rejected("stale, future or reordered teleop input")
+                    raise Rejected(
+                        "stale, future or reordered teleop input "
+                        f"(age_ms={(now_ns - stamp) / 1_000_000:.3f}, "
+                        f"delta_ns={stamp - self.last.stamp_ns if self.last else None})"
+                    )
                 if len(axes) > 32 or len(buttons) > 32:
                     raise Rejected("oversized teleop input")
                 cfg = self.config
@@ -86,7 +90,11 @@ class JoyInput:
                 or not 0 <= now_ns - s.stamp_ns < 200_000_000
                 or not 0 <= now_mono - s.received < 0.2
             ):
-                raise Rejected("fresh teleop input required")
+                raise Rejected(
+                    "fresh teleop input required "
+                    f"(stamp_age_ms={(now_ns - s.stamp_ns) / 1_000_000 if s else None}, "
+                    f"receive_age_ms={(now_mono - s.received) * 1000 if s else None})"
+                )
             return s
 
 

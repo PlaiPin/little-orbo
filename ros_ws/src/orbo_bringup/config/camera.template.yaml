@@ -1,0 +1,20 @@
+# Confirmed ArduCam B0033+B0087: 5MP OV5647 fixed-focus CSI camera.
+# Pi 5 uses its 15-to-22-pin cable; select the actual enumerated camera name.
+enabled: false
+driver: libcamera
+camera: "" # Exact name from camera_ros/libcamera enumeration; OV5647 sensor known; CAM0/CAM1 connection selects the exact name.
+width: 640
+height: 480
+frame_id: camera_optical_frame
+calibration_file: "" # Existing absolute intrinsics YAML path, or empty for viewing only.
+# Optional USB UVC alternative: driver: v4l2
+video_device: /dev/video0 # Prefer /dev/v4l/by-id/... for USB devices.
+pixel_format: YUYV
+# mount:                 # Omit until measured; no base_link transform is invented.
+#   x: ...               # Position in metres; optical-frame rotation in radians.
+#   y: ...
+#   z: ...
+#   roll: ...
+#   pitch: ...
+#   yaw: ...
+#   evidence_record: ...
