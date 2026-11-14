@@ -1,0 +1,11 @@
+{
+  "sender": "replace-sender.near",
+  "origin_contract": "wrap.near",
+  "destination_asset": "nep141:usdt.tether-token.near",
+  "recipient": "replace-recipient.near",
+  "max_input": "1000000000000000000000000",
+  "max_total_input": "1000000000000000000000000",
+  "min_output": "1000000",
+  "slippage_bps": 50,
+  "deadline_seconds": 300
+}
