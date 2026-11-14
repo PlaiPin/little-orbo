@@ -1,6 +1,6 @@
 # Commons review, minimization and recovery
 
-Software revision: 13 November 2026. These operations are local software capabilities. Account enrollment, privacy-service processing, actual upload/admission/retrieval and credit application still need separately authorized live acceptance. NEAR Intents and automatic Fish funding remain outside this change.
+Software revision: 13 November 2026. These operations are local software capabilities. Account enrollment, privacy-service processing, actual upload/admission/retrieval and credit application still need separately authorized live acceptance. NEAR Intents remains a separate owner-authorized operation.
 
 ## Upgrade together
 

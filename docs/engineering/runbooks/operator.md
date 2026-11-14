@@ -143,13 +143,22 @@ The [peripherals runbook](pi-peripherals.md) covers the completed ROS keyboard/g
 
 ## 4. Credentials and voice
 
-The runtime reads systemd credentials first, then explicitly supplied environment values. Keys never belong in TOML, shell history, the journal, source control or a command argument. Put owner-provided keys in root-only files under `/etc/orbo/credentials/` and install the supplied `deploy/systemd/orbo-runtime.service.d/providers.conf` drop-in. The names in that file are `NEARAI_API_KEY` and `FISH_API_KEY`. Optional `NEARAI_REPORTING_TOKEN`, `COMMONS_CONTRIBUTOR_TOKEN` and `COMMONS_EXPORT_TOKEN` have separate scopes; add corresponding `LoadCredential=NAME:/etc/orbo/credentials/NAME` lines only when those functions are configured. Verify the exact credential filenames in the drop-in before starting. Do not supply inference keys as Commons export credentials.
+The runtime reads credentials from the Git-ignored project `.env`. Copy the root
+`.env.example`, fill `NEARAI_API_KEY` and `OPENAI_API_KEY`, and keep the real file
+mode 0600. On deployed hosts use `/opt/orbo/.env` with the supplied systemd
+credential drop-in. See [deployment](../../../deploy/README.md) for optional
+Commons and reporting credentials. No credentials belong in TOML or argv.
 
-For text-only operation, set `[near].enabled = true` and leave `[voice].enabled = false`. Only the NEAR inference credential and `cloud.reasoning` grant are needed for `conversation.text`; tool calls additionally require `tools.execute` and their operation-specific grants. Fish and audio devices are not initialized. Full voice operation requires both flags enabled, transcription/speech credentials and the corresponding grants. Both shipped profiles default to disabled cloud processing.
+OpenAI Live is the sole voice integration. Text-only profiles enable `[near]`
+without opening audio devices. For voice use the embodied profile with `[near]`,
+`[embodied]` and `[live]` enabled. The model is `gpt-live-1`, with verified NEAR
+reasoning and vision delegated through the application. NEAR defaults to
+`z-ai/glm-5.3-flash` and verifies model attestation and complete-response proofs.
 
-Select an actual Fish voice reference and supported model. Fish is prepaid by the owner. Unknown/zero balance and provider errors stop speech; no purchase or automatic funding code exists. NEAR reasoning defaults to `z-ai/glm-5.3-flash`, uses SDK E2EE, verifies model attestation and complete-response proof before speech or tool requests. Transcription is a separate disclosed NEAR upload. It is not represented as verified confidential chat.
-
-Select input/output devices from `python -m sounddevice` in the runtime environment. Capture is 16 kHz mono PCM WAV, bounded to 30 seconds, held transiently; speech is 24 kHz mono PCM by default. Half-duplex capture interrupts playback and waits for a short echo tail. Hands-free mode requires an independently qualified echo-cancelled input. The software does not implement or claim an acoustic echo canceller. Test clipping, audible latency, underrun, unplug/replug and interruption at the actual speaker volume.
+Select devices and commission simultaneous 24 kHz mono PCM16 audio using the
+[Live audio guide](../../../deploy/audio/README.md). The software does not provide
+an acoustic echo canceller. Qualify the actual input/output path before setting
+`aec_qualified = true`; test clipping, interruptions and unplug/replug behavior.
 
 ## 5. Start and explicitly authorize
 
@@ -168,18 +177,18 @@ Inspect `journalctl -u orbo-runtime -u orbo-micro-ros-agent` and CDC1 logs. `ROS
 | `episode.start` | Optional `profile`: `attention.v1` or `physical_task.v1`; returns `episode_id` |
 | `permission.set` | `scope`, `destination`, `enabled`, `expires` (UTC Unix seconds) |
 | `conversation.text` | `episode_id`, `text`; verified reasoning, no automatic playback |
-| `voice.capture` | `episode_id`, optional `max_seconds`; actual capture → transcription → verified reasoning → speech |
-| `voice.capture.stop` | Ends capture normally and submits the utterance |
+| `live.start` | Optional `episode_id`; starts the configured OpenAI Live session |
+| `live.close` | Closes the Live session; durable tasks remain separate |
+| `live.interrupt` | Interrupts speech without cancelling a durable task |
 | `stop` | Cancels the turn/capture/playback and requests controller stop; does not claim measured cessation |
 | `reminder.create` | `episode_id`, unique `key`, `text`, `due_utc` |
 | `reminder.list` | Current owner reminders and acknowledgment state |
-| `reminder.acknowledge` | `reminder_id`, current `ack_token`; speech delivery recorded only after playback completion |
 | `robot.teleop` | `episode_id`, unique `key`, `duration` 1–30 seconds; owner-only deadman teleop session, no model velocity interface |
 | `robot.navigate` | `episode_id`, unique `key`, surveyed `waypoint`, optional `duration` ≤30 seconds |
 | `episode.end` | `episode_id`, `outcome`: completed/failed/cancelled/unknown |
 | `journal` | Optional `after` sequence; bounded pages, no raw audio |
 
-Grant only the required scopes with explicit future expiration: `robot.command` to `orbo`; `cloud.reasoning` and `cloud.transcription` to `near`; `cloud.speech` to `fish`; `audio.capture`, `speech.play`, `tools.execute` to `local`; `preferences.write` to `local` for preference changes. A `stop` request needs no positive motion grant. Commands have monotonic leases and MCU expiry; loss of any layer does not create authority. Unknown physical command outcomes remain unreconciled and block conflicting commands.
+Grant only the required scopes with explicit future expiration: `robot.command` to `orbo`; `cloud.reasoning` to `near`; `cloud.voice` to `openai`; `audio.capture`, `speech.play`, `tools.execute` to `local`; `preferences.write` to `local` for preference changes. A `stop` request needs no positive motion grant. Commands have monotonic leases and MCU expiry; loss of any layer does not create authority. Unknown physical command outcomes remain unreconciled and block conflicting commands.
 
 ## 6. Commission control and navigation
 
@@ -191,16 +200,13 @@ Test with a contained area, external stop, obstacles, missing/stale scan, failed
 
 ## 7. Measure actual Pi voice performance
 
-With provider grants and the actual ROS stack running, execute as the owner service user:
-
-```bash
-/opt/orbo/.venv/bin/python /opt/orbo/tools/measure-voice.py \
-  --turns 30 --capture-seconds 5 \
-  --ros-load 'Record actual active nodes, topic rates, motion state and scenario' \
-  --output /var/lib/orbo/voice-qualification.json
-```
-
-The runner refuses non-Pi-5 hosts. Speak during each capture interval. Keep failed turns in the denominator. The report includes per-stage timestamps, software first playback, missing timings, load and temperature, and p50/p95. Record independent acoustic timing separately if needed. Repeat interruption, network/provider failure and exhausted-credit cases without deleting failures from the report. The runner preserves partial attempts and failed stop/episode-close/journal requests and exits incomplete if the run cannot establish all measurements. Outstanding reminders may prevent episode close; review and cancel or finish them explicitly. No Pi performance result exists until this run is executed on the actual device.
+Use the [Live E2E runner](../../../deploy/live-e2e/README.md) for recorded-input
+provider/delegation checks and the [audio guide](../../../deploy/audio/README.md)
+for the physical conversation. Test with camera, ROS control and logging active.
+Retain failures and inspect Live session usage/delivery evidence. Software audio
+frames do not establish acoustic latency or that the intended words were heard;
+measure those independently on the device. Exercise interruption, disconnect and
+permission revocation with the current deployment.
 
 ## 8. Commons review, submission and analysis
 
@@ -227,7 +233,7 @@ For local export methods, `export.prepare` takes `episode_id`, `purpose`, `recip
 
 For accounting, grant `accounting.read` to `near` or `commons`. Configure `[reporting].near_organization` and its separate reporting token for `accounting.near.sync {start,end}` (timezone-aware ISO timestamps, bounded window). Configure `[commons].origin`, `[commons].account` and `COMMONS_CONTRIBUTOR_TOKEN` for `accounting.commons.sync {submission_ids}` using IDs returned by the linked history. This reads actual status, credit and ledger APIs without initiating transfers. `accounting.summary` separates providers, instruments, stages and provenance. Account snapshots and balances are non-additive. Recipient receipt and applied-usage allocation remain unknown unless independently supplied by their authority; a pipeline payout label cannot establish either.
 
-`accounting.record` records owner assertions explicitly as such. Actual provider records must retain original IDs/provenance. Submitted, admitted, delivered, award, received credit and credit applied to usage are separate facts. Fish prepaid balances/costs are a separate instrument; a Commons score or grant is not a Fish payment or proof of cost coverage.
+`accounting.record` records owner assertions explicitly as such. Actual provider records must retain original IDs/provenance. Submitted, admitted, delivered, award, received credit and credit applied to usage are separate facts. OpenAI usage is billed to its separate owner account; a Commons score or grant does not establish payment or cost coverage.
 
 ## 9. Failure, restart and recovery
 

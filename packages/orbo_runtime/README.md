@@ -14,10 +14,10 @@ and odometry are handled by the ROS hardware plugin and drive controller.
 | `contracts`, `commissioning`, `velocity_gate` | Shared types, geometry/limit validation, expiring velocity authority |
 | `ros_adapter`, `teleop`, `navigation`, `camera` | Firmware sessions, joystick input, named Nav2 goals, camera metadata health |
 | `storage`, `reminders`, `broker`, `coordinator`, `cli` | SQLite state, reminders, exclusive command ownership, conversation/tools, local owner API |
-| `audio`, `audio_check`, `providers` | Audio I/O and optional NEAR/Fish services |
+| `audio`, `audio_check`, `providers`, `live_voice` | Local audio diagnostics, verified NEAR reasoning and OpenAI Live voice |
 | `traces`, `commons`, `consumer`, `economics` | Export preparation, external contributor protocol, retrieval and usage accounting |
 | `k1_adapter` | Client for a separately deployed Booster K1 worker |
-| `live_validation` | Explicit opt-in service checks with private local configuration |
+| `live_e2e` | Explicit OpenAI Live/NEAR/Commons checks using the project `.env` |
 
 The Mac bench path uses calibration validation and the velocity gate. It does
 not start the broker, conversation loop, cloud providers, audio, or export clients.
@@ -36,7 +36,7 @@ uv run --locked --all-extras pytest -q tests
 ```
 
 The demo uses synthetic inputs and makes no hardware/provider calls. ROS tests
-are skipped unless explicitly enabled. The `near` and `audio` extras install
+are skipped unless explicitly enabled. The `near`, `live` and diagnostic `audio` extras install
 optional dependencies; they do not enable services. For a minimal application
 install, omit `--all-extras`. ROS Python modules come from the ROS environment,
 not PyPI dependencies in this package.

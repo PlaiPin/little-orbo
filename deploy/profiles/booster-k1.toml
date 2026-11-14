@@ -11,16 +11,9 @@ qualified = false
 allowed_actions = ["hand_wave"] # Candidate only. Both ends must explicitly commission it.
 attention_action = "hand_wave"
 
-[voice]
-enabled = false
-sample_rate = 24000
-aec_qualified = false
-
 [near]
-enabled = false # Text-only reasoning can be enabled independently of voice.
+enabled = false # Enable verified NEAR text reasoning explicitly.
 model = "z-ai/glm-5.3-flash"
-transcription_model = "openai/whisper-large-v3"
 
-[fish]
-model = "s2.1-pro"
-voice = ""
+# For OpenAI Live voice, configure the embodied runtime and its [live] section.
+# See deploy/profiles/embodied.toml and deploy/audio/README.md.

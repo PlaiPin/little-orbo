@@ -1,20 +1,14 @@
 import asyncio
-import io
 import json
 from types import SimpleNamespace as NS
-import wave
 
-import httpx
 import pytest
 
 from orbo_runtime.broker import Broker, FakeRobot
 from orbo_runtime.contracts import ManualClock, Rejected
 from orbo_runtime.coordinator import Coordinator
 from orbo_runtime.providers import (
-    FishSynthesizer,
     NearReasoner,
-    NearTranscriber,
-    ProviderError,
     VerifiedReply,
 )
 from orbo_runtime.storage import Store
@@ -82,80 +76,6 @@ async def test_near_verification_failure_releases_nothing(options):
         await NearReasoner(client=sdk).complete([], [])
     if not sdk.models:
         assert sdk.calls == ["attest"]
-
-
-async def test_fish_explicit_model_stream_and_prepaid_balance():
-    requests = []
-
-    async def handler(request):
-        requests.append(request)
-        if request.method == "GET":
-            return httpx.Response(
-                200,
-                json={
-                    "credit": "2.50",
-                    "cumulative_top_up": "10.00",
-                    "user_id": "synthetic",
-                },
-            )
-        assert request.headers["model"] == "s2.1-pro"
-        assert json.loads(request.content)["reference_id"] == "synthetic-voice"
-        return httpx.Response(200, content=b"\x00\x01" * 128)
-
-    async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
-        fish = FishSynthesizer(
-            model="s2.1-pro",
-            voice="synthetic-voice",
-            client=client,
-            api_key="synthetic-key",
-        )
-        assert len(b"".join([chunk async for chunk in fish.synthesize("hello")])) == 256
-        assert fish.last_balance["funding"] == "owner_prepaid"
-        assert [request.method for request in requests] == ["GET", "POST"]
-
-
-@pytest.mark.parametrize("status", [402, 401, 503, 302])
-async def test_fish_errors_never_purchase_or_fallback(status):
-    requests = []
-
-    async def handler(request):
-        requests.append(request)
-        return httpx.Response(status, json={"message": "sensitive provider details"})
-
-    async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
-        fish = FishSynthesizer(
-            model="s2.1-pro", voice="fixture", client=client, api_key="synthetic"
-        )
-        with pytest.raises(ProviderError) as error:
-            _ = [chunk async for chunk in fish.synthesize("hello")]
-        assert "sensitive" not in str(error.value)
-        assert fish.last_balance is None
-        assert len(requests) == 1 and requests[0].method == "GET"
-
-
-def test_fish_invalid_model_fails_before_credentials():
-    with pytest.raises(Rejected):
-        FishSynthesizer(model="typo", voice="fixture")
-
-
-async def test_transcription_separate_protection():
-    output = io.BytesIO()
-    with wave.open(output, "wb") as wav:
-        wav.setnchannels(1)
-        wav.setsampwidth(2)
-        wav.setframerate(16000)
-        wav.writeframes(b"\x00" * 3200)
-
-    async def handler(request):
-        assert request.url.path == "/v1/audio/transcriptions"
-        return httpx.Response(200, json={"text": "fixture", "id": "trans-1"})
-
-    async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
-        text, evidence = await NearTranscriber(
-            client=client, api_key="synthetic"
-        ).transcribe(output.getvalue())
-    assert text == "fixture"
-    assert evidence["chat_e2ee"] is False
 
 
 def setup_store(tmp_path):

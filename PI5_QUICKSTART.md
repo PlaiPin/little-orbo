@@ -689,7 +689,7 @@ set `teleop_enabled = true`, `navigation_enabled = false`, and set
 `attention_pulse_us` to an array of your two verified integer targets in
 `[left, right]` order. Set `flippers_qualified = true` after the firmware and
 mechanism are commissioned. Keep the keyboard mapping from **Configuration**
-above. Keep `[near].enabled` and `[voice].enabled` false for this test. Do not
+above. Keep `[near].enabled` and `[live].enabled` false for this test. Do not
 duplicate TOML section headers or replace other configuration.
 
 Check the saved configuration without starting motion:
@@ -981,11 +981,10 @@ services, credentials and recovery.
 
 ## 12. Remaining commissioning
 
-Cloud voice needs tested audio devices, provider credentials, an owner-selected
-Fish voice, explicit provider/capture/playback grants, and funded provider
-accounts. See [voice setup](docs/engineering/runbooks/operator.md#4-credentials-and-voice).
-Systemd credential loading applies only to service operation; a foreground
-runtime needs credentials supplied through its documented environment mechanism.
+OpenAI Live voice needs tested audio devices, `OPENAI_API_KEY`, `NEARAI_API_KEY`,
+explicit provider/capture/playback grants, and funded provider accounts. See
+[Live audio setup](deploy/audio/README.md). Both foreground and deployed runtimes
+read the project `.env`; systemd supplies a private copy to deployed services.
 Never put keys in source, command arguments or shell history.
 
 Nav2 needs a real scan source, transforms, measured limits, surveyed map and

@@ -22,7 +22,7 @@ async def check():
             + json.dumps(str(root / "journal.db"))
             + "\nsocket="
             + json.dumps(str(endpoint))
-            + '\n[robot]\nid="orbo"\nflippers_qualified=false\nattention_pulse_us=[]\n[voice]\nenabled=false\n'
+            + '\n[robot]\nid="orbo"\nflippers_qualified=false\nattention_pulse_us=[]\n'
         )
         config.chmod(0o600)
         env = {

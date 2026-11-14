@@ -22,7 +22,7 @@ async def main():
             + json.dumps(str(root / "journal.db"))
             + "\nsocket="
             + json.dumps(str(endpoint))
-            + '\n[robot]\nid="orbo"\nsocket="/tmp/orbo-no-worker.sock"\nqualified=false\nallowed_actions=["hand_wave"]\n[voice]\nenabled=false\n'
+            + '\n[robot]\nid="orbo"\nsocket="/tmp/orbo-no-worker.sock"\nqualified=false\nallowed_actions=["hand_wave"]\n'
         )
         config.write_text(
             config.read_text().replace(

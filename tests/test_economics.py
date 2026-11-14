@@ -2,11 +2,11 @@ import httpx
 import pytest
 
 from orbo_runtime.contracts import Rejected
-from orbo_runtime.economics import Ledger, NearUsage, fish_period_expense
+from orbo_runtime.economics import Ledger, NearUsage
 from orbo_runtime.storage import Store
 
 
-def test_credit_stages_and_prepaid_costs_stay_separate():
+def test_credit_stages_and_openai_funding_stay_separate():
     s = Store(":memory:")
     ledger = Ledger(s)
     for kind, extra in [
@@ -24,10 +24,9 @@ def test_credit_stages_and_prepaid_costs_stay_separate():
     report = ledger.summary()
     assert len(report["groups"]) == 3
     assert report["cost_coverage"] == "not_established"
-    assert fish_period_expense("10", "8", ["5"])["amount"] == "7"
     with pytest.raises(Rejected):
         ledger.observe(
-            "fish",
+            "openai",
             "synthetic",
             "bad",
             "credit_received",
@@ -38,8 +37,6 @@ def test_credit_stages_and_prepaid_costs_stay_separate():
             },
             provenance="fixture",
         )
-    with pytest.raises(Rejected):
-        fish_period_expense("1", "2", [])
     s.close()
 
 

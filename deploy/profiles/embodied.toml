@@ -17,9 +17,6 @@ attention_pulse_us = []
 enabled = false # Enable with NEARAI_API_KEY after credential installation.
 model = "z-ai/glm-5.3-flash"
 
-[voice]
-enabled = false # Explicit alternate chained voice profile; use live below for GPT-Live.
-
 [embodied]
 enabled = true
 environment = "lab" # Must match the owner's registered environment.

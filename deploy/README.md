@@ -88,8 +88,8 @@ directory if necessary. The service loads the public pointer and systemd's
 private copy automatically; the robot profile contains no secrets.
 
 `near.enabled` enables verified reasoning. `live.enabled` additionally requires
-NEAR and embodied support, the alternate chained voice profile disabled, and a
-qualified audio path. The prerecorded-audio E2E runner opens its own Live session
+NEAR and embodied support and a qualified audio path. OpenAI Live is the only
+voice integration. The prerecorded-audio E2E runner opens its own Live session
 and can delegate to a runtime whose physical `live.enabled` remains false.
 
 Optional `[commons]` and `[reporting]` examples are commented in the profiles.

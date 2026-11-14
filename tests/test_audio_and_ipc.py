@@ -1,5 +1,4 @@
 import asyncio
-from types import SimpleNamespace as NS
 
 import pytest
 
@@ -75,56 +74,6 @@ async def test_interrupt_clears_queued_audio_and_refuses_obsolete_chunk():
     assert not playback.queue and playback.queued_bytes == 0
 
 
-async def test_stop_during_capture_never_transcribes(tmp_path, monkeypatch):
-    service = LocalService(
-        {
-            "runtime": {
-                "profile": "simulated",
-                "owner": "test",
-                "database": str(tmp_path / "state.db"),
-            },
-            "voice": {},
-        }
-    )
-    started = asyncio.Event()
-    submitted = []
-
-    async def record(self, stop_event, **kwargs):
-        started.set()
-        await stop_event.wait()
-        return b"fake-wav"
-
-    from orbo_runtime.audio import Capture
-
-    monkeypatch.setattr(Capture, "record", record)
-
-    class Voice:
-        generation = 0
-        playback = NS()
-
-        async def interrupt(self):
-            self.generation += 1
-
-        async def utterance(self, *args):
-            submitted.append(args)
-
-    service.voice = Voice()
-    episode = service.store.episode("test", provenance="synthetic")
-    service.store.grant(
-        "test", "audio.capture", "local", True, service.store.clock.utc() + 30
-    )
-    work = asyncio.create_task(
-        service.call({"method": "voice.capture", "args": {"episode_id": episode}})
-    )
-    await started.wait()
-    await service.call({"method": "stop"})
-    with pytest.raises((asyncio.CancelledError, Rejected)):
-        await work
-    assert not submitted
-    assert service.capture_task is None
-    service.store.close()
-
-
 async def test_text_reasoning_without_voice_still_requires_grant(tmp_path, monkeypatch):
     from orbo_runtime import providers
     from orbo_runtime.providers import VerifiedReply
@@ -150,8 +99,10 @@ async def test_text_reasoning_without_voice_still_requires_grant(tmp_path, monke
         pytest.fail("Text-only reasoning initialized a voice provider")
 
     monkeypatch.setattr(providers, "NearReasoner", Reasoner)
-    monkeypatch.setattr(providers, "FishSynthesizer", unexpected_audio)
-    monkeypatch.setattr(providers, "NearTranscriber", unexpected_audio)
+    from orbo_runtime import live_voice
+
+    monkeypatch.setattr(live_voice, "LiveWebSocket", unexpected_audio)
+    monkeypatch.setattr(live_voice, "DuplexAudio", unexpected_audio)
     service = LocalService(
         {
             "runtime": {
@@ -160,11 +111,11 @@ async def test_text_reasoning_without_voice_still_requires_grant(tmp_path, monke
                 "database": str(tmp_path / "state.db"),
             },
             "near": {"enabled": True, "model": "z-ai/glm-5.3-flash"},
-            "voice": {"enabled": False},
+            "live": {"enabled": False},
         }
     )
     try:
-        assert service.voice is None
+        assert service.embodied is None
         episode = service.store.episode("test", provenance="synthetic")
         request = {
             "method": "conversation.text",
@@ -193,14 +144,18 @@ async def test_text_reasoning_without_voice_still_requires_grant(tmp_path, monke
     assert service.reasoner.closed
 
 
-def test_voice_requires_reasoning_before_opening_database(tmp_path):
+@pytest.mark.parametrize("near,embodied", [(False, False), (False, True), (True, False)])
+def test_live_requires_reasoning_and_embodied_before_opening_database(
+    tmp_path, near, embodied
+):
     database = tmp_path / "state.db"
-    with pytest.raises(Rejected, match="voice requires near.enabled"):
+    with pytest.raises(Rejected, match="Live requires embodied and NEAR enabled"):
         LocalService(
             {
                 "runtime": {"owner": "test", "database": str(database)},
-                "near": {"enabled": False},
-                "voice": {"enabled": True},
+                "near": {"enabled": near},
+                "embodied": {"enabled": embodied},
+                "live": {"enabled": True},
             }
         )
     assert not database.exists()

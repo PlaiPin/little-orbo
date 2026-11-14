@@ -521,3 +521,51 @@ async def test_task_export_carries_voice_delivery_with_explicit_audio_attributio
     assert frames[0]["acoustic_audibility_verified"] is False
     assert "no_audio_to_task" in frames[0]["gap"]
     assert exported["package"]["episode"]["provenance"] == "synthetic"
+
+
+async def test_runtime_live_start_requires_grants_before_transport_or_devices(
+    service, monkeypatch
+):
+    from orbo_runtime import live_voice
+
+    local, _ = service
+    local.config['live'] = {'enabled': True, 'aec_qualified': True}
+
+    async def unexpected_connect(self):
+        pytest.fail('Live connected before owner voice permission')
+
+    def unexpected_audio(self):
+        pytest.fail('Live opened audio before owner voice permission')
+
+    monkeypatch.setattr(live_voice.LiveWebSocket, 'connect', unexpected_connect)
+    monkeypatch.setattr(live_voice.DuplexAudio, 'start', unexpected_audio)
+    result = await local.call({'method': 'live.start'})
+    await local.embodied.live_job
+    assert result['state'] == 'starting'
+    assert isinstance(local.embodied.live, live_voice.LiveBridge)
+    assert local.embodied.live.config.model == 'gpt-live-1'
+    status = await local.call({'method': 'live.status'})
+    assert status['running'] is False
+    assert status['error'] == 'Rejected'
+
+
+async def test_stop_interrupts_live_speech_and_stops_robot(service, monkeypatch):
+    local, _ = service
+    interrupted = []
+    stops = []
+    controlled_stop = local.broker.adapter.controlled_stop
+
+    async def observe_stop(reason):
+        stops.append(reason)
+        await controlled_stop(reason)
+
+    monkeypatch.setattr(local.broker.adapter, 'controlled_stop', observe_stop)
+    local.embodied.live = SimpleNamespace(
+        interrupt_speech=lambda: interrupted.append(True)
+    )
+    try:
+        await local.call({'method': 'stop'})
+        assert interrupted == [True]
+        assert stops == ['conversation interrupted']
+    finally:
+        local.embodied.live = None

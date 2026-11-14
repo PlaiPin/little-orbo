@@ -36,7 +36,7 @@ Both socket and persistent database directories must be private and owner-contro
 
 ## Connect the Pi runtime
 
-Copy `deploy/profiles/booster-k1.toml` to a separate runtime configuration. Keep the Orbo and K1 runtime databases and socket paths distinct. The same NEAR/Fish credential and permission paths apply when voice is enabled.
+Copy `deploy/profiles/booster-k1.toml` to a separate runtime configuration. Keep the Orbo and K1 runtime databases and socket paths distinct. The K1 profile supports verified NEAR text reasoning. OpenAI Live voice requires an explicitly configured embodied runtime as described in [deployment](../../deploy/README.md); the base K1 profile does not enable voice.
 
 On the K1, an authorized SSH connection can forward the worker socket to the Pi service user:
 

@@ -88,7 +88,7 @@ async def test_runtime_launch_handles_ros_arguments_and_owner_ipc(tmp_path, shor
         '[runtime]\nowner="test"\nprofile="orbo"\n'
         f'database={json.dumps(str(tmp_path / "journal.db"))}\n'
         f'socket={json.dumps(str(endpoint))}\n'
-        '[robot]\nid="orbo"\n[near]\nenabled=false\n[voice]\nenabled=false\n'
+        '[robot]\nid="orbo"\n[near]\nenabled=false\n'
     )
     with (tmp_path / "runtime.log").open("w") as log:
         process = subprocess.Popen(

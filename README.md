@@ -364,13 +364,13 @@ The demo makes no network or hardware calls. It labels simulated action/playback
 
 | Location | Responsibility |
 |---|---|
-| `ros_ws/src/orbo_runtime` | SQLite journal, reminders/preferences, broker, conversation/tools, NEAR/Fish/audio, ROS adapter, exports and owner CLI |
+| `ros_ws/src/orbo_runtime` | SQLite journal, reminders/preferences, broker, conversation/tools, NEAR reasoning, OpenAI Live voice and local audio, ROS adapter, exports and owner CLI |
 | `firmware/orbo` | Production micro-ROS application, local command expiry, XL430 feedback/watchdogs and calibrated PWM |
 | `ros_ws/src` | Bounded shared embedded interfaces and Pi ROS packages |
 | `artifacts/test-evidence` | Ignored local captures; not part of the source distribution |
 | `docs/engineering` | Architecture contracts, status and operator instructions |
 
-Credentials load from systemd's credential directory or injected `NEARAI_API_KEY` / `FISH_API_KEY` environment variables. Never commit keys. Fish is owner-prepaid; the runtime contains no purchase operation. Cloud processing, local execution, speech and contribution permissions are distinct and default to absent.
+Credentials load automatically from the Git-ignored project `.env`; copy the blank [.env.example](.env.example) to initialize it. OpenAI Live is the only voice integration and uses `OPENAI_API_KEY`; NEAR reasoning and vision use `NEARAI_API_KEY`. Deployed services read `/opt/orbo/.env` through systemd. Cloud processing, local execution, speech and contribution permissions are distinct and default to absent.
 
 Firmware boots disarmed. Generic Kconfig defaults disable wheel and flipper commissioning; the checked-in `sdkconfig` selects the wheel-enabled lifted-base bench profile described above. Flipper pins and pulse limits remain unset and flippers stay disabled. Ground driving and navigation still require physical qualification. The runtime includes clients for a separate Booster K1 worker and Commons service;
 those services and their deployment assets are not installed by the Python or
@@ -383,16 +383,17 @@ is documented in the [control runbook](docs/engineering/runbooks/ros-control-mac
 
 ## Private cloud validation
 
-The installed runtime can create private local templates and perform network-free
-preflight without any deployment wrapper:
+Initialize credentials without overwriting existing values, then prepare the
+[E2E configuration and recorded inputs](deploy/live-e2e/README.md):
 
 ```bash
-uv run --locked --all-extras python -m orbo_runtime.live_validation init
-# Fill the ignored .live-validation/credentials.env privately, then:
-uv run --locked --all-extras python -m orbo_runtime.live_validation check
+uv run --frozen orbo credentials init
+uv run --frozen orbo credentials status
+uv run --frozen --extra near --extra live orbo live-e2e preflight --config .live-validation/e2e/config.json
 ```
 
-The default directory is gitignored `.live-validation/`. Preflight reports missing
-configuration without making provider calls. Live execution is a separate
-explicit `run --execute` operation and may consume credit; it is not part of the
-runtime or ROS test commands. Keep credentials and generated reports local.
+Edit only the project `.env` for real keys. Preflight makes no provider calls.
+The Live E2E runner tests OpenAI Live with NEAR delegation; live execution requires
+explicit flags for cloud calls, tasks and exports as applicable. Reports stay
+under ignored `.live-validation/`. For physical microphone/speaker commissioning,
+follow the [Live audio guide](deploy/audio/README.md).

@@ -132,7 +132,7 @@ The shipped integration does **not** save images, send them to NEAR, add them to
 
 ## WaveShare microphone and speaker
 
-The runtime already uses PortAudio/ALSA with separately selectable input/output devices, 16 kHz mono WAV capture, 24 kHz mono PCM speech, bounded buffers and interruption. Audio is separate from ROS image/motion traffic. No raw microphone ROS topic is broadcast. The new local check executable needs no NEAR/Fish keys and does not save or upload audio:
+The runtime already uses PortAudio/ALSA with separately selectable input/output devices, 16 kHz mono WAV capture, 24 kHz mono PCM speech, bounded buffers and interruption. Audio is separate from ROS image/motion traffic. No raw microphone ROS topic is broadcast. The new local check executable needs no provider keys and does not save or upload audio:
 
 ```sh
 sudo -u orbo /opt/orbo/deploy/run-ros.sh run orbo_runtime audio_check list
@@ -148,10 +148,10 @@ sudo -u orbo /opt/orbo/deploy/run-ros.sh run orbo_runtime audio_check record \
 
 `check` tests sample-format support without capturing/playing. `tone` plays a low-amplitude 440 Hz tone; start with low hardware/mixer volume. `record` captures transiently and reports sample count, RMS/peak dBFS and clipping, then discards the bytes. Neither claims the speaker was heard or a person understood speech. Resolve ambiguous names and validate after unplug/replug; card indices can change. If direct hardware access does not support 16/24 kHz, qualify an ALSA `plug` device for sample conversion and select that named endpoint explicitly.
 
-Put the actual unique names in `[voice].input_device` and `[voice].output_device`; keep `sample_rate = 24000`. Full cloud voice additionally requires `[near].enabled = true`, `[voice].enabled = true`, the separate credentials and grants in `operator.md`, and an owner-selected Fish voice. Do local audio checks first. Half-duplex capture interrupts playback and waits for its echo tail. This board is not assumed to provide acoustic echo cancellation; keep `aec_qualified = false` until an actual AEC input is tested. Keep the speaker physically separated from the onboard mic and qualify clipping/feedback/interruption at the intended volume.
+Put the actual unique names in `[live].input_device` and `[live].output_device`; keep `sample_rate = 24000`. OpenAI Live requires the embodied profile, NEAR delegation, provider credentials and explicit grants. Follow the [Live audio guide](../../../deploy/audio/README.md) for simultaneous input/output checks. This board is not assumed to provide acoustic echo cancellation; keep `aec_qualified = false` until the actual audio path is qualified. Test clipping, feedback and interruption at the intended volume.
 
 ## Verification and acceptance
 
 Host tests cover deadman/combined wheel bounds, invalid/stale inputs, stopped-epoch fencing, camera configuration/freshness/intrinsics and audio-level reporting. The ARM64 lane uses real ROS Joy/TwistStamped/ControlSession and Image/CameraInfo/DiagnosticArray traffic with synthetic inputs; it tests wrong-source lease refusal, deadman release, input loss and camera stream loss. A real pseudo-terminal drives the keyboard node to check motion-key expiry and clean exit. Installed drivers and launch configuration are checked without a physical sensor. Logs are under `artifacts/test-evidence/`.
 
-Remaining hardware checks: OV5647 enumeration/optics/fps/mount/intrinsics/unplug behavior; WaveShare mic/speaker levels/echo/device reconnection; actual keyboard/gamepad mapping and measured motion/stop/deadman/network-loss behavior. Re-run `tools/measure-voice.py` with camera, ROS control and logging active. Live provider/Commons checks remain a separate lane in `../pending-validation.md`.
+Remaining hardware checks: OV5647 enumeration/optics/fps/mount/intrinsics/unplug behavior; WaveShare mic/speaker levels/echo/device reconnection; actual keyboard/gamepad mapping and measured motion/stop/deadman/network-loss behavior. Repeat the Live audio checks with camera, ROS control and logging active. Live provider/Commons checks remain a separate lane in `../pending-validation.md`.

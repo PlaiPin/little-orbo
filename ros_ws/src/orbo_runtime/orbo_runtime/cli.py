@@ -79,20 +79,13 @@ async def demo(database):
 
 class LocalService:
     def __init__(self, config):
-        voice_enabled = config.get("voice", {}).get("enabled", False)
-        # Preserve older voice-only configurations; new profiles are explicit.
-        reasoning_enabled = config.get("near", {}).get("enabled", voice_enabled)
+        reasoning_enabled = config.get("near", {}).get("enabled", False)
         live_enabled = config.get("live", {}).get("enabled", False)
         if live_enabled and (
-            voice_enabled
-            or not reasoning_enabled
+            not reasoning_enabled
             or not config.get("embodied", {}).get("enabled", False)
         ):
-            raise Rejected(
-                "Live requires embodied/NEAR enabled and alternate voice disabled"
-            )
-        if voice_enabled and not reasoning_enabled:
-            raise Rejected("voice requires near.enabled")
+            raise Rejected("Live requires embodied and NEAR enabled")
         self.config = config
         self.owner = config["runtime"]["owner"]
         self.store = Store(config["runtime"]["database"])
@@ -118,27 +111,11 @@ class LocalService:
             raise Rejected("unsupported runtime profile")
         self.broker = Broker(self.store, adapter)
         self.reasoner = UnconfiguredReasoner()
-        self.voice = None
         if reasoning_enabled:
             from .providers import NearReasoner
 
             self.reasoner = NearReasoner(model=config["near"]["model"])
         self.coordinator = Coordinator(self.store, self.broker, self.reasoner)
-        if voice_enabled:
-            from .audio import Playback, Voice
-            from .providers import FishSynthesizer, NearTranscriber
-
-            synthesizer = FishSynthesizer(
-                model=config["fish"]["model"],
-                voice=config["fish"]["voice"],
-                sample_rate=config["voice"]["sample_rate"],
-            )
-            transcriber = NearTranscriber(model=config["near"]["transcription_model"])
-            playback = Playback(
-                device=config["voice"].get("output_device"),
-                sample_rate=config["voice"]["sample_rate"],
-            )
-            self.voice = Voice(self.coordinator, transcriber, synthesizer, playback)
         self.exports = Exports(self.store)
         from .economics import Ledger
 
@@ -151,8 +128,6 @@ class LocalService:
                 self.store, ContributorIPC(config["commons"]["socket"])
             )
         self.jobs = set()
-        self.capture_stop = None
-        self.capture_task = None
         self.embodied = None
         if config.get("embodied", {}).get("enabled", False):
             from .embodied_service import EmbodiedService
@@ -163,14 +138,9 @@ class LocalService:
         if self.embodied:
             for task_id in tuple(self.embodied.assistant.jobs):
                 await self.embodied.assistant.pause(self.owner, task_id)
-        if self.capture_stop:
-            self.capture_stop.set()
-        if self.capture_task and self.capture_task is not asyncio.current_task():
-            self.capture_task.cancel()
-        if self.voice:
-            await self.voice.interrupt()
-        else:
-            await self.coordinator.interrupt()
+        if self.embodied and self.embodied.live:
+            self.embodied.live.interrupt_speech()
+        await self.coordinator.interrupt()
 
     async def call(self, request):
         method = request.get("method")
@@ -210,8 +180,6 @@ class LocalService:
                 args["key"],
                 due=args.get("due_utc") if method == "reminder.defer" else None,
             )
-            if self.voice:
-                await self.voice.interrupt()
             if row["command_id"]:
                 await self.broker.cancel(self.owner, row["command_id"])
             return result
@@ -223,83 +191,6 @@ class LocalService:
                     (self.owner,),
                 )
             ]
-        if method == "reminder.acknowledge":
-            if self.voice is None:
-                raise Rejected("voice must be configured before delivering a reminder")
-            self.store.permission(self.owner, "cloud.speech", "fish")
-            self.store.permission(self.owner, "speech.play", "local")
-            text, generation = self.coordinator.reminders.acknowledge(
-                self.owner, args["reminder_id"], args["ack_token"]
-            )
-            try:
-
-                async def checked_chunks():
-                    async for chunk in self.voice.synthesizer.synthesize(text):
-                        current = self.coordinator.reminders.get(
-                            self.owner, args["reminder_id"]
-                        )
-                        if (
-                            current["generation"] != generation
-                            or current["state"] != "delivering"
-                        ):
-                            raise Rejected("obsolete reminder speech")
-                        self.store.permission(self.owner, "cloud.speech", "fish")
-                        self.store.permission(self.owner, "speech.play", "local")
-                        yield chunk
-
-                playback = await self.voice.playback.play(checked_chunks())
-                self.coordinator.reminders.playback_result(
-                    self.owner,
-                    args["reminder_id"],
-                    generation,
-                    True,
-                    playback["frames"],
-                )
-                return playback
-            except BaseException:
-                with contextlib.suppress(Rejected):
-                    self.coordinator.reminders.playback_result(
-                        self.owner,
-                        args["reminder_id"],
-                        generation,
-                        False,
-                        self.voice.playback.played_frames,
-                    )
-                raise
-        if method == "voice.capture":
-            if self.voice is None or self.capture_stop is not None:
-                raise Rejected("voice unavailable or capture active")
-            from .audio import Capture
-
-            self.store.require_episode(args["episode_id"], self.owner)
-            self.store.permission(self.owner, "audio.capture", "local")
-            self.capture_stop = asyncio.Event()
-            self.capture_task = asyncio.current_task()
-            generation = self.voice.generation
-            try:
-                capture = Capture(
-                    self.voice.playback,
-                    device=self.config["voice"].get("input_device"),
-                    aec_qualified=self.config["voice"].get("aec_qualified", False),
-                )
-                wav = await capture.record(
-                    self.capture_stop,
-                    max_seconds=args.get("max_seconds", 30),
-                    guard=lambda: self.store.permission(
-                        self.owner, "audio.capture", "local"
-                    ),
-                )
-                if generation != self.voice.generation:
-                    raise Rejected("capture cancelled before transcription")
-                self.store.permission(self.owner, "audio.capture", "local")
-                return await self.voice.utterance(self.owner, args["episode_id"], wav)
-            finally:
-                self.capture_stop = None
-                self.capture_task = None
-        if method == "voice.capture.stop":
-            if self.capture_stop:
-                self.capture_stop.set()
-            return {"capture_end_requested": True}
         if method == "permission.set":
             self.store.grant(
                 self.owner,
@@ -314,13 +205,9 @@ class LocalService:
                     if self.embodied.live:
                         await self.embodied.live.close()
                     # A speech permission change does not revoke the durable task.
-                    if self.voice:
-                        await self.voice.interrupt()
                 elif scope in {
                     "audio.capture",
-                    "cloud.transcription",
                     "cloud.reasoning",
-                    "cloud.speech",
                     "speech.play",
                     "robot.command",
                     "task.execute",
@@ -637,8 +524,6 @@ class LocalService:
                 None, "shutdown.stop_unconfirmed", {"error_class": type(error).__name__}
             )
         resources = [self.reasoner, self.broker.adapter]
-        if self.voice:
-            resources[:0] = [self.voice.transcriber, self.voice.synthesizer]
         try:
             for resource in resources:
                 if hasattr(resource, "close"):

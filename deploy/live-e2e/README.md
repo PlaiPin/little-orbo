@@ -1,6 +1,6 @@
 # Live end-to-end checks
 
-This runner exercises real provider transports using production adapters. It is separate from the older NEAR/Fish smoke runner. It never supplies simulated provider responses. No stage runs implicitly: `preflight` is network-free and `run` requires explicit flags for selected effects. Runtime grants remain authoritative; the runner never grants itself robot or export permissions.
+This runner exercises real provider transports using production adapters. OpenAI Live is the only voice provider; NEAR handles delegated reasoning and vision. It never supplies simulated provider responses. No stage runs implicitly: `preflight` is network-free and `run` requires explicit flags for selected effects. Runtime grants remain authoritative; the runner never grants itself robot or export permissions.
 
 Install `uv sync --frozen --extra near --extra live`. Copy [config.json.example](config.json.example) into `.live-validation/e2e/config.json` and put an explicitly selected PNG and recorded request WAV beside it. Paths in the configuration resolve relative to that file. The PNG must be 16–1920 by 16–1080 pixels and at most 2 MB. Audio must be 0.1–20 seconds of mono PCM16 at 24 kHz. Record a request that needs delegation, for example “Please ask the application to describe its capabilities.” Actual model delegation is tested, not forced or fabricated.
 

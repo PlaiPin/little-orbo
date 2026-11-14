@@ -19,7 +19,6 @@ KINDS = {
     "award",
     "credit_received",
     "credit_applied",
-    "fish_balance",
     "owner_topup",
     "adjustment",
     "accounting_snapshot",
@@ -44,7 +43,7 @@ class Ledger:
 
     def observe(self, provider, account, external_id, kind, body, *, provenance):
         if (
-            provider not in {"near", "fish", "commons", "openai"}
+            provider not in {"near", "commons", "openai"}
             or kind not in KINDS
             or provenance not in {"live_service", "fixture", "owner_assertion"}
         ):
@@ -59,14 +58,13 @@ class Ledger:
                 "USD",
                 "nano_USD",
                 "near_restricted_credit",
-                "fish_api_credit",
             }:
                 raise Rejected("explicit instrument required")
             if (
-                provider in {"fish", "openai"}
+                provider == "openai"
                 and body["instrument"] == "near_restricted_credit"
             ):
-                raise Rejected("NEAR restricted credit cannot fund Fish or OpenAI")
+                raise Rejected("NEAR restricted credit cannot fund OpenAI")
         if kind == "credit_applied" and not body.get("usage_reference"):
             raise Rejected("applied credit requires actual usage correlation")
         if kind == "credit_received" and not body.get("receipt_reference"):
@@ -118,7 +116,7 @@ class Ledger:
                 },
             )
             group["records"] += 1
-            if row["kind"] in {"fish_balance", "accounting_snapshot"}:
+            if row["kind"] == "accounting_snapshot":
                 group["aggregation"] = "snapshot_not_additive"
                 # Balance samples are not expenses; timestamps may be absent.
                 stamp = data.get("observed_utc")
@@ -139,29 +137,12 @@ class Ledger:
             )
         return {
             "groups": list(groups.values()),
-            "fish_funding": "owner_prepaid",
             "openai_funding": "separate_owner_account",
             "automatic_purchases": False,
             "cost_coverage": "not_established",
             "award_is_received_credit": False,
             "received_is_applied_credit": False,
         }
-
-
-def fish_period_expense(opening, closing, verified_topups):
-    values = [amount(value) for value in [opening, closing, *verified_topups]]
-    if any(v < 0 for v in values):
-        raise Rejected("negative balance/topup")
-    consumed = values[0] + sum(values[2:], Decimal(0)) - values[1]
-    if consumed < 0:
-        raise Rejected("unexplained balance increase requires reconciliation")
-    return {
-        "amount": str(consumed),
-        "instrument": "fish_api_credit",
-        "allocation_basis": "period_balance_difference",
-        "per_request_cost": None,
-        "funding": "owner_prepaid",
-    }
 
 
 class NearUsage:
