@@ -23,7 +23,7 @@ ESP32 encoder positions -> hardware state interfaces
 increments, not requested speed. The plugin subtracts the initial encoder
 positions so counts accumulated before launching ROS do not become a startup
 pose jump. Controller updates and odometry run at 50 Hz; the hardware command
-stream runs at 20 Hz to avoid outpacing the firmware's reliable input loop.
+stream is capped at 20 Hz to avoid outpacing the firmware's reliable input loop.
 
 The checked-in `bench-cad.yaml` uses nominal CAD geometry: 33 mm wheel radius,
 101.8 mm wheel-center separation, and the firmware's 1.2 rad/s wheel limit.
@@ -48,6 +48,39 @@ Pixi also installs the local Python runtime and its console commands; no manual
 `PYTHONPATH` export is needed. To include navigation and run the separate
 peripheral/launch checks, use `ros-build-workspace` and `ros-test-integrations`;
 see the [workspace guide](../../../ros_ws/README.md).
+
+## Mac transport and timing
+
+Pixi runs ARM64 ROS 2 directly on macOS; it does not need Docker or a Linux VM.
+The Mac environment selects `FASTDDS_BUILTIN_TRANSPORTS=UDPv4` and
+`ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET`. Start fresh Pixi shells and restart ROS
+processes/agent after updating this configuration. Existing processes retain
+their old environment. Keep the robot on domain 42 and synthetic tests on their
+separate test domain.
+
+A native stack sample caught Fast DDS 2.14 shared-memory recovery blocked on an
+interprocess mutex. UDP avoids that path without changing topic reliability.
+Do not override discovery to `LOCALHOST` for these timing tests: Jazzy's
+[Fast DDS participant setup](https://github.com/ros2/rmw_fastrtps/blob/jazzy/rmw_fastrtps_shared_cpp/src/participant.cpp)
+explicitly adds shared-memory transport in that mode, bypassing the built-in
+transport selection. `SUBNET` allows LAN discovery, including the future Pi.
+
+The hardware plugin now services incoming callbacks continuously instead of
+allowing a 2 ms callback budget followed by a 50 ms sleep. Fresh authorization
+triggers dispatch with a 20 Hz cap; a short timer releases pending input when the
+cap allows. Each original source timestamp is forwarded
+once, so resending an aging command cannot consume the next send slot ahead of
+fresh input. The keyboard/base helper keeps one executor
+attached rather than adding and removing its node on every callback. The 150 ms
+feedback guard, 100 ms controller-write guard, 200 ms source expiry, and original
+command timestamps are unchanged. No automatic rearm was added.
+
+The synthetic firmware runs in a separate process so host callback work cannot
+hold up its expiry checks through Python's shared interpreter lock. Test cleanup
+terminates the whole process group even if its launcher has exited; earlier
+Linux qualification runs had left 17 controller processes running in Docker.
+A heavily loaded or memory-starved desktop can still miss these deadlines; a
+watchdog stop in that situation must not be treated as a reason to extend them.
 
 ## Run
 
@@ -133,6 +166,8 @@ then run:
 ```bash
 pixi run --locked ros-build-control
 pixi run --locked ros-test-control
+# Five consecutive full 30-second runs, with a fresh stack for each (domain 97):
+pixi run --locked ros-test-control-repeat
 ```
 
 The suite runs the real controller manager, drive controller, velocity gate and
@@ -147,15 +182,23 @@ Orbo hardware plugin with synthetic firmware messages. It covers:
   does not resume merely because messages return.
 - Real plugin deactivation on stale feedback, plus 13 helper/model checks.
 
-An earlier Mac run passed all 7 ROS integration cases and all 13 helper/model
-tests, including the full 30-second synthetic drive. During the runtime packaging
-update, a repeated run stopped on the hardware feedback-freshness guard while
-the other 6 ROS cases and 13 helper/model checks passed. The clean-source build also
-stopped before completing 30 seconds; its 3 installed-launch checks and remaining
-6 ROS control cases passed. The cause of the sustained-control timing failure is
-unresolved. A previous pass is not a guarantee of sustained physical operation.
-Watchdog limits have not been relaxed. The separate launch/peripheral integration
-suite passed all 8 checks.
+After the host timing fixes and shutdown of the leftover Docker qualification
+workload/VM, `ros-test-control-repeat` passed **five consecutive 30-second runs**
+with a freshly launched stack each time (165.75 seconds total test time). Each run
+sent 562–566 wheel commands with strictly increasing source timestamps. Across
+those runs, the largest received-command age was 102 ms (200 ms validity), and
+the largest armed feedback interval was 77.9 ms (150 ms freshness guard).
+The subsequent `ros-test-control` run passed all 8 integration/cleanup cases
+(including another full 30-second drive) and all 13 helper/model checks.
+`ros-test-integrations` also passed all 16 installed-launch, peripheral, navigation
+adapter, and runtime-packaging checks.
+
+The loaded-desktop runs before that cleanup still failed correctly: one publisher
+paused for 160 ms, and another run logged a 190 ms controller cycle. Four isolated
+passes followed by a failure were not counted as a successful repeat batch.
+These results establish software behavior on the tested Mac workload, not hard
+real-time guarantees under arbitrary memory pressure. Watchdog limits have not
+been relaxed. Logs and captures remain in temporary test directories.
 
 A startup race found by these tests was fixed: the bench launch loads both
 controllers inactive, and the bench owner activates them together. It waits for
@@ -163,7 +206,7 @@ fresh joint states and odometry before arming. Long keyboard sessions keep only
 the latest two minutes of odometry in memory and reject missing/non-finite states.
 
 These checks do not simulate USB electrical behavior, motor power, motor-bus
-integrity, or physical stopping distance. The 20 Hz transport change still needs
+integrity, or physical stopping distance. The revised host dispatch/transport still needs
 the battery-powered 30-second drive and keyboard rerun. Captures and test logs
 stay local, outside committed source files.
 

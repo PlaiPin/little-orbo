@@ -266,18 +266,29 @@ The native Pixi environment now includes the controller manager, differential-dr
 controller and joint-state broadcaster. See the [Mac control-stack runbook](docs/engineering/runbooks/ros-control-macos.md)
 for the build, agent, controller, keyboard and live-RViz commands. This path uses
 measured wheel positions for odometry and nominal CAD dimensions for a lifted bench.
-The 30-second physical test of this new path is still pending; initial runs expired,
-and the battery is charging before the revised command-rate test. Software-only
-validation can continue with `pixi run --locked ros-test-control` in isolated domain 96.
+The 30-second physical test of this new path is still pending battery charging.
+The host timing fix passed five consecutive software-only 30-second runs with
+unchanged watchdog limits. Pixi runs natively on macOS; Docker is not required.
+After updating, restart existing Pixi shells, the agent, and ROS processes to pick
+up the UDP transport configuration. Run from the repository root:
+
+```bash
+pixi run --locked ros-test-control         # Full control/fault suite, domain 96
+pixi run --locked ros-test-control-repeat  # Five fresh 30-second runs, domain 97
+```
+
+Neither command opens USB or needs the battery. The [control runbook](docs/engineering/runbooks/ros-control-macos.md#mac-transport-and-timing)
+explains the callback/dispatch fixes, Docker test-process cleanup, and Mac load
+limits. Physical driving still needs the raised-wheel rerun after charging.
 
 The live description and preview now use the complete **v9 assembly**, including
 the v8 chassis, flippers and shells plus the v9 display mount. Use the runbook's
 internal preview to inspect beneath the shells. Flippers are fixed CAD references;
 their physical PWM configuration remains unresolved.
 
-Next: finish the sustained encoder-odometry and fault/recovery tests on the Mac,
-measure the physical geometry and ground odometry, then deploy the same controller
-stack on the Pi. Sensor integration, localization and Nav2 follow that validation.
+Next: repeat the sustained encoder-odometry and fault/recovery tests with the
+charged battery, measure physical geometry and ground odometry, then deploy the
+same controller stack on the Pi. Sensor integration, localization and Nav2 follow that validation.
 
 ### Runtime and ROS source
 

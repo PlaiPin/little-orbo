@@ -37,12 +37,19 @@ without a `PYTHONPATH` workaround.
 keyboard expiry, application teleop, the Nav2 action adapter and runtime packaging.
 `ros-test-control` exercises measured odometry and control-session loss, including
 a 30-second synthetic drive. Both use domain 96 and require no battery or agent.
-Neither establishes physical navigation or peripheral acceptance. The latest
-integration checks passed, but the repeated 30-second control test stopped
-early in both the existing and clean-source installations. See the
-[control runbook](../docs/engineering/runbooks/ros-control-macos.md#work-without-the-battery)
-for this unresolved timing limitation; `ros-test-control` is not currently a
-consistently passing sustained-drive check.
+Neither establishes physical navigation or peripheral acceptance.
+`pixi run --locked ros-test-control-repeat` runs five fresh 30-second stacks in
+domain 97. The final repeat batch passed all five after the callback/dispatch
+fixes, UDP transport configuration, and removal of a leftover Docker qualification
+workload. Watchdog limits remain unchanged; battery-powered verification is still
+pending. See the [control runbook](../docs/engineering/runbooks/ros-control-macos.md#work-without-the-battery)
+for results and limitations.
+
+Pixi runs natively on the Mac and does not require Docker. Its activation selects
+UDPv4 and `SUBNET` discovery; restart existing Pixi shells/ROS processes after
+updating. Jazzy `LOCALHOST` discovery re-enables shared memory and bypasses that
+UDP-only choice. Test cleanup now also kills orphaned controller children when a
+launcher has already exited.
 
 For manual ROS inspection:
 
