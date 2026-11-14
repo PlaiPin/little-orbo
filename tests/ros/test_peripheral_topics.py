@@ -4,12 +4,13 @@ import asyncio
 import os
 import signal
 import subprocess
-import sys
 import threading
 import time
 from types import SimpleNamespace as NS
 
 import pytest
+
+from process_cleanup import stop_process_group
 import yaml
 
 from orbo_runtime.contracts import Action, Rejected, identity
@@ -33,24 +34,18 @@ async def wait_for(predicate, timeout=8):
 def process(module, log, *args):
     return subprocess.Popen(
         [
-            sys.executable,
-            "-c",
-            f"from orbo_runtime.{module} import main; main()",
+            "ros2", "run", "orbo_runtime",
+            {"camera": "camera_monitor"}.get(module, module),
             *args,
         ],
         stdout=log,
         stderr=subprocess.STDOUT,
+        start_new_session=True,
     )
 
 
 def terminate(proc):
-    proc.send_signal(signal.SIGINT)
-    try:
-        proc.wait(timeout=5)
-    except subprocess.TimeoutExpired:
-        proc.kill()
-        proc.wait()
-
+    stop_process_group(proc)
 
 @pytest.mark.parametrize("input_kind", ["keyboard", "gamepad"])
 async def test_teleop_real_topics_gate_deadman_and_input_loss(tmp_path, input_kind):
@@ -336,13 +331,12 @@ async def test_keyboard_terminal_key_expiry_without_motion_authority(tmp_path):
     with (tmp_path / "keyboard.log").open("w") as log:
         keyboard = subprocess.Popen(
             [
-                sys.executable,
-                "-c",
-                "from orbo_runtime.teleop_keyboard import main; main()",
+                "ros2", "run", "orbo_runtime", "teleop_keyboard",
             ],
             stdin=slave,
             stdout=log,
             stderr=subprocess.STDOUT,
+            start_new_session=True,
         )
         try:
             await wait_for(lambda: received and list(received[-1].buttons) == [0])

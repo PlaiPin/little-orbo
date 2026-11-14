@@ -10,6 +10,7 @@
   <exec_depend>nav2_bringup</exec_depend>
   <exec_depend>nav2_msgs</exec_depend>
   <exec_depend>orbo_bringup</exec_depend>
+  <exec_depend>orbo_runtime</exec_depend>
   <exec_depend>launch</exec_depend>
   <exec_depend>ament_index_python</exec_depend>
   <exec_depend>python3-yaml</exec_depend>

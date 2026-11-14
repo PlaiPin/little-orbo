@@ -28,10 +28,10 @@ orbo-camera-monitor = "orbo_runtime.camera:main"
 orbo-velocity-gate = "orbo_runtime.velocity_gate:main"
 
 [tool.hatch.build.targets.sdist]
-include = ["packages/orbo_runtime", "pyproject.toml", "uv.lock", "README.md"]
+include = ["ros_ws/src/orbo_runtime", "packages/orbo_runtime/README.md", "pyproject.toml", "uv.lock", "README.md"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["packages/orbo_runtime"]
+packages = ["ros_ws/src/orbo_runtime/orbo_runtime"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

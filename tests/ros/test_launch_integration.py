@@ -228,7 +228,8 @@ def test_joy_requires_explicit_device_and_supported_driver(name, driver):
 def test_teleop_launch_owns_one_gate(source, tmp_path):
     import yaml
     from ament_index_python.packages import get_package_share_directory
-    from launch.actions import ExecuteProcess, IncludeLaunchDescription
+    from launch.actions import IncludeLaunchDescription
+    from launch_ros.actions import Node
 
     profile = yaml.safe_load(
         (
@@ -249,7 +250,10 @@ def test_teleop_launch_owns_one_gate(source, tmp_path):
             driver="game_controller_node",
         )
     )
-    assert sum(isinstance(a, ExecuteProcess) for a in actions) == 1
+    gates = [a for a in actions if isinstance(a, Node)]
+    assert len(gates) == 1
+    assert gates[0].node_package == "orbo_runtime"
+    assert gates[0].node_executable == "velocity_gate"
     if source == "joystick":
         assert len(actions) == 2 and isinstance(actions[1], IncludeLaunchDescription)
         assert dict(actions[1].launch_arguments) == {

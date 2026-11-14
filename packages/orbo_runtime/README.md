@@ -1,5 +1,9 @@
 # Orbo host runtime
 
+The implementation now lives in the [ROS workspace package](../../ros_ws/src/orbo_runtime/README.md).
+The root Python wheel and ROS executables share those modules. For Pi operation,
+follow the [native ROS quickstart](../../PI5_QUICKSTART.md); systemd is optional.
+
 This Python package runs on the host computer (Mac for development, Pi for the
 robot). It coordinates application requests and ROS interfaces. Motor-bus I/O
 and the final command watchdog run in the ESP32 firmware; measured wheel state
@@ -60,9 +64,9 @@ in `dist/` are ignored. The package exposes `orbo`, `orbo-audio-check`,
 
 - `pixi run --locked ros-base-keyboard`: current Mac lifted-bench controller.
   Activates controllers, requests one firmware arm, and checks measured odometry.
-- `orbo-teleop-keyboard`: application input source. Publishes `Joy` only and
+- `ros2 run orbo_runtime teleop_keyboard`: application input source. Publishes `Joy` only and
   requires a separately authorized runtime teleop session; it cannot arm the robot.
-- `firmware/orbo/bench_tests/control_wheels.py keyboard`: direct firmware bench
+- `ros2 run orbo_runtime wheel_bench keyboard`: direct firmware bench
   helper, bypassing the ROS drive controller.
 
 Use one path at a time. See the [Mac control runbook](../../docs/engineering/runbooks/ros-control-macos.md)

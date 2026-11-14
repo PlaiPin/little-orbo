@@ -1,217 +1,229 @@
-# Raspberry Pi 5: install and test Orbo
+# Raspberry Pi 5: native ROS 2 installation and testing
 
-These commands target **Ubuntu 24.04 ARM64 with ROS 2 Jazzy already installed**
-and an OV5647 camera already working with `rpicam-hello`. They use native ROS,
-colcon, and a Python virtual environment. **Do not use Pixi on the Pi.**
+Target: **Ubuntu 24.04 ARM64, ROS 2 Jazzy already installed, and an OV5647 camera
+working with `rpicam-hello`**. The primary workflow is `ros2 run` / `ros2 launch`.
+Systemd is optional. Pixi is only used for Mac development, never on the Pi.
 
-Run commands in Bash on the Pi as your normal user, using `sudo` where shown.
-Copy one block at a time and check its result before continuing. Replace values
-marked `YOUR_...` or `ACTUAL_...` with your device/configuration values.
-Initial motor tests require the current wheel-enabled ESP32 firmware, motor power,
-and the wheels lifted clear of the surface. Keep the physical power cutoff within
-reach. Only one motion-control path may run at a time.
+Run one block at a time in Bash. Initial movement tests require the current
+wheel-enabled ESP32 firmware, motor power, and the wheels lifted. Keep the power
+cutoff within reach. Run only one motion owner and one velocity gate at a time.
 
 ## Contents
 
-1. [Install or update](#1-install-or-update)
-2. [Prepare each ROS terminal](#2-prepare-each-ros-terminal)
-3. [Check the runtime without hardware](#3-check-the-runtime-without-hardware)
-4. [Test the ESP32 and wheels independently](#4-test-the-esp32-and-wheels-independently)
-5. [Test the complete lifted-wheel base stack](#5-test-the-complete-lifted-wheel-base-stack)
-6. [Build and test the camera](#6-build-and-test-the-camera)
-7. [Test microphone and speaker](#7-test-microphone-and-speaker)
-8. [Run the full application with calibrated teleop](#8-run-the-full-application-with-calibrated-teleop)
-9. [Logs and shutdown](#9-logs-and-shutdown)
-10. [Run software tests on the Pi](#10-run-software-tests-on-the-pi)
-11. [Voice and remaining commissioning](#11-voice-and-remaining-commissioning)
+1. [Upgrade an existing installation](#1-upgrade-an-existing-installation)
+2. [First installation](#2-first-installation)
+3. [Open ROS terminals](#3-open-ros-terminals)
+4. [Check installed executables](#4-check-installed-executables)
+5. [Agent and direct-wheel checks](#5-agent-and-direct-wheel-checks)
+6. [Complete lifted-wheel base stack](#6-complete-lifted-wheel-base-stack)
+7. [Camera](#7-camera)
+8. [Microphone and speaker](#8-microphone-and-speaker)
+9. [Full application teleop](#9-full-application-teleop)
+10. [Software tests](#10-software-tests)
+11. [Optional systemd deployment](#11-optional-systemd-deployment)
+12. [Remaining commissioning](#12-remaining-commissioning)
 
-## 1. Install or update
+## 1. Upgrade an existing installation
 
-For a **first checkout**:
+If you already ran `sudo ./deploy/install-pi.sh --camera-stack existing`, **do not
+delete the installation**. Keep `/etc/orbo` (configuration, credentials,
+calibration), `/var/lib/orbo` (journal/data), `/opt/orbo/.venv`, and
+`/opt/orbo-camera` (working camera overlay). No manual build-directory cleanup is
+required for this refactor. The installer rebuilds the workspace in place.
+
+First stop motion through the running owner/helper, confirm disarming, and close
+any manual ROS launches. Then, in your **normal-user terminal**, stop and disable
+the old services so they cannot compete with foreground ROS commands:
 
 ```bash
-git clone https://github.com/PlaiPin/little-orbo.git ~/little-orbo
-cd ~/little-orbo
+sudo systemctl disable --now \
+  orbo-teleop orbo-navigation orbo-control orbo-runtime \
+  orbo-k1-runtime orbo-camera orbo-micro-ros-agent
 ```
 
-For an **existing checkout**, use this instead:
+If the old installer only installed the units, they are already disabled; this
+also stops any that you subsequently started. The unit files may remain on disk.
+They are harmless while disabled and stopped. This command does not erase data.
+
+Update and reinstall from a fresh normal-user shell without an old workspace or
+virtualenv activated:
 
 ```bash
 cd ~/little-orbo
 git pull --ff-only
+sudo ./deploy/install-pi.sh --camera-stack existing
 ```
 
-If Orbo is already installed and running, stop any motion helper first and wait
-for stopped/disarmed feedback. Then stop services before reinstalling:
+The installer refuses to overwrite an installation with active Orbo services.
+It preserves configuration, rebuilds the new Python ROS package, and does not
+install/start/enable systemd units by default. Old source copies can remain;
+installed ROS executables use the rebuilt workspace. Close old ROS shells after
+upgrading and open fresh ones using section 3. Continue with section 4.
+
+## 2. First installation
+
+Skip this section if you followed the upgrade above. In your normal-user terminal:
 
 ```bash
-sudo systemctl stop orbo-teleop orbo-navigation orbo-control \
-  orbo-runtime orbo-k1-runtime orbo-camera orbo-micro-ros-agent
-```
-
-Install from the checkout:
-
-```bash
+git clone https://github.com/PlaiPin/little-orbo.git ~/little-orbo
 cd ~/little-orbo
 sudo ./deploy/install-pi.sh --camera-stack existing
 ```
 
-The installer copies source to `/opt/orbo`, builds the Orbo ROS packages and
-micro-ROS agent, installs the runtime in `/opt/orbo/.venv`, and installs disabled
-systemd services. It does not flash the ESP32 or start services. Existing runtime
-and camera configurations are preserved; review them when upgrading.
+This installs the native ROS workspace under `/opt/orbo/ros_ws`, the service
+account `orbo`, and the Python dependencies under `/opt/orbo/.venv`. Colcon
+installs ROS executables with the appropriate Python interpreter in their
+shebangs; you do not need to activate that virtualenv to use `ros2 run`.
 
-`--camera-stack existing` preserves the working camera packages and refuses an APT
-plan that would change them. Build the compatible ROS camera overlay in section 6.
-If APT reports a camera dependency conflict, resolve it before continuing rather
-than switching camera stacks to bypass the check.
+The working camera packages are preserved. If APT proposes a camera-stack
+change, resolve the reported conflict instead of switching modes to bypass it.
+The installer does not flash firmware, start nodes, or grant motion authority.
 
-## 2. Prepare each ROS terminal
+## 3. Open ROS terminals
 
-Paste this into **every new Pi terminal that runs ROS commands**, including both
-terminals used for the base-control test:
+Use a separate terminal for each long-running ROS command. To reuse the existing
+private `/etc/orbo` configuration and journal ownership without changing their
+permissions, run the robot processes as the existing `orbo` user.
+
+In **each new ROS terminal**, paste:
 
 ```bash
+sudo -u orbo bash
+```
+
+Then, inside that shell:
+
+```bash
+cd /opt/orbo
 source /opt/ros/jazzy/setup.bash
 source /opt/orbo/ros_ws/install/local_setup.bash
 export ROS_DOMAIN_ID=42
 export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 export ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET
+export ROS_LOG_DIR=/var/lib/orbo/ros-logs
 unset ROS_LOCALHOST_ONLY
 ```
 
-Hardware services use domain 42. Software tests below use separate domains and
-do not need the battery or USB device.
+Run the `ros2` commands below in these shells. Use `exit` to return to your normal
+user. Perform installation and `sudoedit` configuration steps from a separate
+**normal-user terminal**, not from the `orbo` shell. This user choice provides
+device/configuration access; it does not require a background service.
 
-## 3. Check the runtime without hardware
+## 4. Check installed executables
 
-In a terminal prepared with section 2:
+In a ROS terminal:
 
 ```bash
-/opt/orbo/.venv/bin/orbo diagnostics
-
-orbo_demo_dir=$(mktemp -d /tmp/orbo-demo-XXXXXX)
-/opt/orbo/.venv/bin/orbo demo --database "$orbo_demo_dir/demo.db"
-
-sudo -u orbo bash -c '
-  source /opt/ros/jazzy/setup.bash
-  source /opt/orbo/ros_ws/install/local_setup.bash
-  exec /opt/orbo/.venv/bin/python /opt/orbo/tools/smoke-installed.py
-'
+ros2 pkg executables orbo_runtime
+ros2 run orbo_runtime runtime diagnostics
+ros2 run orbo_runtime base_bench --help
+ros2 run orbo_runtime wheel_bench --help
+ros2 run orbo_runtime installed_smoke
 ```
 
-`diagnostics` inventories the environment; it does not verify hardware health.
-The demo is synthetic. The smoke helper checks the real runtime/ROS adapter,
-private socket, episode journal, and graceful shutdown in isolated domain 94.
-Neither test arms motors or calls cloud providers. Expect the smoke helper to
-report a successful shutdown with exit status 0.
+Expect `base_bench`, `wheel_bench`, `teleop_keyboard`, `velocity_gate`,
+`camera_monitor`, `runtime`, `audio_check`, and `installed_smoke`.
 
-## 4. Test the ESP32 and wheels independently
+The smoke check uses a temporary journal/socket in isolated domain 94. It checks
+the real runtime/ROS adapter, owner IPC and shutdown without arming or provider
+calls. Diagnostics inventories dependencies; it is not a hardware-health check.
 
-### Select the application USB transport
+Optional synthetic application demo:
+
+```bash
+orbo_demo_dir=$(mktemp -d /tmp/orbo-demo-XXXXXX)
+ros2 run orbo_runtime runtime demo --database "$orbo_demo_dir/demo.db"
+```
+
+## 5. Agent and direct-wheel checks
+
+### Terminal A: agent
+
+Identify the actual application **CDC0 transport** device:
 
 ```bash
 ls -l /dev/serial/by-id/
-sudoedit /etc/orbo/agent.env
 ```
 
-Put the actual **application CDC0 transport** path in that file:
-
-```text
-ORBO_SERIAL_DEVICE=/dev/serial/by-id/YOUR_ACTUAL_CDC0_DEVICE
-```
-
-CDC1 is the logging interface; the ROM bootloader device is for flashing. Do not
-select either for the agent. Only one process may open the transport device.
+Replace the placeholder and leave the agent running:
 
 ```bash
-sudo chown root:root /etc/orbo/agent.env
-sudo chmod 0600 /etc/orbo/agent.env
-sudo systemctl stop orbo-runtime orbo-control orbo-teleop orbo-navigation
-sudo systemctl restart orbo-micro-ros-agent
-sudo systemctl status orbo-micro-ros-agent --no-pager
+ros2 run micro_ros_agent micro_ros_agent serial \
+  --dev /dev/serial/by-id/YOUR_ACTUAL_CDC0_DEVICE -b 115200
 ```
 
-### Verify health and feedback
+CDC1 is for logs; the ROM bootloader device is for flashing. Only one agent may
+open CDC0. `/etc/orbo/agent.env` is used by the optional service wrapper; direct
+`ros2 run` selects its device with `--dev`.
 
-With section 2 sourced:
+### Terminal B: feedback and a short wheel test
+
+Open another ROS terminal using section 3:
 
 ```bash
 ros2 topic echo /orbo/embedded/health \
   --once --qos-reliability best_effort
-
 ros2 topic echo /orbo/embedded/wheel_state \
   --once --qos-reliability best_effort
 ```
 
-Check fresh synchronized health, `armed: false`, and valid wheel feedback before
-requesting motion. If no messages arrive, inspect the agent logs in section 9.
-
-### Short direct-wheel test
-
-With the wheels lifted and motor power on:
+Check fresh synchronized health, `armed: false`, and valid wheel feedback. With
+wheels lifted and motor power on, run:
 
 ```bash
-/opt/orbo/.venv/bin/python \
-  /opt/orbo/firmware/orbo/bench_tests/control_wheels.py \
-  drive --left 0.6 --right 0.6 --seconds 3
+ros2 run orbo_runtime wheel_bench drive --left 0.6 --right 0.6 --seconds 3
 ```
 
-Expect stopped/disarmed encoder feedback. After the short test passes, optionally
-run interactive control:
+Expect stopped/disarmed encoder feedback. Then optionally:
 
 ```bash
-/opt/orbo/.venv/bin/python \
-  /opt/orbo/firmware/orbo/bench_tests/control_wheels.py \
-  keyboard --speed 0.6
+ros2 run orbo_runtime wheel_bench keyboard --speed 0.6
 ```
 
-W/S drive forward/reverse, A/D turn, Space/X command zero, and Q exits. Wait for
-stopped/disarmed encoder feedback before switching to the next control path.
-Do not run the legacy `Software/Teleoperate` program alongside this firmware.
+W/S drive, A/D turn, Space/X command zero, and Q exits. Exit and verify disarming
+before the next section. Do not run this direct-wheel owner alongside the base
+controller, application runtime, or legacy `Software/Teleoperate` program.
 
-## 5. Test the complete lifted-wheel base stack
+## 6. Complete lifted-wheel base stack
 
-This tests `velocity input → gate → ros2_control → micro-ROS → ESP32 → encoder
-odometry`. Exit the direct-wheel helper first. Keep the agent running and the
-application runtime, teleop, navigation, and control services stopped.
+Keep the agent running. Exit the direct-wheel helper. No systemd control,
+teleop, navigation, or runtime services may be active.
 
-**Terminal A:** source section 2, then leave this launch running:
+**Terminal B:** start the bench stack, leaving it running:
 
 ```bash
-/opt/orbo/deploy/run-ros.sh launch orbo_bringup control.launch.py \
-  calibration:=/opt/orbo/ros_ws/src/orbo_description/config/bench-cad.yaml
+ros2 launch orbo_bringup bench.launch.py
 ```
 
-**Terminal B:** source section 2, then run the short test:
+This resolves the installed CAD bench profile and starts the controllers and one
+velocity gate. It does not arm the MCU. The profile is for lifted wheels only;
+its nominal dimensions do not establish ground calibration.
+
+**Terminal C:** open another ROS terminal and run:
 
 ```bash
-/opt/orbo/.venv/bin/python /opt/orbo/tools/control-base.py \
-  drive --linear 0.02 --seconds 3
+ros2 run orbo_runtime base_bench drive --linear 0.02 --seconds 3
 ```
 
-Only after it passes, run the longer test:
+After the short test passes:
 
 ```bash
-/opt/orbo/.venv/bin/python /opt/orbo/tools/control-base.py \
-  drive --linear 0.02 --seconds 30
+ros2 run orbo_runtime base_bench drive --linear 0.02 --seconds 30
 ```
 
 Optional interactive test, after the drive finishes:
 
 ```bash
-/opt/orbo/.venv/bin/python /opt/orbo/tools/control-base.py \
-  keyboard --speed 0.6
+ros2 run orbo_runtime base_bench keyboard --speed 0.6
 ```
 
-The helper activates controllers, requests a fresh arm, and reports measured
-encoder odometry and read errors. `bench-cad.yaml` contains nominal CAD dimensions
-for lifted testing; it does not qualify floor driving.
+The packaged helper preserves controller activation, fresh arm epochs, expiring
+leases, velocity bounds, competing-publisher rejection, measured feedback and
+odometry checks, and stop/disarm acknowledgment. It publishes through the gate
+and ros2_control. It does not replace these checks with a raw velocity publisher.
 
-Stop the helper and verify disarming before Ctrl-C in terminal A. Do not start
-the application runtime or another velocity gate while this bench path runs.
-
-An independent software stop request from a sourced domain-42 terminal is:
+Stop the helper and confirm disarming before Ctrl-C in terminal B. Leave the
+agent running only if another test needs it. An independent software stop is:
 
 ```bash
 ros2 topic pub --once --max-wait-time-secs 10 \
@@ -220,23 +232,20 @@ ros2 topic pub --once --max-wait-time-secs 10 \
   '{interface_version: 1, operation: 0}'
 ```
 
-Verify disarmed feedback; a publisher message alone is not an acknowledgment.
-Use the physical power cutoff for unexpected motion.
+Check the acknowledgment/health; a successful publish alone does not prove a
+physical stop. Use the power cutoff for unexpected motion.
 
-## 6. Build and test the camera
+## 7. Camera
 
-### Build against the working libcamera installation
+### Build or reuse the camera overlay
 
-Stop `rpicam-hello` and other capture programs. If the Orbo camera service is
-running, stop it too:
+If `/opt/orbo-camera/install/local_setup.bash` already exists and was built with
+the working camera setup script, reuse it; this refactor does not require a
+camera rebuild. Otherwise, stop all capture programs and run as your normal user:
 
 ```bash
-sudo systemctl stop orbo-camera
 cd ~/little-orbo
-
-sudo install -d -m 0755 \
-  -o "$USER" -g "$(id -gn)" /opt/orbo-camera
-
+sudo install -d -m 0755 -o "$USER" -g "$(id -gn)" /opt/orbo-camera
 (
   umask 022
   bash deploy/ros2-camera/setup-camera.sh \
@@ -244,51 +253,30 @@ sudo install -d -m 0755 \
 )
 ```
 
-The build script checks OV5647 enumeration and library linkage. If matching
-headers/pkg-config metadata are missing, obtain them from the same source as the
-working libcamera installation. Do not replace it with an arbitrary libcamera
-package. See the [camera setup guide](deploy/ros2-camera/README.md) for the
-`--libcamera-pc-dir` option and compatibility checks.
+Matching headers and pkg-config metadata must come from the working libcamera
+installation. See the [camera setup guide](deploy/ros2-camera/README.md) if the
+script reports missing or mismatched development files.
 
-### Test the standalone publisher
+### Initial camera selection
 
-**Camera terminal A**, from `~/little-orbo`:
+In a ROS terminal, add the camera overlay and verify its prefix:
 
 ```bash
-ROS_DOMAIN_ID=42 bash deploy/ros2-camera/setup-camera.sh \
-  --start-only --workspace /opt/orbo-camera \
-  --width 640 --height 480
+source /opt/orbo-camera/install/local_setup.bash
+ros2 pkg prefix camera_ros
+ros2 run camera_ros camera_node --ros-args -p camera:=0
 ```
 
-**Camera terminal B**, after sourcing section 2:
+Expect the prefix `/opt/orbo-camera/install/camera_ros`. Record the exact camera
+identifier printed by the driver, then Ctrl-C before starting another publisher.
+
+In a **normal-user terminal**:
 
 ```bash
-ros2 topic echo /camera/camera_info --once
-ros2 topic hz /camera/image_raw
-```
-
-Ctrl-C the rate observer, then Ctrl-C the publisher in terminal A. Record the
-exact camera identifier printed by the driver for the service configuration.
-
-### Configure the Orbo camera service
-
-```bash
-printf '%s\n' \
-  'ORBO_CAMERA_OVERLAY=/opt/orbo-camera/install' \
-  | sudo tee /etc/orbo/camera.env >/dev/null
-
-sudo chmod 0644 /etc/orbo/camera.env
-
-sudo -u orbo env \
-  ROS_DOMAIN_ID=42 \
-  ORBO_CAMERA_OVERLAY=/opt/orbo-camera/install \
-  /opt/orbo/deploy/run-ros.sh pkg prefix camera_ros
-
 sudoedit /etc/orbo/camera.yaml
 ```
 
-The prefix command must print `/opt/orbo-camera/install/camera_ros`. In the YAML,
-set these existing fields using the exact enumerated identifier:
+Edit existing fields (do not erase measured intrinsics/mount on an upgrade):
 
 ```yaml
 enabled: true
@@ -300,15 +288,15 @@ frame_id: camera_optical_frame
 calibration_file: ""
 ```
 
-Do not erase measured calibration or mount values on an existing installation.
-On first setup, leave intrinsics and mount unset until measured.
+### Launch and observe
+
+In the ROS terminal with the camera overlay sourced:
 
 ```bash
-sudo systemctl start orbo-camera
-sudo journalctl -u orbo-camera -n 60 --no-pager
+ros2 launch orbo_bringup camera.launch.py config:=/etc/orbo/camera.yaml
 ```
 
-With section 2 sourced:
+In a second ROS terminal:
 
 ```bash
 ros2 topic hz /orbo/camera/image_raw
@@ -320,82 +308,80 @@ Ctrl-C the observer, then:
 ros2 topic echo /orbo/camera/diagnostics --once
 ```
 
-Frames with an intrinsics warning are expected before optical calibration.
-Standalone topics are `/camera/*`; service topics are `/orbo/camera/*`.
+An intrinsics warning is expected before optical calibration. Ctrl-C the launch
+when done. `/etc/orbo/camera.env` is only needed for the optional systemd camera
+service; foreground launches use the sourced overlay.
 
-## 7. Test microphone and speaker
+## 8. Microphone and speaker
 
-Enumerate devices as the service user:
+In a ROS terminal:
 
 ```bash
-sudo -u orbo /opt/orbo/.venv/bin/orbo-audio-check list
+ros2 run orbo_runtime audio_check list
 ```
 
-Replace the following with actual device names or indices:
+Set the actual input/output names or indices and check format support:
 
 ```bash
 ORBO_AUDIO_IN='ACTUAL_INPUT_NAME_OR_INDEX'
 ORBO_AUDIO_OUT='ACTUAL_OUTPUT_NAME_OR_INDEX'
-
-sudo -u orbo /opt/orbo/.venv/bin/orbo-audio-check check \
+ros2 run orbo_runtime audio_check check \
   --input "$ORBO_AUDIO_IN" --output "$ORBO_AUDIO_OUT"
 ```
 
-Start with low speaker volume, then play the short tone:
+Start at low speaker volume:
 
 ```bash
-sudo -u orbo /opt/orbo/.venv/bin/orbo-audio-check tone \
-  --output "$ORBO_AUDIO_OUT" --seconds 2
+ros2 run orbo_runtime audio_check tone --output "$ORBO_AUDIO_OUT" --seconds 2
 ```
 
-Speak during the microphone test:
+Speak during the microphone check:
 
 ```bash
-sudo -u orbo /opt/orbo/.venv/bin/orbo-audio-check record \
-  --input "$ORBO_AUDIO_IN" --seconds 3
+ros2 run orbo_runtime audio_check record --input "$ORBO_AUDIO_IN" --seconds 3
 ```
 
-`check` verifies sample-format support. `record` reports levels and clipping,
-then discards the audio. These local checks need no cloud credentials.
+The recording check reports levels/clipping and discards the audio. These checks
+need no cloud credentials and do not save or upload audio.
 
-## 8. Run the full application with calibrated teleop
+## 9. Full application teleop
 
-The application path adds the owner runtime, permission grants, and bounded
-teleop sessions. It requires measured wheel calibration and a qualified input
-mapping. Complete the lifted checks first; do not relabel the CAD bench profile
-as measured calibration. Camera and audio can be tested before this step.
+This adds the application permission broker and bounded owner sessions. It
+requires measured wheel calibration and a qualified input mapping. Complete the
+lifted checks first. Do not relabel the CAD profile as measured calibration.
 
-### Prepare calibration and runtime configuration
+### Configuration
 
-Exit all manual wheel/base helpers and the bench launch from section 5. Stop any
-existing application motion session, then stop services before changing config:
+Stop the bench helper and `bench.launch.py`; only the agent may remain running.
+In a **normal-user terminal**, preserve existing files and create a template only
+if calibration is missing:
 
 ```bash
-sudo systemctl stop orbo-teleop orbo-navigation orbo-control orbo-runtime
-
 sudo test -e /etc/orbo/calibration.yaml || \
   sudo install -o orbo -g orbo -m 0600 \
     /opt/orbo/ros_ws/src/orbo_description/config/calibration.template.yaml \
     /etc/orbo/calibration.yaml
-
 sudoedit /etc/orbo/calibration.yaml
 sudoedit /etc/orbo/runtime.toml
+sudo install -d -o orbo -g orbo -m 0700 /run/orbo
 ```
 
-Fill the calibration template with measured geometry, limits, and evidence.
-Keep limits within the configured firmware bounds. Set qualification flags only
-after performing and recording the corresponding physical checks.
+`/run/orbo` is temporary: recreate it after reboot for foreground runtime use.
+The optional systemd runtime creates it automatically. Keep the existing journal
+path and private ownership; no database migration/deletion is needed here.
 
-In `runtime.toml`, edit the existing sections rather than appending duplicates:
+Supply measured geometry, firmware-compatible speed limits and qualification
+records. For keyboard teleop, edit the existing TOML sections without duplicating
+section headers or removing other fields:
 
 ```toml
 [robot]
-# Retain the existing id, calibration, and flipper fields.
+# Retain id, calibration, and flipper fields.
 teleop_enabled = true
 navigation_enabled = false
 
 [robot.teleop]
-qualified = true # Only after the physical mapping/stop checks are recorded.
+qualified = true # Only after physical mapping/stop checks are recorded.
 linear_axis = 0
 angular_axis = 1
 deadman_button = 0
@@ -404,195 +390,186 @@ angular_scale = 0.25
 evidence_record = "YOUR_MEASURED_KEYBOARD_TELEOP_QUALIFICATION_RECORD"
 ```
 
-This mapping is for the application keyboard publisher. Keep `[near].enabled`
-and `[voice].enabled` false for the first application test. For Xbox input,
-use the [separate joystick walkthrough](ros_ws/README.md#remote-xbox-joystick-control)
-and its mapping; do not run both keyboard and joystick publishers.
+Keep voice and cloud reasoning disabled for this first application test. For
+Xbox input, use the [joystick mapping](ros_ws/README.md#remote-xbox-joystick-control)
+and run only that input publisher instead of the keyboard.
 
-### Start services and activate controllers
+### Launch the application components
+
+Use section 3 for **each ROS terminal**. Keep the agent from section 5 running.
+
+**Control terminal:**
 
 ```bash
-sudo systemctl start \
-  orbo-micro-ros-agent orbo-control orbo-runtime orbo-teleop
-
-# Once section 6 camera setup has passed:
-sudo systemctl start orbo-camera
-
-sudo systemctl status orbo-micro-ros-agent orbo-control \
-  orbo-runtime orbo-teleop orbo-camera --no-pager
+ros2 launch orbo_bringup control.launch.py calibration:=/etc/orbo/calibration.yaml
 ```
 
-With section 2 sourced, wait for the hardware/controllers to appear:
+**Runtime terminal:**
+
+```bash
+ros2 launch orbo_bringup runtime.launch.py config:=/etc/orbo/runtime.toml
+```
+
+**Teleop gate terminal:**
+
+```bash
+ros2 launch orbo_bringup teleop.launch.py \
+  calibration:=/etc/orbo/calibration.yaml input:=keyboard
+```
+
+Camera can run concurrently in its own terminal as in section 7. These launches
+are foreground processes; errors and logs appear in their terminals.
+
+**Owner terminal:** wait for hardware/controllers, then activate them:
 
 ```bash
 ros2 control list_hardware_components -c /orbo/controller_manager
 ros2 control list_controllers -c /orbo/controller_manager
-```
-
-Then activate:
-
-```bash
-ros2 control set_hardware_component_state OrboWheels active \
-  -c /orbo/controller_manager
-
-ros2 control set_controller_state drive_controller active \
-  -c /orbo/controller_manager
-
+ros2 control set_hardware_component_state OrboWheels active -c /orbo/controller_manager
+ros2 control set_controller_state drive_controller active -c /orbo/controller_manager
 ros2 control list_controllers -c /orbo/controller_manager
 ```
 
-Confirm `joint_state_broadcaster` and `drive_controller` are active. Controller
-activation alone does not arm the MCU.
+Confirm `joint_state_broadcaster` and `drive_controller` are active. Activation
+alone does not arm.
 
-### Start keyboard input and authorize a bounded session
-
-**Keyboard terminal:** source section 2, then leave this running in an interactive
-terminal (use SSH with a TTY):
+**Keyboard terminal** (interactive TTY):
 
 ```bash
-/opt/orbo/.venv/bin/orbo-teleop-keyboard
+ros2 run orbo_runtime teleop_keyboard
 ```
 
-**Owner terminal:** grant five minutes of permission and create an episode:
+### Authorize a session
+
+In the owner terminal:
 
 ```bash
 orbo_grant_expires=$(date -u -d '+5 minutes' +%s)
-
-sudo -u orbo /opt/orbo/.venv/bin/orbo request permission.set \
+ros2 run orbo_runtime runtime request permission.set \
   --args "{\"scope\":\"robot.command\",\"destination\":\"orbo\",\"enabled\":true,\"expires\":$orbo_grant_expires}"
-
-sudo -u orbo /opt/orbo/.venv/bin/orbo request episode.start \
+ros2 run orbo_runtime runtime request episode.start \
   --args '{"profile":"physical_task.v1"}'
 ```
 
-Copy the returned `episode_id` into this command. With keyboard input neutral,
-request a session, then use W/S/A/D in the keyboard terminal:
+Copy the returned episode ID. With input neutral, request a session, then use
+W/S/A/D in the keyboard terminal:
 
 ```bash
-sudo -u orbo /opt/orbo/.venv/bin/orbo request robot.teleop \
+ros2 run orbo_runtime runtime request robot.teleop \
   --args '{"episode_id":"YOUR_EPISODE_ID","key":"pi-test-001","duration":20}'
 ```
 
-Use a new request key for each session. Space commands neutral; Q exits the
-keyboard publisher. Sessions last at most 30 seconds. The owner request remains
-active while the session runs, so use another owner terminal for an early stop:
+Use a new key each time. Space commands neutral; Q exits keyboard input. Sessions
+last at most 30 seconds. From another owner terminal, stop early with:
 
 ```bash
-sudo -u orbo /opt/orbo/.venv/bin/orbo request stop
+ros2 run orbo_runtime runtime request stop
 ```
 
-After the session ends and disarming is confirmed, close the episode with its
-actual outcome (`completed`, `cancelled`, `failed`, or `unknown`):
+After disarming, close the episode with the actual outcome (`completed`,
+`cancelled`, `failed`, or `unknown`):
 
 ```bash
-sudo -u orbo /opt/orbo/.venv/bin/orbo request episode.end \
+ros2 run orbo_runtime runtime request episode.end \
   --args '{"episode_id":"YOUR_EPISODE_ID","outcome":"completed"}'
 ```
 
-Restarting the runtime revokes motion grants; explicitly reauthorize afterward.
+On shutdown, stop the session first, exit input, and confirm disarming. Then
+Ctrl-C the gate, runtime, control and camera launches, and finally the agent.
+A runtime restart requires new motion grants; it never restores old authority.
 
-## 9. Logs and shutdown
+## 10. Software tests
 
-Follow service logs; Ctrl-C stops only the log viewer:
-
-```bash
-sudo journalctl -f \
-  -u orbo-micro-ros-agent -u orbo-control \
-  -u orbo-runtime -u orbo-teleop -u orbo-camera
-```
-
-For a bounded log snapshot:
-
-```bash
-sudo journalctl -n 100 --no-pager \
-  -u orbo-micro-ros-agent -u orbo-control \
-  -u orbo-runtime -u orbo-teleop -u orbo-camera
-```
-
-If the application runtime is running, request a stop first:
-
-```bash
-sudo -u orbo /opt/orbo/.venv/bin/orbo request stop
-```
-
-Exit manual helpers/publishers and verify stopped/disarmed feedback before
-stopping the stack. Manual launches in other terminals must be stopped there;
-systemctl only stops its managed processes.
-
-```bash
-sudo systemctl stop orbo-teleop orbo-navigation orbo-control \
-  orbo-runtime orbo-k1-runtime orbo-camera orbo-micro-ros-agent
-```
-
-Do not enable boot startup until the selected configuration has been qualified.
-
-## 10. Run software tests on the Pi
-
-Use a separate test virtual environment so development dependencies do not
-replace the production environment. From a normal Pi terminal:
+These are optional software-only checks, separate from physical acceptance.
+Stop physical tests to avoid CPU contention. In a fresh **normal-user terminal**:
 
 ```bash
 cd ~/little-orbo
 python3.12 -m venv --system-site-packages ~/orbo-test-venv
-
 /opt/orbo/.venv/bin/uv export --frozen --all-extras --group dev \
   --no-emit-project -o /tmp/orbo-test-requirements.txt
-
 /opt/orbo/.venv/bin/uv pip install --python ~/orbo-test-venv/bin/python \
   --require-hashes -r /tmp/orbo-test-requirements.txt
-
-/opt/orbo/.venv/bin/uv pip install \
-  --python ~/orbo-test-venv/bin/python --no-deps .
-
+/opt/orbo/.venv/bin/uv pip install --python ~/orbo-test-venv/bin/python --no-deps .
 source ~/orbo-test-venv/bin/activate
-source /opt/ros/jazzy/setup.bash
-source /opt/orbo/ros_ws/install/local_setup.bash
-export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
-export ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET
-unset ROS_LOCALHOST_ONLY
-
 python -m pytest -q tests --ignore=tests/ros --ignore=tests/k1
 ```
 
-After the camera overlay has been built, run the synthetic ROS suite:
+After the camera overlay is built, source the workspace and run synthetic ROS
+checks in domain 96 (never domain 42):
 
 ```bash
+source /opt/ros/jazzy/setup.bash
+source /opt/orbo/ros_ws/install/local_setup.bash
 source /opt/orbo-camera/install/local_setup.bash
+export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+export ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET
+unset ROS_LOCALHOST_ONLY
 ROS_DOMAIN_ID=96 ORBO_ROS_TESTS=1 python -m pytest -q tests/ros
-```
-
-The synthetic ROS suite uses domain 96 and may take several minutes. Stop
-physical testing while it runs to avoid competing CPU load. It does not open USB
-or command the real robot. Firmware host checks use stubbed hardware:
-
-```bash
 bash firmware/orbo/host_tests/run.sh
 deactivate
 ```
 
-Open a fresh terminal and source section 2 before returning to hardware tests.
-Passing software tests does not establish physical motor, camera, audio, or
-navigation acceptance.
+This includes installed executable discovery, launches from outside the source
+checkout, synthetic drive/stop/fault checks, keyboard expiry and camera stream
+health. No test opens the physical USB device. Use a fresh ROS terminal before
+returning to hardware tests.
 
-## 11. Voice and remaining commissioning
+## 11. Optional systemd deployment
 
-For full cloud voice, first complete local audio checks, then follow the
-[credential and voice setup](docs/engineering/runbooks/operator.md#4-credentials-and-voice)
-and [permission scopes](docs/engineering/runbooks/operator.md#5-start-and-explicitly-authorize).
-Configure the actual audio devices and an owner-selected Fish voice, enable
-reasoning and voice, and supply the separate provider credentials. Provider
-calls may consume account credit. Keys belong in the documented credential
-store, not this file or shell commands.
+Once foreground operation is qualified, systemd can supervise the same ROS
+commands for unattended use. It is not needed for any foreground test above.
+Do not run service and foreground copies together.
 
-The [voice measurement procedure](docs/engineering/runbooks/operator.md#7-measure-actual-pi-voice-performance)
-checks latency under actual Pi ROS/audio load after those prerequisites are met.
+Stop all robot processes, then install/update the optional units from a fresh
+normal-user terminal:
 
-Nav2 additionally needs a real scan source, measured transforms, map,
-localization, and qualified navigation limits. Flippers remain disabled until
-their pins, pulse limits, and mechanics are independently commissioned. Neither
-is enabled by completing the lifted-base, camera, or audio tests above.
+```bash
+cd ~/little-orbo
+sudo ./deploy/install-pi.sh --camera-stack existing --install-systemd
+```
 
-Further reference: [operator runbook](docs/engineering/runbooks/operator.md),
-[Pi peripherals](docs/engineering/runbooks/pi-peripherals.md),
-[firmware instructions](firmware/orbo/README.md), and
-[ROS workspace guide](ros_ws/README.md).
+Configure `/etc/orbo/agent.env` with the actual CDC0 path, root-owned mode 0600.
+For the separate camera overlay, preserve or create `/etc/orbo/camera.env`:
+
+```text
+ORBO_CAMERA_OVERLAY=/opt/orbo-camera/install
+```
+
+Start only commissioned components. For example, to supervise just the agent:
+
+```bash
+sudo systemctl start orbo-micro-ros-agent
+sudo journalctl -u orbo-micro-ros-agent -f
+```
+
+Ctrl-C exits the log viewer, not the service. Stop it before foreground agent use:
+
+```bash
+sudo systemctl stop orbo-micro-ros-agent
+```
+
+Installation never enables boot startup. Service status describes process
+supervision, not ROS readiness, controller activation, or physical qualification.
+See the [operator runbook](docs/engineering/runbooks/operator.md) for application
+services, credentials and recovery.
+
+## 12. Remaining commissioning
+
+Cloud voice needs tested audio devices, provider credentials, an owner-selected
+Fish voice, explicit provider/capture/playback grants, and funded provider
+accounts. See [voice setup](docs/engineering/runbooks/operator.md#4-credentials-and-voice).
+Systemd credential loading applies only to service operation; a foreground
+runtime needs credentials supplied through its documented environment mechanism.
+Never put keys in source, command arguments or shell history.
+
+Nav2 needs a real scan source, transforms, measured limits, surveyed map and
+localization. Once qualified, its foreground entry point is
+`ros2 launch orbo_navigation navigation.launch.py` with explicit `calibration`
+and `map` arguments. It replaces the teleop gate and leaves lifecycle startup
+explicit. Flippers remain disabled until their pins, pulse limits and mechanics
+are independently qualified.
+
+Further reference: [runtime package](ros_ws/src/orbo_runtime/README.md),
+[ROS workspace](ros_ws/README.md), [firmware](firmware/orbo/README.md), and
+[Pi peripherals](docs/engineering/runbooks/pi-peripherals.md).

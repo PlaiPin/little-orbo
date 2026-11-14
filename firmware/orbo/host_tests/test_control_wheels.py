@@ -1,19 +1,14 @@
 """Run in the Pixi ROS overlay; mocks only, no board/agent or motion."""
-import importlib.util
 import io
 import math
 import os
-from pathlib import Path
 import pty
 import termios
 import time
 import unittest
 from unittest.mock import Mock, patch
 
-spec = importlib.util.spec_from_file_location('control_wheels',
-    Path(__file__).resolve().parents[1] / 'bench_tests/control_wheels.py')
-manual = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(manual)
+from orbo_runtime.bench import wheels as manual
 
 
 class KeyboardTests(unittest.TestCase):

@@ -2,7 +2,7 @@
 
 The target is Raspberry Pi 5 (8 GB), Ubuntu 24.04 ARM64 / ROS 2 Jazzy, and
 ESP32-S3. Native Mac development uses the locked Pixi environment. The host Python
-runtime and all five ROS package sources are versioned; deployment archives,
+runtime and all six ROS package sources are versioned; deployment archives,
 generated evidence and external service installations are separate.
 
 For installation and copy-and-paste hardware checks on the robot, use the
@@ -324,7 +324,7 @@ The Orbo Python application workflow requires Python 3.12 and `uv`. Run from thi
 ```sh
 uv sync --locked --all-extras --group dev
 uv run --locked --all-extras pytest -q
-uv run ruff check packages tests
+uv run ruff check ros_ws/src/orbo_runtime/orbo_runtime tests
 uv run --all-extras orbo diagnostics
 uv run --all-extras orbo demo --database /tmp/orbo-synthetic.db
 cc -std=c11 -Wall -Wextra -Werror -fsanitize=address,undefined \
@@ -339,7 +339,7 @@ The demo makes no network or hardware calls. It labels simulated action/playback
 
 | Location | Responsibility |
 |---|---|
-| `packages/orbo_runtime` | SQLite journal, reminders/preferences, broker, conversation/tools, NEAR/Fish/audio, ROS adapter, exports and owner CLI |
+| `ros_ws/src/orbo_runtime` | SQLite journal, reminders/preferences, broker, conversation/tools, NEAR/Fish/audio, ROS adapter, exports and owner CLI |
 | `firmware/orbo` | Production micro-ROS application, local command expiry, XL430 feedback/watchdogs and calibrated PWM |
 | `ros_ws/src` | Bounded shared embedded interfaces and Pi ROS packages |
 | `artifacts/test-evidence` | Ignored local captures; not part of the source distribution |

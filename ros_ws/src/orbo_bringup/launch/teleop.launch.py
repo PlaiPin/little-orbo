@@ -1,10 +1,10 @@
 from pathlib import Path
 import yaml
 from ament_index_python.packages import get_package_share_directory
+from launch_ros.actions import Node
 from launch import LaunchDescription
 from launch.actions import (
     DeclareLaunchArgument,
-    ExecuteProcess,
     IncludeLaunchDescription,
     OpaqueFunction,
 )
@@ -23,18 +23,11 @@ def setup(context):
     if source not in {"keyboard", "joystick", "remote"}:
         raise RuntimeError("input must be keyboard, joystick or remote")
     actions = [
-        ExecuteProcess(
-            cmd=[
-                "orbo-velocity-gate",
-                "--ros-args",
-                "-p",
-                "source:=teleop",
-                "-p",
-                "max_linear:=" + str(calibration["max_linear_m_s"]),
-                "-p",
-                "max_angular:=" + str(calibration["max_angular_rad_s"]),
-            ]
-        )
+        Node(
+            package="orbo_runtime", executable="velocity_gate", output="screen",
+            parameters=[{"source": "teleop", "max_linear": calibration["max_linear_m_s"],
+                         "max_angular": calibration["max_angular_rad_s"]}],
+        ),
     ]
     if source == "joystick":
         name = LaunchConfiguration("device_name").perform(context)

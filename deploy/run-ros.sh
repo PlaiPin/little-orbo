@@ -10,4 +10,4 @@ if [[ -n ${ORBO_CAMERA_OVERLAY:-} ]]; then
   source "$ORBO_CAMERA_OVERLAY/local_setup.bash"
 fi
 set -u
-exec /opt/orbo/.venv/bin/python /opt/ros/jazzy/bin/ros2 "$@"
+exec ros2 "$@"

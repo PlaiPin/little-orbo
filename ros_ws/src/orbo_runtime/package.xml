@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>orbo_runtime</name>
+  <version>0.1.0</version>
+  <description>Orbo runtime, peripheral nodes and bounded bench control</description>
+  <maintainer email="maintainers@orbo.invalid">Orbo maintainers</maintainer>
+  <license>Apache-2.0</license>
+  <buildtool_depend>ament_python</buildtool_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>ros2run</exec_depend>
+  <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>controller_manager_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>nav2_msgs</exec_depend>
+  <exec_depend>diagnostic_msgs</exec_depend>
+  <exec_depend>orbo_embedded_interfaces</exec_depend>
+  <exec_depend>orbo_description</exec_depend>
+  <exec_depend>python3-yaml</exec_depend>
+  <exec_depend>python3-httpx</exec_depend>
+  <exec_depend>python3-jsonschema</exec_depend>
+  <!-- Optional NEAR/audio dependencies are installed from the root uv.lock. -->
+  <export><build_type>ament_python</build_type></export>
+</package>

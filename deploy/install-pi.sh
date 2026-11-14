@@ -4,18 +4,21 @@ set -euo pipefail
 export LC_ALL=C
 ORBO_STAGING=false
 ORBO_CAMERA_STACK=existing
+ORBO_INSTALL_SYSTEMD=false
 while (($#)); do
   case "$1" in
     --staging) ORBO_STAGING=true; shift ;;
+    --install-systemd) ORBO_INSTALL_SYSTEMD=true; shift ;;
     --camera-stack)
       if [[ ${2:-} != existing && ${2:-} != ros ]]; then
         echo '--camera-stack requires existing or ros' >&2; exit 1
       fi
       ORBO_CAMERA_STACK=$2; shift 2 ;;
     -h|--help)
-      echo "Usage: $0 [--staging] [--camera-stack existing|ros]"
+      echo "Usage: $0 [--staging] [--camera-stack existing|ros] [--install-systemd]"
       echo 'Default: preserve existing camera packages; build camera_ros with deploy/ros2-camera/setup-camera.sh.'
       echo 'Use ros only when deliberately selecting the apt ROS camera/libcamera stack.'
+      echo 'Systemd units are installed only with --install-systemd; services are never started or enabled.'
       exit 0 ;;
     *) echo "Unknown argument: $1 (use --help)" >&2; exit 1 ;;
   esac
@@ -26,9 +29,17 @@ if [[ "$ID" != ubuntu || "$VERSION_ID" != 24.04 || $(uname -m) != aarch64 ]]; th
   echo "Requires Ubuntu 24.04 ARM64" >&2; exit 1
 fi
 if [[ ! -f /opt/ros/jazzy/setup.bash ]]; then echo "Install ROS 2 Jazzy from its official Ubuntu packages first" >&2; exit 1; fi
+if [[ -d /run/systemd/system ]]; then
+  for ORBO_UNIT in orbo-micro-ros-agent orbo-control orbo-runtime orbo-k1-runtime orbo-teleop orbo-navigation orbo-camera; do
+    if systemctl is-active --quiet "$ORBO_UNIT"; then
+      echo "Stop $ORBO_UNIT and all motion helpers before updating the installation." >&2
+      exit 1
+    fi
+  done
+fi
 ORBO_SOURCE=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 apt-get update
-ORBO_PACKAGES=(python3.12-venv python3-pip python3-colcon-common-extensions python3-rosdep
+ORBO_PACKAGES=(python3.12-venv python3-pip python3-setuptools python3-colcon-common-extensions python3-rosdep
   libportaudio2 portaudio19-dev build-essential git rsync
   ros-jazzy-ros2-control ros-jazzy-ros2-controllers ros-jazzy-xacro
   ros-jazzy-robot-state-publisher ros-jazzy-navigation2 ros-jazzy-nav2-bringup
@@ -71,18 +82,22 @@ set -u
 python3 tools/bootstrap-agent.py
 cd ros_ws
 export CMAKE_BUILD_PARALLEL_LEVEL=2 MAKEFLAGS=-j2
-colcon build --executor sequential --merge-install --base-paths src ../.sdk/agent-locked/micro_ros_agent/micro_ros_agent ../.sdk/agent-locked/micro_ros_msgs --cmake-args -DCMAKE_BUILD_TYPE=Release -DUAGENT_USE_SYSTEM_LOGGER=OFF -DBUILD_TESTING=OFF
+# Colcon's Python interpreter becomes the ament_python executable shebang.
+# ROS CLI/launch can use the system Python; nodes use the locked dependency env.
+../.venv/bin/python -m colcon build --executor sequential --merge-install --base-paths src ../.sdk/agent-locked/micro_ros_agent/micro_ros_agent ../.sdk/agent-locked/micro_ros_msgs --cmake-args -DCMAKE_BUILD_TYPE=Release -DUAGENT_USE_SYSTEM_LOGGER=OFF -DBUILD_TESTING=OFF
 cd ..
 [[ -f /etc/orbo/runtime.toml ]] || install -m 0600 deploy/profiles/pi.toml /etc/orbo/runtime.toml
 [[ -f /etc/orbo/booster-k1.toml ]] || install -m 0600 deploy/profiles/booster-k1.toml /etc/orbo/booster-k1.toml
 [[ -f /etc/orbo/camera.yaml ]] || install -m 0600 ros_ws/src/orbo_bringup/config/camera.template.yaml /etc/orbo/camera.yaml
 chown orbo:orbo /etc/orbo/camera.yaml
 chown orbo:orbo /etc/orbo/runtime.toml /etc/orbo/booster-k1.toml
-install -m 0644 deploy/systemd/*.service /etc/systemd/system/
-if [[ "$ORBO_STAGING" == false ]]; then
-  systemctl daemon-reload
-else
-  echo "Staging validation: units installed; systemd reload and service startup not performed"
+if [[ "$ORBO_INSTALL_SYSTEMD" == true ]]; then
+  install -m 0644 deploy/systemd/*.service /etc/systemd/system/
+  if [[ "$ORBO_STAGING" == false ]]; then
+    systemctl daemon-reload
+  else
+    echo "Staging validation: units installed; systemd reload and service startup not performed"
+  fi
 fi
-# Service enablement, device selection and commissioning are explicit next steps.
-printf '%s\n' 'Installation complete; follow docs/engineering/runbooks/operator.md before starting hardware.'
+# Existing units/configuration/data are preserved on upgrade; no service starts.
+printf '%s\n' 'Installation complete; source Jazzy and ros_ws/install/local_setup.bash, then follow PI5_QUICKSTART.md.'

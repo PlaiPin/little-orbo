@@ -5,7 +5,8 @@
 | `orbo_embedded_interfaces` | Host/firmware message definitions |
 | `orbo_hardware` | ros2_control plugin using measured ESP32 wheel feedback |
 | `orbo_description` | Complete v9 visuals, wheel joints, calibration templates, RViz views |
-| `orbo_bringup` | Control, camera and application teleop launch files |
+| `orbo_runtime` | Installed Python runtime, peripheral nodes and bounded bench helpers |
+| `orbo_bringup` | Bench, control, runtime, camera and application teleop launch files |
 | `orbo_navigation` | Calibration-gated Nav2 configuration and velocity gate |
 
 All these package sources are versioned. Build/install/log directories are local.
@@ -15,6 +16,33 @@ or `pixi run --locked rviz-pi` on the Mac. See the
 [Pi viewer guide](../docs/engineering/runbooks/ros-macos.md#combined-pi-viewer-model-camera-odometry-and-frames).
 Only `meshes/v9` is installed; obsolete `meshes/v05` exports are ignored and excluded
 from installation even if they remain on a developer's disk.
+
+## Native Pi workflow
+
+See [PI5_QUICKSTART.md](../PI5_QUICKSTART.md) for first installation and the
+in-place upgrade from the original installer. No configuration or database needs
+to be deleted. Stop/disable old services before foreground operation.
+
+The Pi installer builds the ament Python package with the locked dependency
+interpreter; afterward source Jazzy and `ros_ws/install/local_setup.bash` and use
+`ros2 run orbo_runtime ...` or `ros2 launch orbo_bringup ...`. A native manual build
+of the same installed tree, with services stopped and dependencies already
+installed, is:
+
+```bash
+sudo bash -c '
+  source /opt/ros/jazzy/setup.bash
+  cd /opt/orbo/ros_ws
+  export CMAKE_BUILD_PARALLEL_LEVEL=2 MAKEFLAGS=-j2
+  exec /opt/orbo/.venv/bin/python -m colcon build --merge-install --executor sequential \
+    --base-paths src ../.sdk/agent-locked/micro_ros_agent/micro_ros_agent ../.sdk/agent-locked/micro_ros_msgs \
+    --cmake-args -DCMAKE_BUILD_TYPE=Release -DUAGENT_USE_SYSTEM_LOGGER=OFF -DBUILD_TESTING=OFF
+'
+```
+
+Prefer rerunning the installer for upgrades: it also refreshes dependencies and
+source. Systemd units are installed only with `--install-systemd` and supervise
+the same ROS launches. They do not replace ROS lifecycle or readiness checks.
 
 ## Mac setup and software checks
 
@@ -153,6 +181,10 @@ wheel-speed bounds applied by the runtime. Input is published at 50 Hz with a
 each session, then hold LB to drive.
 
 ### 2. Pi: configure and start the robot
+
+This subsection uses optional systemd deployment (`--install-systemd`). For
+foreground ROS operation, use [the Pi quickstart](../PI5_QUICKSTART.md#9-full-application-teleop)
+with the Xbox mapping and remote Joy source instead of the keyboard publisher.
 
 These commands assume the [Pi deployment](../docs/engineering/runbooks/operator.md#3-install-the-pi-runtime-and-agent)
 is installed at `/opt/orbo`, with the ESP32 agent device configured and measured
@@ -297,9 +329,9 @@ calibration file. It installs only its `launch` directory; no empty, unversioned
 It requires qualified geometry/limits, a real LaserScan source and sensor frame,
 and a surveyed map. A successful launch/configuration test does not supply those.
 
-On the Pi, install Jazzy and the required drivers, install `orbo-runtime` into the
-Python environment used to invoke ROS launch, then build this workspace with
-colcon. The package manifests declare ROS dependencies; Python packaging supplies
+On the Pi, use the native installer to install dependencies and build all six
+Orbo workspace packages with colcon. The workspace provides both ROS launch
+imports and installed Python node entry points. The package manifests declare ROS dependencies; Python packaging supplies
 the runtime. Native CSI/V4L2 drivers are Pi/Linux dependencies and are not validated
 by the Mac suite. Device profiles, system services, sensor calibration, ground
 odometry and stopping behavior still need target-specific validation.

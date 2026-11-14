@@ -1,7 +1,7 @@
 from pathlib import Path
 import yaml
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, ExecuteProcess, OpaqueFunction
+from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from orbo_runtime.camera import camera_spec
@@ -22,13 +22,9 @@ def setup(context):
             remappings=remaps,
             output="screen",
         ),
-        ExecuteProcess(
-            cmd=[
-                "orbo-camera-monitor",
-                "--ros-args",
-                "-p",
-                "frame_id:=" + config["frame_id"],
-            ]
+        Node(
+            package="orbo_runtime", executable="camera_monitor", output="screen",
+            parameters=[{"frame_id": config["frame_id"]}],
         ),
     ]
     if config.get("mount"):

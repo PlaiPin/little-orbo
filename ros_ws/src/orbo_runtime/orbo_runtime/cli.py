@@ -662,7 +662,7 @@ def diagnostics():
     }
 
 
-def main():
+def main(args=None):
     os.umask(0o077)
     parser = argparse.ArgumentParser(prog="orbo")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -679,7 +679,7 @@ def main():
     sub.add_parser("diagnostics")
     analysis = sub.add_parser("analyze")
     analysis.add_argument("package")
-    args = parser.parse_args()
+    args = parser.parse_args(args)
     try:
         if args.command == "serve":
             asyncio.run(serve(args.config))

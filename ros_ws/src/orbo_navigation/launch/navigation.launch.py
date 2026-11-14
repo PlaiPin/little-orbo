@@ -7,12 +7,11 @@ from launch.actions import (
     DeclareLaunchArgument,
     IncludeLaunchDescription,
     OpaqueFunction,
-    ExecuteProcess,
     GroupAction,
 )
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
-from launch_ros.actions import SetRemap
+from launch_ros.actions import Node, SetRemap
 from orbo_runtime.commissioning import validate_calibration
 
 
@@ -168,17 +167,10 @@ def setup(context):
                 ),
             ]
         ),
-        ExecuteProcess(
-            cmd=[
-                "orbo-velocity-gate",
-                "--ros-args",
-                "-p",
-                "source:=nav2",
-                "-p",
-                "max_linear:=" + str(calibration["max_linear_m_s"]),
-                "-p",
-                "max_angular:=" + str(calibration["max_angular_rad_s"]),
-            ]
+        Node(
+            package="orbo_runtime", executable="velocity_gate", output="screen",
+            parameters=[{"source": "nav2", "max_linear": calibration["max_linear_m_s"],
+                         "max_angular": calibration["max_angular_rad_s"]}],
         ),
     ]
 

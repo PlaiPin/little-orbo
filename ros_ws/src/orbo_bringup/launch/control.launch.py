@@ -1,10 +1,9 @@
 from pathlib import Path
-import sys
 import yaml
 import xacro
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, OpaqueFunction, ExecuteProcess
+from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from orbo_runtime.commissioning import validate_calibration
@@ -92,10 +91,11 @@ def setup(context):
         ),
     ]
     if calibration.get("bench_only"):
-        actions.append(ExecuteProcess(cmd=[sys.executable, "-c",
-            "from orbo_runtime.velocity_gate import main; main()", "--ros-args",
-            "-p", "source:=teleop", "-p", "max_linear:="+str(calibration["max_linear_m_s"]),
-            "-p", "max_angular:="+str(calibration["max_angular_rad_s"])], output="screen"))
+        actions.append(Node(
+            package="orbo_runtime", executable="velocity_gate", output="screen",
+            parameters=[{"source": "teleop", "max_linear": calibration["max_linear_m_s"],
+                         "max_angular": calibration["max_angular_rad_s"]}],
+        ))
     return actions
 
 

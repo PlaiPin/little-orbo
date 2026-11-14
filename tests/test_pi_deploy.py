@@ -10,7 +10,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 MOCK = r'''#!/usr/bin/env python3
-import json, os, pathlib, sys
+import json, os, pathlib, shutil, sys
 name = pathlib.Path(sys.argv[0]).name
 args = sys.argv[1:]
 with open(os.environ['ORBO_TEST_CALLS'], 'a') as out:
@@ -22,8 +22,38 @@ elif name == 'uname':
 elif name == 'apt-get' and '-s' in args:
     print(os.environ.get('ORBO_TEST_APT_PLAN', ''))
 elif name == 'python3.12':
-    # Stop before virtualenv creation; no actual software is installed.
-    sys.exit(42)
+    if not os.getenv('ORBO_TEST_FINISH'):
+        sys.exit(42)
+    # Fake only the environment/toolchain, keeping real copy/config decisions.
+    directory = pathlib.Path('.venv/bin')
+    directory.mkdir(parents=True, exist_ok=True)
+    for tool in ('pip', 'uv', 'python'):
+        target = directory / tool
+        if not target.exists():
+            target.symlink_to(pathlib.Path(sys.argv[0]).resolve())
+elif name == 'install':
+    paths = []
+    mode = 0o755
+    index = 0
+    while index < len(args):
+        value = args[index]
+        if value in ('-m', '-o', '-g'):
+            if value == '-m': mode = int(args[index + 1], 8)
+            index += 2
+        elif value == '-d': index += 1
+        else:
+            paths.append(pathlib.Path(value))
+            index += 1
+    if '-d' in args:
+        for path in paths: path.mkdir(parents=True, exist_ok=True)
+    else:
+        for source in paths[:-1]:
+            target = paths[-1] / source.name if paths[-1].is_dir() else paths[-1]
+            shutil.copyfile(source, target)
+            target.chmod(mode)
+elif name == 'systemctl':
+    if args[0] == 'is-active':
+        sys.exit(0 if os.getenv('ORBO_TEST_ACTIVE') == args[-1] else 3)
 '''
 
 
@@ -35,6 +65,8 @@ def installer(tmp_path):
     target.mkdir()
     (tmp_path / 'os-release').write_text('ID=ubuntu\nVERSION_ID=24.04\n')
     (tmp_path / 'ros-setup.bash').touch()
+    (tmp_path / 'systemd-running').mkdir()
+    (tmp_path / 'systemd-units').mkdir()
     script = (ROOT / 'deploy/install-pi.sh').read_text()
     for old, new in {
         '/etc/os-release': tmp_path / 'os-release',
@@ -42,28 +74,72 @@ def installer(tmp_path):
         '/opt/orbo': target,
         '/etc/orbo': tmp_path / 'config',
         '/var/lib/orbo': tmp_path / 'state',
+        '/run/systemd/system': tmp_path / 'systemd-running',
+        '/etc/systemd/system': tmp_path / 'systemd-units',
+        '/tmp/orbo-runtime-requirements.txt': tmp_path / 'requirements.txt',
     }.items():
         script = script.replace(old, str(new))
     path = source / 'deploy/install-pi.sh'
     path.write_text(script)
     bin_dir = tmp_path / 'bin'
     bin_dir.mkdir()
-    for name in ('id', 'uname', 'apt-get', 'install', 'useradd', 'usermod', 'python3.12'):
+    for name in ('id', 'uname', 'apt-get', 'install', 'useradd', 'usermod', 'chown', 'systemctl', 'python3.12'):
         tool = bin_dir / name
         tool.write_text(MOCK)
         tool.chmod(0o755)
     calls = tmp_path / 'calls.jsonl'
 
-    def run(*args, plan=''):
+    def run(*args, plan='', finish=False, active=''):
         result = subprocess.run(
             ['bash', str(path), *args], capture_output=True, text=True, timeout=20,
             env=dict(os.environ, PATH=f'{bin_dir}:{os.environ["PATH"]}',
-                     ORBO_TEST_CALLS=str(calls), ORBO_TEST_APT_PLAN=plan),
+                     ORBO_TEST_CALLS=str(calls), ORBO_TEST_APT_PLAN=plan,
+                     ORBO_TEST_FINISH='1' if finish else '', ORBO_TEST_ACTIVE=active),
         )
         invoked = [json.loads(line) for line in calls.read_text().splitlines()]
         return result, invoked
 
     return source, target, run
+
+
+def test_active_service_refuses_upgrade_before_apt_or_copy(installer):
+    source, target, run = installer
+    result, calls = run(active='orbo-control')
+    assert result.returncode == 1
+    assert 'Stop orbo-control' in result.stderr
+    assert not any(call[0] == 'apt-get' for call in calls)
+    assert not (target / 'deploy').exists()
+
+
+@pytest.mark.parametrize('systemd', [False, True])
+def test_upgrade_preserves_configuration_and_data_and_systemd_is_opt_in(installer, systemd):
+    source, target, run = installer
+    root = source.parent
+    # Public deployment files plus a harmless stand-in for the network bootstrap.
+    for name in ('deploy/profiles/pi.toml', 'deploy/profiles/booster-k1.toml',
+                 'ros_ws/src/orbo_bringup/config/camera.template.yaml',
+                 'deploy/systemd/orbo-runtime.service'):
+        path = source / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text('NEW_PUBLIC_TEMPLATE')
+    (source / 'tools').mkdir()
+    (source / 'tools/bootstrap-agent.py').write_text('')
+    (root / 'config').mkdir()
+    (root / 'state').mkdir()
+    preserved = [root / 'config' / name for name in
+                 ('runtime.toml', 'booster-k1.toml', 'camera.yaml', 'calibration.yaml', 'agent.env', 'camera.env')]
+    preserved += [root / 'state/journal.db', root / 'config/credentials/NEARAI_API_KEY']
+    for path in preserved:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text('EXISTING_OWNER_DATA')
+    result, calls = run(*(['--install-systemd'] if systemd else []), finish=True)
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert all(p.read_text() == 'EXISTING_OWNER_DATA' for p in preserved)
+    assert (root / 'systemd-units/orbo-runtime.service').exists() is systemd
+    assert (['systemctl', 'daemon-reload'] in calls) is systemd
+    assert not any(c[:2] in (['systemctl', 'start'], ['systemctl', 'enable']) for c in calls)
+    builds = [c for c in calls if c[:3] == ['python', '-m', 'colcon']]
+    assert len(builds) == 1
 
 
 @pytest.mark.parametrize('plan', [
@@ -118,7 +194,7 @@ def test_ros_wrapper_uses_selected_overlay_or_refuses_missing_one(tmp_path, vali
     script = (ROOT / 'deploy/run-ros.sh').read_text()
     script = script.replace('/opt/ros/jazzy/setup.bash', str(base))
     script = script.replace('/opt/orbo/ros_ws/install/local_setup.bash', str(base))
-    script = script.replace('/opt/orbo/.venv/bin/python', str(probe))
+    script = script.replace('exec ros2', 'exec ' + str(probe))
     path = tmp_path / 'run-ros.sh'
     path.write_text(script)
     result = subprocess.run(

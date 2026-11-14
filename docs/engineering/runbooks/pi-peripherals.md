@@ -1,5 +1,8 @@
 # Pi teleoperation, ArduCam and WaveShare audio
 
+For foreground ROS commands, start with [PI5_QUICKSTART.md](../../../PI5_QUICKSTART.md).
+The systemd examples below are optional and require `--install-systemd`.
+
 The software supports ROS 2 teleoperation, local camera topics, and microphone/speaker operation on the Pi 5 / Ubuntu 24.04 / Jazzy target. Physical commissioning is still pending. The original `Software/Teleoperate` program remains a separate legacy UDP/text application; it must not run alongside the production ROS firmware. The new operator path is `Joy → brokered teleop session → stamped velocity gate → ros2_control → micro-ROS → XL430`.
 
 ## Confirmed hardware
@@ -11,7 +14,7 @@ No sensor identity or connection type needs to be requested again. Remaining dev
 
 ## Installation and ownership
 
-`deploy/install-pi.sh --camera-stack existing` is the default for a Pi whose camera already works with `rpicam-hello`. It installs `joy`, `v4l2_camera`, image transport plugins, `v4l-utils` and `alsa-utils`, but does not request ROS `camera_ros`/libcamera packages. It checks APT's proposed changes and refuses changes to camera-stack packages. It gives the `orbo` service account audio/video/input/dialout access, installs **seven** disabled systemd units and copies an initially disabled `/etc/orbo/camera.yaml`. Existing runtime/camera configurations are preserved on reinstall; merge the new template fields when upgrading. The Pi uses native Jazzy, colcon and a Python virtual environment; it does not use Pixi.
+`deploy/install-pi.sh --camera-stack existing` is the default for a Pi whose camera already works with `rpicam-hello`. It installs `joy`, `v4l2_camera`, image transport plugins, `v4l-utils` and `alsa-utils`, but does not request ROS `camera_ros`/libcamera packages. It checks APT's proposed changes and refuses changes to camera-stack packages. It gives the `orbo` service account audio/video/input/dialout access, optionally installs **seven** disabled systemd units with `--install-systemd` and copies an initially disabled `/etc/orbo/camera.yaml`. Existing runtime/camera configurations are preserved on reinstall; merge the new template fields when upgrading. The Pi uses native Jazzy, colcon and a Python virtual environment; it does not use Pixi.
 
 For a working rpicam camera, follow the [camera build guide](../../../deploy/ros2-camera/README.md) to compile the pinned camera_ros against the existing libraries. Use a shared workspace so the `orbo` service can read its symlink install:
 
@@ -132,14 +135,14 @@ The shipped integration does **not** save images, send them to NEAR, add them to
 The runtime already uses PortAudio/ALSA with separately selectable input/output devices, 16 kHz mono WAV capture, 24 kHz mono PCM speech, bounded buffers and interruption. Audio is separate from ROS image/motion traffic. No raw microphone ROS topic is broadcast. The new local check executable needs no NEAR/Fish keys and does not save or upload audio:
 
 ```sh
-sudo -u orbo /opt/orbo/.venv/bin/orbo-audio-check list
+sudo -u orbo /opt/orbo/deploy/run-ros.sh run orbo_runtime audio_check list
 arecord -l
 aplay -l
-sudo -u orbo /opt/orbo/.venv/bin/orbo-audio-check check \
+sudo -u orbo /opt/orbo/deploy/run-ros.sh run orbo_runtime audio_check check \
   --input 'ACTUAL_UNIQUE_USB_INPUT_NAME' --output 'ACTUAL_UNIQUE_USB_OUTPUT_NAME'
-sudo -u orbo /opt/orbo/.venv/bin/orbo-audio-check tone \
+sudo -u orbo /opt/orbo/deploy/run-ros.sh run orbo_runtime audio_check tone \
   --output 'ACTUAL_UNIQUE_USB_OUTPUT_NAME' --seconds 2
-sudo -u orbo /opt/orbo/.venv/bin/orbo-audio-check record \
+sudo -u orbo /opt/orbo/deploy/run-ros.sh run orbo_runtime audio_check record \
   --input 'ACTUAL_UNIQUE_USB_INPUT_NAME' --seconds 3
 ```
 

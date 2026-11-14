@@ -1,7 +1,6 @@
 """Real controllers, gate and plugin with synthetic encoders; isolated DDS only."""
 
 from contextlib import ExitStack
-import importlib.util
 import json
 import math
 import os
@@ -32,11 +31,7 @@ def stack(tmp_path):
     assert os.environ.get("ROS_DOMAIN_ID") in {"96", "97", "98", "99"}, (
         "Never test on the board domain"
     )
-    spec = importlib.util.spec_from_file_location(
-        "base_bench", ROOT / "tools/control-base.py"
-    )
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    from orbo_runtime.bench import base as module
 
     with ExitStack() as cleanup:
         rclpy.init()

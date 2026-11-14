@@ -1,8 +1,6 @@
 """ROS message/description checks with mocks; never accesses hardware."""
-import importlib.util
 import math
 from pathlib import Path
-import sys
 import time
 import unittest
 from unittest.mock import Mock
@@ -10,10 +8,8 @@ import xml.etree.ElementTree as ET
 import yaml
 
 ROOT=Path(__file__).resolve().parents[3]
-sys.path.insert(0,str(ROOT/'packages'))
-spec=importlib.util.spec_from_file_location('control_base',ROOT/'tools/control-base.py')
-base=importlib.util.module_from_spec(spec);spec.loader.exec_module(base)
-from control_wheels import WheelState,Health
+from orbo_runtime.bench import base
+from orbo_runtime.bench.wheels import WheelState, Health
 from orbo_runtime.commissioning import validate_calibration
 from orbo_runtime.contracts import Rejected
 

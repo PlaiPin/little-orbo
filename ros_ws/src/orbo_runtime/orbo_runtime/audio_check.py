@@ -77,13 +77,13 @@ async def run(args):
     return await playback.play(tone())
 
 
-def main():
+def main(args=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("command", choices=["list", "check", "record", "tone"])
     parser.add_argument("--input", help="PortAudio index or unique device substring")
     parser.add_argument("--output", help="PortAudio index or unique device substring")
     parser.add_argument("--seconds", type=float, default=2)
-    args = parser.parse_args()
+    args = parser.parse_args(args)
     try:
         print(json.dumps(asyncio.run(run(args)), indent=2))
     except Exception as error:

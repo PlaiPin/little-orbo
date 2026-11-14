@@ -25,8 +25,10 @@ from .providers import (
     VerifiedReply,
 )
 
-SOURCE_ROOT = Path(__file__).resolve().parents[2]
-PROJECT_ROOT = SOURCE_ROOT if (SOURCE_ROOT / "pyproject.toml").is_file() else Path.cwd()
+PROJECT_ROOT = next(
+    (parent for parent in Path(__file__).resolve().parents
+     if (parent / "pyproject.toml").is_file()), Path.cwd()
+)
 DEFAULT_DIRECTORY = PROJECT_ROOT / ".live-validation"
 DEFAULT_CONFIG = {
     "version": 1,

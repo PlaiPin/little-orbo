@@ -1,5 +1,10 @@
 # Orbo Pi / ESP32 operator runbook
 
+For the primary foreground `ros2 run`/`ros2 launch` workflow and migration from
+the old installer, use [PI5_QUICKSTART.md](../../../PI5_QUICKSTART.md). This
+runbook also covers optional systemd supervision; its service commands require
+installation with `--install-systemd`.
+
 Target: Raspberry Pi 5 (8 GB), Ubuntu 24.04 ARM64, ROS 2 Jazzy; ESP32-S3 with two XL430-W250-T wheels and two independently calibrated PWM flippers. Read `implementation-status.md` for what has actually been tested. Compilation and synthetic DDS tests do not establish physical safety, acoustic performance or navigation accuracy.
 
 ## 1. Inventory and deployment inputs
@@ -39,12 +44,14 @@ On the Pi with Ubuntu 24.04 ARM64 and ROS 2 Jazzy already installed, use the cur
 git clone https://github.com/PlaiPin/little-orbo.git ~/little-orbo
 cd ~/little-orbo
 # For an existing clone, use git pull --ff-only instead of cloning.
-sudo ./deploy/install-pi.sh --camera-stack existing
+sudo ./deploy/install-pi.sh --camera-stack existing --install-systemd
 ```
 
 This installs `/opt/orbo`, a service user, the frozen Python environment, the Orbo ROS packages and the micro-ROS Agent from `deploy/agent.source-lock.json`. Builds use two compiler jobs and sequential colcon packages to bound Pi memory use. The default camera mode preserves working camera packages and refuses an APT plan that would modify them; build the camera overlay separately as described in the peripherals runbook. `--camera-stack ros` is an explicit alternative for a target deliberately selecting apt's ROS camera stack. The Agent uses a pinned compatible spdlog rather than Ubuntu's incompatible newer fmt interface. Jazzy Fast DDS/CDR and OS packages come from apt; preserve `dpkg-query -W` output with each deployment. `uv.lock` is a Python dependency lock, not an apt snapshot. Private validation directories, credentials, SDK/build directories, Pixi environments and generated artifacts are excluded from source copying. Reinstallation preserves existing configuration and does not restart running services; stop the robot services before updating an active installation.
 
-Services are installed but not started or enabled. Set `/etc/orbo/agent.env` to the actual application transport interface:
+With `--install-systemd`, services are installed but not started or enabled. The
+default installer does not install units. Existing units remain on upgrade; stop
+and disable them before switching to foreground launches. Set `/etc/orbo/agent.env` to the actual application transport interface:
 
 ```text
 ORBO_SERIAL_DEVICE=/dev/serial/by-id/ACTUAL_CDC0_DEVICE
@@ -62,10 +69,10 @@ source /opt/orbo/ros_ws/install/local_setup.bash
 export ROS_DOMAIN_ID=42 RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 export ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET
 unset ROS_LOCALHOST_ONLY
-/opt/orbo/.venv/bin/orbo diagnostics
+ros2 run orbo_runtime runtime diagnostics
 orbo_demo_dir=$(mktemp -d /tmp/orbo-demo-XXXXXX)
-/opt/orbo/.venv/bin/orbo demo --database "$orbo_demo_dir/demo.db"
-sudo -u orbo bash -c 'source /opt/ros/jazzy/setup.bash; source /opt/orbo/ros_ws/install/local_setup.bash; exec /opt/orbo/.venv/bin/python /opt/orbo/tools/smoke-installed.py'
+ros2 run orbo_runtime runtime demo --database "$orbo_demo_dir/demo.db"
+sudo -u orbo bash -c 'source /opt/ros/jazzy/setup.bash; source /opt/orbo/ros_ws/install/local_setup.bash; exec ros2 run orbo_runtime installed_smoke'
 ```
 
 The smoke helper uses isolated domain 94, creates a temporary journal/socket, and does not arm hardware or call cloud providers. `diagnostics` is a package/environment inventory, not a device health check.
@@ -107,26 +114,25 @@ export ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET
 unset ROS_LOCALHOST_ONLY
 ros2 topic echo /orbo/embedded/health --once --qos-reliability best_effort
 ros2 topic echo /orbo/embedded/wheel_state --once --qos-reliability best_effort
-/opt/orbo/.venv/bin/python /opt/orbo/firmware/orbo/bench_tests/control_wheels.py \
+ros2 run orbo_runtime wheel_bench \
   drive --left 0.6 --right 0.6 --seconds 3
 # Optional interactive direct-wheel test, after the drive exits:
-/opt/orbo/.venv/bin/python /opt/orbo/firmware/orbo/bench_tests/control_wheels.py keyboard --speed 0.6
+ros2 run orbo_runtime wheel_bench keyboard --speed 0.6
 ```
 
 Wait for stopped/disarmed encoder feedback before switching paths. For the complete base path, terminal A runs the bench control launch in the same sourced domain-42 environment:
 
 ```bash
-/opt/orbo/deploy/run-ros.sh launch orbo_bringup control.launch.py \
-  calibration:=/opt/orbo/ros_ws/src/orbo_description/config/bench-cad.yaml
+ros2 launch orbo_bringup bench.launch.py
 ```
 
 Terminal B sources the same ROS/workspace setup and domain, then runs:
 
 ```bash
-/opt/orbo/.venv/bin/python /opt/orbo/tools/control-base.py drive --linear 0.02 --seconds 3
+ros2 run orbo_runtime base_bench drive --linear 0.02 --seconds 3
 # Only after the short test passes:
-/opt/orbo/.venv/bin/python /opt/orbo/tools/control-base.py drive --linear 0.02 --seconds 30
-/opt/orbo/.venv/bin/python /opt/orbo/tools/control-base.py keyboard --speed 0.6
+ros2 run orbo_runtime base_bench drive --linear 0.02 --seconds 30
+ros2 run orbo_runtime base_bench keyboard --speed 0.6
 ```
 
 This exercises stamped velocity, the velocity gate, ros2_control, the agent and real MCU encoder feedback. The helper activates controllers and requests a fresh arm. `bench-cad.yaml` is nominal geometry for lifted testing; it does not qualify floor driving. Stop the helper before Ctrl-C in terminal A. Do not start the application runtime/teleop gate alongside this bench path. Once measured calibration and teleop qualification exist, follow the [application teleop sequence](../../../ros_ws/README.md#2-pi-configure-and-start-the-robot) for the brokered full application path.
@@ -150,7 +156,7 @@ Select input/output devices from `python -m sounddevice` in the runtime environm
 ```bash
 sudo systemctl start orbo-micro-ros-agent
 sudo systemctl start orbo-runtime
-sudo -u orbo /opt/orbo/.venv/bin/orbo diagnostics
+sudo -u orbo ros2 run orbo_runtime runtime diagnostics
 ```
 
 Inspect `journalctl -u orbo-runtime -u orbo-micro-ros-agent` and CDC1 logs. `ROS_DOMAIN_ID=42` is the deployment domain. Use `sudo -u orbo env ROS_DOMAIN_ID=42 /opt/orbo/deploy/run-ros.sh topic echo /orbo/embedded/health` to verify fresh boot ID, epoch, time sync and unarmed state. Confirm measured per-motor feedback with torque disabled before arm. ROS DDS is a trusted local robot-control network boundary; do not expose this domain on an untrusted network. The owner API is a private mode-0600 Unix socket under a mode-0700 directory.
