@@ -19,6 +19,7 @@ cutoff within reach. Run only one motion owner and one velocity gate at a time.
 7. [Camera](#7-camera)
 8. [Microphone and speaker](#8-microphone-and-speaker)
 9. [Full application teleop](#9-full-application-teleop)
+   - [Update and test wheels and flippers together](#move-the-flippers-while-driving)
 10. [Software tests](#10-software-tests)
 11. [Optional systemd deployment](#11-optional-systemd-deployment)
 12. [Remaining commissioning](#12-remaining-commissioning)
@@ -36,9 +37,12 @@ any manual ROS launches. Then, in your **normal-user terminal**, stop and disabl
 the old services so they cannot compete with foreground ROS commands:
 
 ```bash
-sudo systemctl disable --now \
-  orbo-teleop orbo-navigation orbo-control orbo-runtime \
-  orbo-k1-runtime orbo-camera orbo-micro-ros-agent
+for unit in orbo-teleop orbo-navigation orbo-control orbo-runtime \
+            orbo-k1-runtime orbo-camera orbo-micro-ros-agent; do
+  if systemctl cat "$unit.service" >/dev/null 2>&1; then
+    sudo systemctl disable --now "$unit.service"
+  fi
+done
 ```
 
 If the old installer only installed the units, they are already disabled; this
@@ -50,7 +54,10 @@ virtualenv activated:
 
 ```bash
 cd ~/little-orbo
-git pull --ff-only
+git status --short
+git switch main
+git pull --ff-only origin main
+git log -1 --oneline
 sudo ./deploy/install-pi.sh --camera-stack existing
 ```
 
@@ -118,10 +125,11 @@ ros2 pkg executables orbo_runtime
 ros2 run orbo_runtime runtime diagnostics
 ros2 run orbo_runtime base_bench --help
 ros2 run orbo_runtime wheel_bench --help
+ros2 run orbo_runtime flipper_bench --help
 ros2 run orbo_runtime installed_smoke
 ```
 
-Expect `base_bench`, `wheel_bench`, `teleop_keyboard`, `velocity_gate`,
+Expect `base_bench`, `wheel_bench`, `flipper_bench`, `teleop_keyboard`, `velocity_gate`,
 `camera_monitor`, `runtime`, `audio_check`, and `installed_smoke`.
 
 The smoke check uses a temporary journal/socket in isolated domain 94. It checks
@@ -602,13 +610,245 @@ last at most 30 seconds.
 
 ### Move the flippers while driving
 
-After configuring the [flipper firmware limits](firmware/orbo/README.md#flippers-on-d7-and-d10),
-set `robot.flippers_qualified = true` and `robot.attention_pulse_us` to the two
-commissioned pulse targets in the runtime TOML. Restart the runtime to load the
-profile, then authorize the driving session above. Left is GPIO10/D7 and right
-is GPIO21/D10.
+This is the combined test for **left GPIO10/D7, right GPIO21/D10**. Use the
+application runtime from this section; `wheel_bench`, `base_bench`,
+`flipper_bench`, and `bench.launch.py` must be stopped. Keep the wheels lifted.
 
-While that session is armed, use another terminal on the Pi:
+#### A. Update the Pi and check the firmware prerequisite
+
+Stop the current session with the command below in an existing ROS terminal,
+confirm disarming, then Ctrl-C all foreground robot launches:
+
+```bash
+ros2 run orbo_runtime runtime request stop
+ros2 topic echo /orbo/embedded/health --once --qos-reliability best_effort
+```
+
+If the runtime is not running, there is no owner socket to stop through; finish
+any active bench helper and check disarming through the agent instead. Then run
+the service-stop loop and upgrade commands in [section 1](#1-upgrade-an-existing-installation).
+The software update is:
+
+```bash
+cd ~/little-orbo
+git switch main
+git pull --ff-only origin main
+git merge-base --is-ancestor 8d120e9 HEAD && echo 'Shared-control code is present'
+sudo ./deploy/install-pi.sh --camera-stack existing
+```
+
+Run this block as your **normal user**, with no old ROS workspace/virtualenv
+activated. Resolve local Git changes if `git switch` or `git pull` refuses;
+do not reset or erase your configuration. Open fresh ROS terminals afterward.
+
+**The Pi installer does not flash the ESP32.** The checked-in firmware profile
+still disables flipper PWM. The board must already have a build containing:
+
+```text
+CONFIG_ORBO_FLIPPER_LEFT_GPIO=10
+CONFIG_ORBO_FLIPPER_RIGHT_GPIO=21
+CONFIG_ORBO_FLIPPERS_CALIBRATED=y
+```
+
+That build must also contain measured, nonzero `ORBO_FLIPPER_MIN_US`,
+`ORBO_FLIPPER_MAX_US`, and `ORBO_FLIPPER_REST_US`, with both selected targets
+inside the limits. Arming applies the rest position to both servos. Updating
+`runtime.toml` alone cannot enable PWM in a disabled firmware build.
+
+If this firmware step has not been done, use the existing pinned ESP-IDF
+**build workstation**, with the board attached there and its agent stopped:
+
+```bash
+# Run from the little-orbo checkout on the configured build workstation.
+source .sdk/esp-idf-v6.0.3/export.sh
+python tools/bootstrap-firmware.py --sdk-dir .sdk/locked-build
+export ORBO_MICROROS_COMPONENT="$PWD/.sdk/locked-build/micro_ros_espidf_component"
+idf.py -C firmware/orbo -B build-locked menuconfig
+# In Orbo production controller, enter the measured limits/rest and enable flippers.
+bash tools/build-firmware.sh
+bash tools/flash-firmware.sh
+```
+
+These use the existing workstation SDK; they are not Pi installation commands.
+The flash helper's automatic application-port discovery supports macOS. See the
+[firmware setup guide](firmware/orbo/README.md#flippers-on-d7-and-d10) for the
+full setup. Reconnect the board to the Pi afterward. A generic "9g" label does
+not determine the mounted rest/travel limits, so no guessed pulse range is supplied.
+
+#### B. Configure and verify the Pi runtime
+
+Before starting the runtime, in the **normal-user terminal**:
+
+```bash
+sudoedit /etc/orbo/runtime.toml
+sudo install -d -o orbo -g orbo -m 0700 /run/orbo
+```
+
+Edit the existing `[robot]` section: retain its `id` and `calibration` fields,
+set `teleop_enabled = true`, `navigation_enabled = false`, and set
+`attention_pulse_us` to an array of your two verified integer targets in
+`[left, right]` order. Set `flippers_qualified = true` after the firmware and
+mechanism are commissioned. Keep the keyboard mapping from **Configuration**
+above. Keep `[near].enabled` and `[voice].enabled` false for this test. Do not
+duplicate TOML section headers or replace other configuration.
+
+Check the saved configuration without starting motion:
+
+```bash
+sudo -u orbo /opt/orbo/.venv/bin/python - <<'PY'
+from pathlib import Path
+import tomllib
+import yaml
+from orbo_runtime.commissioning import validate_calibration
+
+config = tomllib.loads(Path('/etc/orbo/runtime.toml').read_text())
+robot = config['robot']
+assert config['runtime']['profile'] == 'orbo'
+assert config['runtime']['socket'] == '/run/orbo/runtime.sock'
+assert robot['id'] == 'orbo'
+assert robot['teleop_enabled'] is True and robot.get('navigation_enabled', False) is False
+assert robot['flippers_qualified'] is True
+pulses = robot['attention_pulse_us']
+assert len(pulses) == 2 and all(type(p) is int and 0 < p < 20000 for p in pulses)
+teleop = robot['teleop']
+assert teleop['qualified'] is True and teleop['evidence_record']
+assert (teleop['linear_axis'], teleop['angular_axis'], teleop['deadman_button']) == (0, 1, 0)
+validate_calibration(yaml.safe_load(Path(robot['calibration']).read_text()))
+assert not config.get('near', {}).get('enabled', False)
+assert not config.get('voice', {}).get('enabled', False)
+print(f'Configuration loaded: left={pulses[0]} us, right={pulses[1]} us')
+print('Firmware pulse limits and physical calibration must match these targets.')
+PY
+```
+
+If an assertion fails, correct the corresponding field before continuing. This
+checks configuration, not whether the flashed firmware is commissioned. The
+application still requires the measured wheel calibration described at the start
+of section 9; do not mark the CAD bench profile as measured to bypass validation.
+
+#### C. Start one owner and the wheel-control stack
+
+Power the motors and servo supply, connect ESP32 USB to the Pi, then reset once
+with power present. Follow the single-agent/feedback checks in section 5. In each
+ROS terminal, first use the `orbo` shell and environment from section 3.
+
+Leave each of these commands running in its own terminal:
+
+| Terminal | Command |
+|---|---|
+| Agent | Use the CDC0 agent command from section 5; keep exactly one agent running |
+| Control | `ros2 launch orbo_bringup control.launch.py calibration:=/etc/orbo/calibration.yaml` |
+| Runtime | `ros2 launch orbo_bringup runtime.launch.py config:=/etc/orbo/runtime.toml` |
+| Gate | `ros2 launch orbo_bringup teleop.launch.py calibration:=/etc/orbo/calibration.yaml input:=keyboard` |
+| Keyboard | `ros2 run orbo_runtime teleop_keyboard` |
+
+Do not hold a movement key yet. In the **owner ROS terminal**, activate the
+hardware and controllers, then inspect the initial feedback:
+
+```bash
+ros2 control list_hardware_components -c /orbo/controller_manager
+ros2 control list_controllers -c /orbo/controller_manager
+ros2 control set_hardware_component_state OrboWheels active -c /orbo/controller_manager
+ros2 control set_controller_state drive_controller active -c /orbo/controller_manager
+ros2 control list_controllers -c /orbo/controller_manager
+ros2 topic echo /orbo/embedded/health --once --qos-reliability best_effort
+ros2 topic echo /orbo/embedded/wheel_state --once --qos-reliability best_effort
+```
+
+Both controllers must be active. Require synchronized health, `armed: false`,
+valid wheel feedback and no hardware errors. Record the initial read-error counts.
+
+In an **observer ROS terminal**, watch the measured wheel state during the test:
+
+```bash
+ros2 topic echo /orbo/embedded/wheel_state --qos-reliability best_effort --flow-style
+```
+
+#### D. Run a 20-second session with three flipper gestures
+
+In the **owner ROS terminal**, paste the block below. It grants this runtime
+owner five minutes of robot-command permission, opens a fresh episode, requests
+one 20-second driving session, and sends three gestures through that same owner.
+It creates fresh request keys automatically. It sends stop during cleanup if
+the sequence fails or you press Ctrl-C.
+
+After starting it, switch to the **keyboard terminal** and hold W to drive the
+lifted wheels. Gesture requests begin after five seconds, leaving time to switch
+terminals. Keep sending W/S/A/D input during the gestures; releasing keys returns
+wheel velocity to zero after the keyboard's short repeat timeout. Space is
+neutral. The script waits for the driving budget to end normally.
+
+```bash
+/opt/orbo/.venv/bin/python - <<'PY'
+import asyncio
+import time
+import uuid
+from orbo_runtime.cli import request
+
+async def call(method, **args):
+    response = await request('/run/orbo/runtime.sock', method, args)
+    if not response.get('ok'):
+        raise RuntimeError(f'{method}: {response.get("error", response)}')
+    return response['result']
+
+async def main():
+    await call('permission.set', scope='robot.command', destination='orbo',
+               enabled=True, expires=time.time() + 300)
+    episode = (await call('episode.start', profile='physical_task.v1'))['episode_id']
+    print(f'Episode: {episode}', flush=True)
+    drive = None
+    outcome = 'unknown'
+    try:
+        drive = asyncio.create_task(call('robot.teleop', episode_id=episode,
+                                         key=uuid.uuid4().hex, duration=20))
+        print('Switch to the keyboard and hold W. First gesture in 5 seconds.', flush=True)
+        await asyncio.sleep(5)
+        gesture_epochs = []
+        for index in range(3):
+            if drive.done():
+                await drive  # Surface a rejected/failed session before any new gesture.
+                raise RuntimeError('Driving session ended before the gesture sequence')
+            result = await call('robot.gesture', episode_id=episode,
+                                key=uuid.uuid4().hex, duration=1.5)
+            if result['state'] != 'completed':
+                raise RuntimeError(f'Gesture did not complete: {result["state"]}')
+            gesture_epochs.append(result['epoch'])
+            print(f'Gesture {index + 1}: completed, epoch={result["epoch"]}', flush=True)
+            await asyncio.sleep(1)
+        result = await drive
+        if result['state'] != 'completed' or any(e != result['epoch'] for e in gesture_epochs):
+            raise RuntimeError('Driving did not complete in the shared gesture epoch')
+        outcome = 'completed'
+        print('Shared-session commands completed. Check observed motion and final telemetry.', flush=True)
+    finally:
+        try:
+            await call('stop')
+        finally:
+            if drive is not None:
+                if not drive.done():
+                    drive.cancel()
+                await asyncio.gather(drive, return_exceptions=True)
+        await call('episode.end', episode_id=episode, outcome=outcome)
+
+asyncio.run(main())
+PY
+```
+
+Pass criteria: both wheels visibly turn while each flipper gesture occurs;
+measured wheel velocities continue during the gestures; `boot_id` and `epoch`
+stay unchanged; feedback remains valid; hardware errors stay zero and read-error
+counts do not increase. Each gesture should return the flippers to rest without
+interrupting driving. The script checks command completion/session correlation;
+it does not measure servo position or prove that you supplied nonzero wheel input.
+
+If a request fails, inspect that error and the runtime/control logs before trying
+again. Unknown outcomes can reserve resources until reconciled; do not delete
+the journal or restart repeatedly to bypass an unresolved command.
+
+#### E. Manual gesture and stop commands
+
+For a manually authorized session from **Authorize a session** above, use its
+episode ID while it is still armed:
 
 ```bash
 ros2 run orbo_runtime runtime request robot.gesture \
@@ -642,9 +882,16 @@ From another owner terminal, stop both streams early with:
 
 ```bash
 ros2 run orbo_runtime runtime request stop
+ros2 topic echo /orbo/embedded/health --once --qos-reliability best_effort
+ros2 topic echo /orbo/embedded/wheel_state --once --qos-reliability best_effort
 ```
 
-After disarming, close the episode with the actual outcome (`completed`,
+Require `armed: false`, valid feedback and near-zero wheel velocities, with
+unchanged error counts. Observe that the flippers stop being driven; these
+three-wire servos provide no measured-position feedback.
+
+For a manually created episode (the timed script closes its own), after
+disarming close the episode with the actual outcome (`completed`,
 `cancelled`, `failed`, or `unknown`):
 
 ```bash
