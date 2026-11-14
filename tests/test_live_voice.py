@@ -362,3 +362,53 @@ def test_openai_near_credit_is_rejected_and_update_limit_is_conservative():
         ReleasedUpdate("é" * 241)
     with pytest.raises(Rejected):
         ReleasedUpdate("hello", "task")
+
+
+async def test_unqualified_aec_refused_before_billed_connection():
+    async def backend(context):
+        raise AssertionError
+
+    store, wire, bridge = setup(backend)
+    bridge.audio = DuplexAudio()
+    with pytest.raises(Rejected, match="echo"):
+        await bridge.run(wake="local")
+    assert wire.sent == []
+    assert store.db.execute("SELECT count(*) FROM live_sessions").fetchone()[0] == 0
+
+
+def test_restart_fences_unresolved_voice_work_without_replay(tmp_path):
+    async def backend(context):
+        raise AssertionError("recovery must never execute a delegation")
+
+    path = tmp_path / "journal.db"
+    store = Store(path)
+    episode = store.episode("owner", provenance="synthetic")
+    LiveBridge(store, "owner", episode, backend, Transport(), Audio())
+    store.db.execute(
+        "INSERT INTO live_sessions VALUES(?,?,?,?,?,?,?,?,?)",
+        (
+            "s",
+            "owner",
+            episode,
+            "old-provider",
+            "active",
+            5,
+            0,
+            store.clock.utc(),
+            store.boot,
+        ),
+    )
+    store.db.execute("INSERT INTO live_delegations VALUES('s','d',10,'working','t',1)")
+    store.close()
+    recovered = Store(path)
+    bridge = LiveBridge(recovered, "owner", episode, backend, Transport(), Audio())
+    assert recovered.db.execute(
+        "SELECT state,seconds,finalized FROM live_sessions"
+    ).fetchone()[:] == ("unconfirmed", 5, 0)
+    assert (
+        recovered.db.execute("SELECT state FROM live_delegations").fetchone()[0]
+        == "unknown"
+    )
+    assert bridge.work.empty()
+    assert bridge.binding == ("t", 1)
+    recovered.close()

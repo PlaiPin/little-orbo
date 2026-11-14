@@ -13,6 +13,7 @@ from jsonschema import Draft202012Validator
 
 from .contracts import Rejected, canonical, digest, finite
 from .embodied_tasks import KINDS, TERMINAL
+from .economics import Ledger
 from .live_voice import DelegationContext, ReleasedUpdate
 from .providers import VerifiedReply
 
@@ -93,6 +94,7 @@ class ConversationBackend:
         active_task_id=None,
         allowed_places=None,
         timeout=45,
+        usage_provenance="fixture",
     ):
         if any(
             not isinstance(v, str) or not v.strip() or len(v) > 256
@@ -121,6 +123,9 @@ class ConversationBackend:
         ):
             raise Rejected("invalid task count budget")
         self.timeout = finite(timeout, 1, 120)
+        if usage_provenance not in {"fixture", "live_service"}:
+            raise Rejected("explicit provider usage provenance required")
+        self.usage_provenance = usage_provenance
         if allowed_places is not None and (
             not isinstance(allowed_places, list)
             or len(allowed_places) > 32
@@ -288,7 +293,7 @@ class ConversationBackend:
                     update = self._clarify("intent")
                 else:
                     proposal, evidence, usage = await self._interpret(
-                        context, active, places, references, baselines
+                        context, active, places, references, baselines, key
                     )
                     self.store.db.execute(
                         "UPDATE conversation_requests SET state='planned',proposal=? WHERE owner=? AND key=?",
@@ -324,7 +329,9 @@ class ConversationBackend:
                 )
                 raise
 
-    async def _interpret(self, context, active, places, references, baselines):
+    async def _interpret(
+        self, context, active, places, references, baselines, request_key
+    ):
         instructions = (
             "Interpret the owner's embodied-assistant request using ONLY supplied context and catalog. "
             "Return exactly one JSON object matching the supplied schema, no markdown or tools. "
@@ -390,6 +397,21 @@ class ConversationBackend:
             or not isinstance(proof.get("response_id"), str)
         ):
             raise Rejected("verified private interpretation required")
+        Ledger(self.store).observe(
+            "near",
+            self.owner,
+            proof["response_id"],
+            "usage",
+            {
+                "model": proof["model"],
+                "raw_usage": reply.usage,
+                "amount": None,
+                "request_key": request_key,
+                "task_id": active["id"] if active else None,
+                "stage": "request_interpretation",
+            },
+            provenance=self.usage_provenance,
+        )
         if reply.message.get("tool_calls"):
             raise Rejected("interpreter tool calls prohibited")
         content = reply.message.get("content")

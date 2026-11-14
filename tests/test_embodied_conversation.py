@@ -50,7 +50,7 @@ class Reasoner:
                 "signature_kind": "provider_tee",
                 "message_digest": digest(message),
                 "model": self.model,
-                "response_id": "fixture-response",
+                "response_id": "fixture-response-" + str(len(self.calls)),
             },
             {"total_tokens": 20},
         )
@@ -311,3 +311,22 @@ async def test_memory_revoked_during_interpretation_never_admits_reference(confi
     with pytest.raises(Rejected, match="permission"):
         await backend.text("check exact wrench", "one")
     assert not assistant.submitted
+
+
+async def test_interpretation_usage_is_separate_from_task_and_unpriced(configured):
+    store, _, reasoner, backend = configured
+    result = await backend.text("Check shelf", "one")
+    row = store.db.execute(
+        "SELECT * FROM records WHERE provider='near' AND kind='usage'"
+    ).fetchone()
+    body = json.loads(row["body"])
+    assert row["account"] == "owner"
+    assert body["provenance"] == "fixture"
+    assert body["data"]["raw_usage"] == {"total_tokens": 20}
+    assert body["data"]["amount"] is None
+    assert body["data"]["task_id"] is None  # Task does not exist before interpretation.
+    request = store.db.execute(
+        "SELECT result FROM conversation_requests WHERE key=?",
+        (body["data"]["request_key"],),
+    ).fetchone()
+    assert json.loads(request[0])["task_id"] == result.task_id

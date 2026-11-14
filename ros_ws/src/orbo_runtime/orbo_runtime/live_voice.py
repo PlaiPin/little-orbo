@@ -24,7 +24,7 @@ SCHEMA = """
 CREATE TABLE IF NOT EXISTS live_sessions(
  id TEXT PRIMARY KEY, owner TEXT NOT NULL, episode_id TEXT NOT NULL REFERENCES episodes(id),
  provider_id TEXT, state TEXT NOT NULL, seconds REAL NOT NULL DEFAULT 0,
- finalized INTEGER NOT NULL DEFAULT 0, created REAL NOT NULL);
+ finalized INTEGER NOT NULL DEFAULT 0, created REAL NOT NULL, boot TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS live_fragments(
  session_id TEXT NOT NULL REFERENCES live_sessions(id), event_id TEXT NOT NULL,
  role TEXT NOT NULL, start_ms INTEGER NOT NULL, end_ms INTEGER NOT NULL, text TEXT NOT NULL,
@@ -288,6 +288,18 @@ class LiveBridge:
             raise Rejected("capture/playback and Live sample rates must match")
         self.current_revision = current_revision
         store.db.executescript(SCHEMA)
+        # A restarted process cannot own a prior network session. Preserve its
+        # unconfirmed usage; never enqueue its unresolved delegated side effects.
+        store.db.execute(
+            "UPDATE live_delegations SET state='unknown' WHERE state IN ('admitted','working') "
+            "AND session_id IN (SELECT id FROM live_sessions WHERE boot!=?)",
+            (store.boot,),
+        )
+        store.db.execute(
+            "UPDATE live_sessions SET state='unconfirmed' WHERE boot!=? "
+            "AND state IN ('connecting','active')",
+            (store.boot,),
+        )
         self.session_id = identity()
         self.provider_id = None
         self.started, self.finalized = asyncio.Event(), asyncio.Event()
@@ -342,9 +354,16 @@ class LiveBridge:
         if wake not in {"local", "authenticated_remote"} or self.running:
             raise Rejected("explicit local/authenticated wake required")
         self._permission()
+        if getattr(self.audio, "aec_qualified", True) is not True:
+            raise Rejected("full-duplex Live requires qualified echo-cancelled input")
+        if self.store.db.execute(
+            "SELECT 1 FROM live_sessions WHERE owner=? AND state IN ('connecting','active')",
+            (self.owner,),
+        ).fetchone():
+            raise Rejected("an owned Live session is already active")
         self.running = True
         self.store.db.execute(
-            "INSERT INTO live_sessions VALUES(?,?,?,?,?,?,?,?)",
+            "INSERT INTO live_sessions VALUES(?,?,?,?,?,?,?,?,?)",
             (
                 self.session_id,
                 self.owner,
@@ -354,9 +373,11 @@ class LiveBridge:
                 0,
                 0,
                 self.store.clock.utc(),
+                self.store.boot,
             ),
         )
         jobs = []
+        receiver = None
         try:
             await self.transport.connect()
             await self._send(
@@ -414,6 +435,9 @@ class LiveBridge:
                     break
         finally:
             self.closing = True
+            if receiver is not None:
+                receiver.cancel()
+                await asyncio.gather(receiver, return_exceptions=True)
             for job in jobs:
                 job.cancel()
             await asyncio.gather(*jobs, return_exceptions=True)
@@ -421,8 +445,10 @@ class LiveBridge:
             # backend worker may finish and leave its result durably pending.
             if self._worker and self._worker.done():
                 await asyncio.gather(self._worker, return_exceptions=True)
-            self.audio.close()
-            await self.transport.close()
+            try:
+                self.audio.close()
+            finally:
+                await self.transport.close()
             state = "closed" if self.finalized.is_set() else "unconfirmed"
             self.store.db.execute(
                 "UPDATE live_sessions SET state=? WHERE id=?", (state, self.session_id)
