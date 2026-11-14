@@ -205,8 +205,36 @@ class EmbodiedService:
             request.setdefault("environment", self.environment)
             request.setdefault("map_version", self.map_version)
             return await self.submit(self.owner, args["key"], request)
+        if method == "task.delegate":
+            from .live_voice import DelegationContext
+
+            body = args.get("context")
+            if not isinstance(body, dict) or set(body) - {
+                "session_id", "delegation_id", "offset_ms", "fragments",
+                "task_id", "revision", "complete_turn",
+            }:
+                raise Rejected("bounded Live delegation context required")
+            fragments = body.get("fragments")
+            if (
+                not isinstance(fragments, list) or len(fragments) > 256
+                or any(not isinstance(item, dict) for item in fragments)
+                or type(body.get("offset_ms")) is not int
+                or not 0 <= body["offset_ms"] <= 3_600_000
+            ):
+                raise Rejected("invalid Live delegation fragments or offset")
+            context = DelegationContext(
+                **dict(body, fragments=tuple(fragments), complete_turn=False)
+            )
+            result = await self.backend("openai")(context)
+            return {
+                "text": result.text, "task_id": result.task_id,
+                "revision": result.revision, "kind": result.kind,
+            }
         if method == "task.text":
-            backend = self.backend(active_task_id=args.get("task_id"))
+            destination = args.get("destination", "local")
+            if destination not in {"local", "openai"}:
+                raise Rejected("owner text destination must be local or openai")
+            backend = self.backend(destination, active_task_id=args.get("task_id"))
             result = await backend.text(args["text"], args["key"])
             return {
                 "text": result.text,

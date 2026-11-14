@@ -10,6 +10,7 @@ from pathlib import Path
 import platform
 import signal
 import socket
+import sys
 import tomllib
 
 from .broker import Broker, FakeRobot
@@ -756,9 +757,22 @@ def main(args=None):
     req.add_argument("--args", default="{}")
     req.add_argument("--socket", default="/run/orbo/runtime.sock")
     sub.add_parser("diagnostics")
+    sub.add_parser("live-e2e", help="opt-in live integration tests (use --help)")
+    sub.add_parser("intents", help="explicit NEAR Intents quote/approval/execution (use --help)")
     analysis = sub.add_parser("analyze")
     analysis.add_argument("package")
-    args = parser.parse_args(args)
+    arguments = list(sys.argv[1:] if args is None else args)
+    # Delegate intact argv so the integration CLIs own their opt-in flags and
+    # expose identical behavior through installed, ROS and module entry points.
+    if arguments and arguments[0] == "live-e2e":
+        from .live_e2e import main as live_e2e_main
+
+        return live_e2e_main(arguments[1:])
+    if arguments and arguments[0] == "intents":
+        from .intents import main as intents_main
+
+        return intents_main(arguments[1:])
+    args = parser.parse_args(arguments)
     try:
         if args.command == "serve":
             asyncio.run(serve(args.config))
@@ -781,4 +795,4 @@ def main(args=None):
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

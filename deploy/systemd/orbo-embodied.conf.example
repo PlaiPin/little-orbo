@@ -9,3 +9,7 @@ LoadCredential=NEARAI_API_KEY:/etc/orbo/credentials/NEARAI_API_KEY
 LoadCredential=OPENAI_API_KEY:/etc/orbo/credentials/OPENAI_API_KEY
 # Optional principal-specific remote credential:
 # LoadCredential=ORBO_REMOTE_OWNER_PHONE_TOKEN:/etc/orbo/credentials/ORBO_REMOTE_OWNER_PHONE_TOKEN
+# Optional consumer retrieval and authoritative usage/credit reads:
+# LoadCredential=COMMONS_EXPORT_TOKEN:/etc/orbo/credentials/COMMONS_EXPORT_TOKEN
+# LoadCredential=COMMONS_CONTRIBUTOR_TOKEN:/etc/orbo/credentials/COMMONS_CONTRIBUTOR_TOKEN
+# LoadCredential=NEARAI_REPORTING_TOKEN:/etc/orbo/credentials/NEARAI_REPORTING_TOKEN

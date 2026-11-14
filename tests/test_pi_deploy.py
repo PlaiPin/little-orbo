@@ -116,7 +116,7 @@ def test_upgrade_preserves_configuration_and_data_and_systemd_is_opt_in(installe
     source, target, run = installer
     root = source.parent
     # Public deployment files plus a harmless stand-in for the network bootstrap.
-    for name in ('deploy/profiles/pi.toml', 'deploy/profiles/booster-k1.toml',
+    for name in ('deploy/profiles/pi.toml', 'deploy/profiles/booster-k1.toml', 'deploy/profiles/embodied.toml',
                  'ros_ws/src/orbo_bringup/config/camera.template.yaml',
                  'deploy/systemd/orbo-runtime.service'):
         path = source / name
@@ -127,7 +127,7 @@ def test_upgrade_preserves_configuration_and_data_and_systemd_is_opt_in(installe
     (root / 'config').mkdir()
     (root / 'state').mkdir()
     preserved = [root / 'config' / name for name in
-                 ('runtime.toml', 'booster-k1.toml', 'camera.yaml', 'calibration.yaml', 'agent.env', 'camera.env')]
+                 ('runtime.toml', 'booster-k1.toml', 'embodied.toml', 'camera.yaml', 'calibration.yaml', 'agent.env', 'camera.env')]
     preserved += [root / 'state/journal.db', root / 'config/credentials/NEARAI_API_KEY']
     for path in preserved:
         path.parent.mkdir(parents=True, exist_ok=True)

@@ -9,4 +9,4 @@ export RMW_IMPLEMENTATION=rmw_fastrtps_cpp ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHO
 export ROS_STATIC_PEERS="" SKIP_DEFAULT_XML=1
 unset ROS_DISCOVERY_SERVER ROS_SUPER_CLIENT ROS_LOCALHOST_ONLY
 unset FASTRTPS_DEFAULT_PROFILES_FILE FASTDDS_DEFAULT_PROFILES_FILE
-exec python -m orbo_runtime.cli serve --config deploy/profiles/gazebo-embodied.toml
+exec python -m orbo_runtime.cli serve --config "${1:-deploy/profiles/gazebo-embodied.toml}"

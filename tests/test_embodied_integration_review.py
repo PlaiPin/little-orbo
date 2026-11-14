@@ -173,6 +173,38 @@ async def settle(local, task_id):
     return local.embodied.assistant.tasks.get("owner", task_id)
 
 
+@pytest.mark.parametrize("method", ["task.text", "task.delegate"])
+async def test_external_live_backend_preserves_release_destination(service, method):
+    local, reasoner = service
+    args = {"text": "Check shelf", "key": "external-live", "destination": "openai"}
+    if method == "task.delegate":
+        args = {"context": {
+            "session_id": "external-live", "delegation_id": "one", "offset_ms": 150,
+            "fragments": [{"role": "user", "text": "Check shelf", "start_ms": 0, "end_ms": 150}],
+            # The API never upgrades a Live fragment into a completed turn.
+            "complete_turn": True,
+        }}
+    accepted = await local.call({"method": method, "args": args})
+    task = await settle(local, accepted["task_id"])
+    assert task["request"]["destination"] == "openai"
+    if method == "task.delegate":
+        context = json.loads(reasoner.calls[0][1]["content"])
+        assert context["complete_turn"] is False
+        assert context["delegation_offset_ms"] == 150
+    local.store.grant("owner", "result.release", "openai", False, local.store.clock.utc() + 30)
+    with pytest.raises(Rejected):
+        await local.call({"method": "task.result", "args": {"task_id": task["id"]}})
+
+
+async def test_owner_text_rejects_unconfigured_external_recipient(service):
+    local, reasoner = service
+    with pytest.raises(Rejected, match="destination"):
+        await local.call({"method": "task.text", "args": {
+            "text": "Check shelf", "key": "invalid-destination", "destination": "public",
+        }})
+    assert not reasoner.calls
+
+
 async def test_natural_owner_ipc_reaches_evidence_linked_result_once(service):
     local, reasoner = service
     request = {

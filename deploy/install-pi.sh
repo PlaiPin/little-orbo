@@ -78,7 +78,7 @@ python3.12 -m venv --system-site-packages .venv
 set +u
 source /opt/ros/jazzy/setup.bash
 set -u
-.venv/bin/python -c 'import rclpy, nearai_inference_sdk, sounddevice'
+.venv/bin/python -c 'import rclpy, nearai_inference_sdk, sounddevice, websockets'
 python3 tools/bootstrap-agent.py
 cd ros_ws
 export CMAKE_BUILD_PARALLEL_LEVEL=2 MAKEFLAGS=-j2
@@ -88,9 +88,10 @@ export CMAKE_BUILD_PARALLEL_LEVEL=2 MAKEFLAGS=-j2
 cd ..
 [[ -f /etc/orbo/runtime.toml ]] || install -m 0600 deploy/profiles/pi.toml /etc/orbo/runtime.toml
 [[ -f /etc/orbo/booster-k1.toml ]] || install -m 0600 deploy/profiles/booster-k1.toml /etc/orbo/booster-k1.toml
+[[ -f /etc/orbo/embodied.toml ]] || install -m 0600 deploy/profiles/embodied.toml /etc/orbo/embodied.toml
 [[ -f /etc/orbo/camera.yaml ]] || install -m 0600 ros_ws/src/orbo_bringup/config/camera.template.yaml /etc/orbo/camera.yaml
 chown orbo:orbo /etc/orbo/camera.yaml
-chown orbo:orbo /etc/orbo/runtime.toml /etc/orbo/booster-k1.toml
+chown orbo:orbo /etc/orbo/runtime.toml /etc/orbo/booster-k1.toml /etc/orbo/embodied.toml
 if [[ "$ORBO_INSTALL_SYSTEMD" == true ]]; then
   install -m 0644 deploy/systemd/*.service /etc/systemd/system/
   if [[ "$ORBO_STAGING" == false ]]; then
@@ -100,4 +101,4 @@ if [[ "$ORBO_INSTALL_SYSTEMD" == true ]]; then
   fi
 fi
 # Existing units/configuration/data are preserved on upgrade; no service starts.
-printf '%s\n' 'Installation complete; source Jazzy and ros_ws/install/local_setup.bash, then follow PI5_QUICKSTART.md.'
+printf '%s\n' 'Installation complete; source Jazzy and ros_ws/install/local_setup.bash, then follow deploy/README.md.'

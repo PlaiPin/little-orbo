@@ -54,3 +54,14 @@ socket = "/run/orbo/remote-tasks.sock"
 # environments = ["lab"]
 # credential = "ORBO_REMOTE_OWNER_PHONE_TOKEN"
 # expires = 1800000000.0 # Set an intentional future UTC epoch expiry.
+
+# Optional compatible Trace Commons contributor/server deployment.
+# Uncomment only after following deploy/trace-commons/README.md.
+# [commons]
+# socket = "/var/lib/orbo/commons/daemon.sock"
+# origin = "https://commons.example.org"
+# account = "enrolled-contributor-account"
+#
+# Optional authoritative NEAR usage reconciliation (separate reporting token).
+# [reporting]
+# near_organization = "organization-id"

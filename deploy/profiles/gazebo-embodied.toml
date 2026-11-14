@@ -35,3 +35,9 @@ sample_rate = 24000
 idle_seconds = 60
 max_session_seconds = 900
 aec_qualified = false
+
+# Optional compatible Trace Commons deployment; account/server must be enrolled.
+# [commons]
+# socket = "artifacts/private/commons/daemon.sock"
+# origin = "https://commons.example.org"
+# account = "enrolled-contributor-account"

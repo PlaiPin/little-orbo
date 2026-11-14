@@ -23,7 +23,7 @@ gz-transport13-python = ">=13.5,<14"
 gz-msgs10-python = ">=10.3,<11"
 
 [pypi-dependencies]
-orbo-runtime = { path = ".", editable = true }
+orbo-runtime = { path = ".", editable = true, extras = ["near", "live", "intents"] }
 pytest-asyncio = "==1.2.0"
 
 # Fast DDS 2.14 shared-memory recovery can block native Mac publishers.
