@@ -1,0 +1,19 @@
+{
+  "micro_ros_agent": {
+    "url": "https://github.com/micro-ROS/micro-ROS-Agent.git",
+    "commit": "7c932329ad5591ef23942ef1962534258c16b000"
+  },
+  "xrce_agent": {
+    "url": "https://github.com/eProsima/Micro-XRCE-DDS-Agent.git",
+    "commit": "73622810d984349b80bbac0ef55fc0b694d62222"
+  },
+  "micro_ros_msgs": {
+    "path": "micro_ros_src/src/micro_ros_msgs",
+    "url": "https://github.com/micro-ROS/micro_ros_msgs",
+    "commit": "b1ef85201e5545d3e07b73f4628bb15836062573"
+  },
+  "spdlog": {
+    "url": "https://github.com/gabime/spdlog.git",
+    "commit": "eb3220622e73a4889eee355ffa37972b3cac3df5"
+  }
+}
