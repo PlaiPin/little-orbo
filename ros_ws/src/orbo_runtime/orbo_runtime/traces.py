@@ -10,6 +10,7 @@ from .contracts import Rejected, canonical, identity
 PURPOSES = {
     "attention_timing": "attention.v1",
     "physical_task_outcomes": "physical_task.v1",
+    "embodied_process": "physical_task.v1",
 }
 
 
@@ -260,6 +261,13 @@ def analyze(package):
     ):
         raise Rejected("unsupported package")
     events = package["events"]
+    from .embodied_evaluation import analyze_process
+
+    process = (
+        {"process_evaluation": analyze_process(package)}
+        if package["purpose"] == "embodied_process"
+        else {}
+    )
     kinds = [e["kind"] for e in events]
     unknown = [
         e["id"]
@@ -286,6 +294,7 @@ def analyze(package):
             ):
                 latencies.append(event["mono"] - start["mono"])
     return {
+        **process,
         "provenance": package["episode"]["provenance"],
         "event_count": len(events),
         "declared_outcome": package["episode"]["state"],
