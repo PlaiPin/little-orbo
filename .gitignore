@@ -26,3 +26,9 @@ credentials.env
 
 # Generated local test reports and hardware captures
 /artifacts/test-evidence/
+
+# Superseded preview exports; the current description installs v9 only
+/ros_ws/src/orbo_description/meshes/v05/
+
+# Locally built Python distributions
+/dist/
