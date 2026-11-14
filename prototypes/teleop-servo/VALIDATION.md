@@ -41,7 +41,7 @@ C assertions were not executed during this session.
 ## Review scope and preserved behavior
 
 Reviewed the Wi-Fi/USB keyboard teleoperation path and the existing PWM flipper code,
-using the user's running Software/Teleoperate tree as the copy source. The broader
+using the user's running prototypes/teleop tree as the copy source. The broader
 ROS, simulation and CAD projects were outside this integration scope.
 
 The running wheel driver, motor IDs, UART pins, 1 Mbps bus rate, AP credentials,

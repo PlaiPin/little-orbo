@@ -12,9 +12,9 @@ ROS 2 Jazzy and preserves the working camera stack; no Pixi is needed on the Pi.
 Start with the [runtime guide](packages/orbo_runtime/README.md),
 [ROS workspace guide](ros_ws/README.md), and [firmware README](firmware/orbo/README.md).
 Software-only checks do not establish physical driving, Pi peripheral operation,
-live-provider behavior or navigation acceptance. Existing CAD and
-`Software/Teleoperate` remain intact; the ROS firmware does not use legacy UDP/text
-motion handlers.
+live-provider behavior or navigation acceptance. Standalone USB/Wi-Fi experiments
+live under [prototypes/](prototypes/README.md). The ROS firmware uses its own
+bus driver and does not use the prototypes' UDP/text motion handlers.
 
 CAD models, printable STL files, versioned design packages, and ROS mesh exports
 are consolidated under [`cad/`](cad/). Version folders retain their supporting

@@ -1,9 +1,9 @@
 # Little Orbo — Wi-Fi keyboard drive + little hands
 
 This standalone ESP-IDF project provides Wi-Fi keyboard driving and two PWM
-arms. It shares the teleoperation approach in `Software/Teleoperate` and the
-flipper driver approach in `firmware/orbo/main/flippers.c`. No ROS or Raspberry
-Pi runtime is needed.
+arms. It shares the teleoperation approach in [teleop](../teleop/README.md) and the
+flipper driver approach in [the production firmware](../../firmware/orbo/main/flippers.c).
+No ROS or Raspberry Pi runtime is needed.
 
 ## Run
 
@@ -72,10 +72,11 @@ on the servo. Wheels retain the existing 500 ms drive-command watchdog.
 
 ## Build / upload
 
-On this PC, the helper uses the installed ESP-IDF 6.1 toolchain:
+From the repository root on the Windows development PC, the helper uses its
+configured ESP-IDF 6.1 installation:
 
 ```powershell
-cd 'C:\Users\sahlu\Desktop\little-orbo\final with servo'
+cd prototypes/teleop-servo
 .\build.ps1
 .\build.ps1 -Flash -Port COM25
 ```
@@ -90,8 +91,8 @@ running reference: ESP32-S3, 16 MB flash, UART GPIO43/44, 1 Mbps, wheel IDs 1/2,
 50 Hz, 14-bit LEDC PWM, following the existing flipper driver and
 [Espressif's LEDC documentation](https://docs.espressif.com/projects/esp-idf/en/stable/esp32s3/api-reference/peripherals/ledc.html).
 
-To restore the previous application, build/flash the untouched reference project's
-`Teleoperate/firmware` folder. It retains its original source and build output.
+To use the wheel-only application, build and flash
+[the teleop firmware](../teleop/firmware) with its own configuration.
 
 ## Protocol additions
 

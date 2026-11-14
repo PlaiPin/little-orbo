@@ -3,7 +3,7 @@
 For foreground ROS commands, start with [PI5_QUICKSTART.md](../../../PI5_QUICKSTART.md).
 The systemd examples below are optional and require `--install-systemd`.
 
-The software supports ROS 2 teleoperation, local camera topics, and microphone/speaker operation on the Pi 5 / Ubuntu 24.04 / Jazzy target. Physical commissioning is still pending. The original `Software/Teleoperate` program remains a separate legacy UDP/text application; it must not run alongside the production ROS firmware. The new operator path is `Joy → brokered teleop session → stamped velocity gate → ros2_control → micro-ROS → XL430`.
+The software supports ROS 2 teleoperation, local camera topics, and microphone/speaker operation on the Pi 5 / Ubuntu 24.04 / Jazzy target. Physical commissioning is still pending. The original `prototypes/teleop` program remains a separate legacy UDP/text application; it must not run alongside the production ROS firmware. The new operator path is `Joy → brokered teleop session → stamped velocity gate → ros2_control → micro-ROS → XL430`.
 
 ## Confirmed hardware
 

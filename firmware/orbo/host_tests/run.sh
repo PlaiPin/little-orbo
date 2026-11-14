@@ -21,7 +21,7 @@ for profile in enabled disabled; do
 done
 "$ORBO_CC" "${FLAGS[@]}" \
   -I"$ORBO_FIRMWARE/host_tests/bus_stubs" -I"$ORBO_FIRMWARE/host_tests/usb_stubs" \
-  -I"$ORBO_FIRMWARE/main" -I"$ORBO_FIRMWARE/../../Software/Teleoperate/firmware/main" \
+  -I"$ORBO_FIRMWARE/main" \
   "$ORBO_FIRMWARE/main/wheel_bus.c" "$ORBO_FIRMWARE/host_tests/test_wheel_bus.c" \
   -o "$ORBO_TEST_BUILD/wheel-bus"
 "$ORBO_TEST_BUILD/wheel-bus"

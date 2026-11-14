@@ -139,7 +139,7 @@ This exercises stamped velocity, the velocity gate, ros2_control, the agent and 
 
 ## Pi teleoperation, camera and USB audio
 
-The [peripherals runbook](pi-peripherals.md) covers the completed ROS keyboard/gamepad teleop path, confirmed ArduCam B0033+B0087 OV5647 camera, and WaveShare USB TO AUDIO onboard mic/8Ω 5W speaker. It includes local camera/audio checks, calibration, exclusive control modes, and the two new disabled services. The original `Software/Teleoperate` is a separate legacy path.
+The [peripherals runbook](pi-peripherals.md) covers the completed ROS keyboard/gamepad teleop path, confirmed ArduCam B0033+B0087 OV5647 camera, and WaveShare USB TO AUDIO onboard mic/8Ω 5W speaker. It includes local camera/audio checks, calibration, exclusive control modes, and the two new disabled services. The original `prototypes/teleop` is a separate legacy path.
 
 ## 4. Credentials and voice
 

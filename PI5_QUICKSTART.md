@@ -298,7 +298,7 @@ This uses the existing 1.2 rad/s bench bound. Expect a completed drive and
 speed, no hardware errors and unchanged read-error counters before proceeding.
 If the helper exits with a failure or stop is unconfirmed, do not continue to
 the next test. Do not run this direct-wheel owner alongside the base controller,
-application runtime, or legacy `Software/Teleoperate` program.
+application runtime, or legacy `prototypes/teleop` program.
 
 ## 6. Complete lifted-wheel base stack
 
