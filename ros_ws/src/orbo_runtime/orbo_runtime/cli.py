@@ -81,6 +81,15 @@ class LocalService:
         voice_enabled = config.get("voice", {}).get("enabled", False)
         # Preserve older voice-only configurations; new profiles are explicit.
         reasoning_enabled = config.get("near", {}).get("enabled", voice_enabled)
+        live_enabled = config.get("live", {}).get("enabled", False)
+        if live_enabled and (
+            voice_enabled
+            or not reasoning_enabled
+            or not config.get("embodied", {}).get("enabled", False)
+        ):
+            raise Rejected(
+                "Live requires embodied/NEAR enabled and alternate voice disabled"
+            )
         if voice_enabled and not reasoning_enabled:
             raise Rejected("voice requires near.enabled")
         self.config = config
@@ -137,8 +146,16 @@ class LocalService:
         self.jobs = set()
         self.capture_stop = None
         self.capture_task = None
+        self.embodied = None
+        if config.get("embodied", {}).get("enabled", False):
+            from .embodied_service import EmbodiedService
+
+            self.embodied = EmbodiedService(self)
 
     async def interrupt(self):
+        if self.embodied:
+            for task_id in tuple(self.embodied.assistant.jobs):
+                await self.embodied.assistant.pause(self.owner, task_id)
         if self.capture_stop:
             self.capture_stop.set()
         if self.capture_task and self.capture_task is not asyncio.current_task():
@@ -153,6 +170,10 @@ class LocalService:
         args = request.get("args", {})
         if not isinstance(args, dict):
             raise Rejected("arguments must be an object")
+        if method.startswith(("task.", "place.", "memory.", "live.", "evaluation.")):
+            if self.embodied is None:
+                raise Rejected("embodied profile not enabled")
+            return await self.embodied.call(method, args)
         if method == "episode.start":
             return {
                 "episode_id": self.store.episode(
@@ -588,6 +609,8 @@ class LocalService:
             await asyncio.sleep(0.2)
 
     async def close(self):
+        if self.embodied:
+            await self.embodied.close()
         try:
             await self.interrupt()
         except Exception as error:
@@ -632,6 +655,16 @@ async def serve(path):
         service.handle, str(socket_path), limit=65537
     )
     socket_path.chmod(0o600)
+    remote_server, remote_path = None, None
+    if service.embodied and service.embodied.remote:
+        remote_path = Path(config["embodied"]["remote"]["socket"])
+        if remote_path == socket_path or remote_path.exists():
+            raise Rejected("separate unused remote socket path required")
+        remote_path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        remote_server = await asyncio.start_unix_server(
+            service.embodied.remote.handle, str(remote_path), limit=32769
+        )
+        remote_path.chmod(0o600)
     stop = asyncio.Event()
     for sig in (signal.SIGINT, signal.SIGTERM):
         asyncio.get_running_loop().add_signal_handler(sig, stop.set)
@@ -646,6 +679,10 @@ async def serve(path):
         for task in tuple(service.jobs):
             task.cancel()
         await asyncio.gather(*service.jobs, return_exceptions=True)
+        if remote_server:
+            remote_server.close()
+            await remote_server.wait_closed()
+            remote_path.unlink(missing_ok=True)
         await service.close()
         socket_path.unlink(missing_ok=True)
 

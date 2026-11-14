@@ -92,7 +92,9 @@ class RemoteTasks:
             # Caller cannot choose identity or impersonate a local provenance.
             body.pop("owner", None)
             body["requester"] = principal.name
-            task = await self.submit(principal.owner, args["key"], body)
+            task = await self.submit(
+                principal.owner, "remote:" + principal.name + ":" + args["key"], body
+            )
             with self.store.transaction() as db:
                 existing = db.execute(
                     "SELECT principal FROM remote_task_bindings WHERE task_id=?",
@@ -117,7 +119,13 @@ class RemoteTasks:
             }
         binding = self.owned(principal, args.get("task_id"))
         if method == "task.cancel":
-            return await self.cancel(principal.owner, binding["task_id"])
+            task = await self.cancel(principal.owner, binding["task_id"])
+            return {
+                "task_id": binding["task_id"],
+                "state": task.get("state", "cancel_requested"),
+                "stop_requested": True,
+                "physical_cessation": "not_independently_verified",
+            }
         if method == "delivery.ack":
             with self.store.transaction() as db:
                 result = db.execute(

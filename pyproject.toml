@@ -16,6 +16,7 @@ dependencies = [
 [project.optional-dependencies]
 near = ["nearai-inference-sdk==0.3.0"]
 audio = ["sounddevice==0.5.3"]
+live = ["websockets>=15,<16", "sounddevice==0.5.3"]
 
 [dependency-groups]
 dev = ["pytest==8.4.2", "pytest-asyncio==1.2.0", "ruff==0.14.5"]

@@ -1,0 +1,55 @@
+# Owner-edited Pi configuration. No service starts or permissions are granted by this file.
+[runtime]
+owner = "owner"
+profile = "orbo"
+database = "/var/lib/orbo/journal.db"
+socket = "/run/orbo/runtime.sock"
+
+[robot]
+id = "orbo"
+navigation_enabled = true
+teleop_enabled = false
+calibration = "/etc/orbo/calibration.yaml"
+flippers_qualified = false
+attention_pulse_us = []
+
+[near]
+enabled = false # Enable with NEARAI_API_KEY after credential installation.
+model = "z-ai/glm-5.3-flash"
+
+[voice]
+enabled = false # Explicit alternate chained voice profile; use live below for GPT-Live.
+
+[embodied]
+enabled = true
+environment = "lab" # Must match the owner's registered environment.
+map_version = "surveyed-map" # Change when the commissioned map changes.
+image_directory = "/var/lib/orbo/private-images"
+camera_enabled = true
+camera_frame = "camera_optical_frame"
+camera_calibration = "owner-calibrated-camera"
+image_topic = "/orbo/camera/image_raw"
+camera_info_topic = "/orbo/camera/camera_info"
+pose_topic = "/orbo/amcl_pose"
+
+[live]
+enabled = false # OPENAI_API_KEY + explicit grants + actual echo qualification required.
+model = "gpt-live-1"
+voice = "marin"
+sample_rate = 24000
+idle_seconds = 60
+account = "owner"
+aec_qualified = false
+# input_device = "commissioned input"
+# output_device = "commissioned output"
+
+[embodied.remote]
+enabled = false
+socket = "/run/orbo/remote-tasks.sock"
+# Provide a strong dedicated credential through systemd credentials/environment.
+# Only forward this gateway socket to remote clients, never the owner runtime socket.
+# [[embodied.remote.principals]]
+# name = "owner-phone"
+# environments = ["lab"]
+# credential = "ORBO_REMOTE_OWNER_PHONE_TOKEN"
+# expires = 1800000000.0 # Set an intentional future UTC epoch expiry.

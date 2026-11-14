@@ -19378,6 +19378,8 @@ packages:
   - pyyaml>=6.0.2,<7
   - nearai-inference-sdk==0.3.0 ; extra == 'near'
   - sounddevice==0.5.3 ; extra == 'audio'
+  - websockets>=15,<16 ; extra == 'live'
+  - sounddevice==0.5.3 ; extra == 'live'
   requires_python: '>=3.12,<3.14'
 - pypi: https://files.pythonhosted.org/packages/04/4b/29cac41a4d98d144bf5f6d33995617b185d14b22401f75ca86f384e87ff1/h11-0.16.0-py3-none-any.whl
   name: h11
