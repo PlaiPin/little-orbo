@@ -104,6 +104,10 @@ sanitizer, baud-migration, and nine manual-publisher regression tests passed.
 The motors were raised off the ground; this does not qualify ground driving.
 Generated captures remain local and ignored by Git.
 
+For the full `ros2_control` path with measured wheel odometry and v9 RViz meshes,
+see the [Mac control-stack runbook](../../docs/engineering/runbooks/ros-control-macos.md).
+That path uses `tools/control-base.py`; do not run it alongside the direct helper below.
+
 ## Manual CLI and keyboard wheel control
 
 The installed firmware accepts `orbo_embedded_interfaces/msg/WheelCommand` on
@@ -113,13 +117,18 @@ include the current boot ID, an explicitly armed epoch, a strictly increasing
 sequence, and a fresh Unix-millisecond timestamp with bounded validity. Repeating
 one static YAML message with `ros2 topic pub -r` will not maintain motion.
 
-Keep the base lifted and motor power on. In terminal A, from the repository root:
+For the already-flashed updated firmware, no rebuild or B1–GND bridge is needed.
+Keep USB connected, the base lifted, and motor power on. Use two fresh terminals
+outside ESP-IDF and stop any other wheel-command publisher. In terminal A:
 
 ```bash
+cd /Users/kpatch/startup/opendive/projects/little-orbo
 ./tools/run-xrce-agent-macos.sh /dev/cu.usbmodem1234561
 ```
 
-In a fresh terminal B, outside ESP-IDF:
+Leave the agent running. Use the actual application CDC0 port if its name has
+changed (`ls /dev/cu.usbmodem*`); reuse an already-running agent on that port.
+The agent helper enters Pixi itself. In terminal B:
 
 ```bash
 cd /Users/kpatch/startup/opendive/projects/little-orbo
@@ -127,12 +136,18 @@ pixi run --locked bash
 source ros_ws/install/macos/local_setup.bash
 export ROS_DOMAIN_ID=42
 export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+python firmware/orbo/bench_tests/control_wheels.py keyboard
 ```
 
-For a two-second command to both wheels, run:
+Wait for `Armed:` before using the keys below. Q or Ctrl-C exits with stop and
+disarm; expect `Stopped and disarmed (encoder feedback).` Stop the agent only
+after the controller exits. For a timed command instead, exit keyboard mode and
+run either command in the same configured terminal B:
 
 ```bash
 python firmware/orbo/bench_tests/control_wheels.py drive --left 1.2 --right 1.2 --seconds 2
+# Or repeat the full 30-second regression:
+python firmware/orbo/bench_tests/control_wheels.py drive --left 1.2 --right 1.2 --seconds 30
 ```
 
 Use negative values for reverse, opposite signs for opposite wheel rotation, or

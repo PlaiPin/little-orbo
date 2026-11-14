@@ -30,6 +30,53 @@ exchange. It does not communicate with the ESP32. Rerun that check with
 below is separate. See the [Mac runbook](docs/engineering/runbooks/ros-macos.md)
 for environment troubleshooting and `pixi run orbo-preview` for the RViz model.
 
+### Quick start: keyboard control with the updated firmware
+
+With the updated firmware already flashed, keep USB connected, motor power on,
+and the base lifted. No rebuild, flash, or B1–GND bridge is needed for this test.
+Use two fresh terminals outside ESP-IDF; stop any other wheel-command publisher.
+
+**Terminal 1 — agent (leave running):**
+
+```bash
+cd /Users/kpatch/startup/opendive/projects/little-orbo
+./tools/run-xrce-agent-macos.sh /dev/cu.usbmodem1234561
+```
+
+Use the application CDC0 port; check `ls /dev/cu.usbmodem*` if its name changed.
+The agent helper activates Pixi itself. If an agent is already using that port,
+keep it running instead of starting a second copy.
+
+**Terminal 2 — keyboard controller:**
+
+```bash
+cd /Users/kpatch/startup/opendive/projects/little-orbo
+pixi run --locked bash
+source ros_ws/install/macos/local_setup.bash
+export ROS_DOMAIN_ID=42
+export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+python firmware/orbo/bench_tests/control_wheels.py keyboard
+```
+
+Wait for `Armed:`. W/S command both wheels positive/negative; A/D command
+opposite wheel directions. Space/X requests zero while staying armed. Q or
+Ctrl-C stops, disarms, and exits. Default speed is 1.2 rad/s; add `--speed 0.6`
+for half speed. After 350 ms without a movement key/repeat, velocity returns to
+zero; the operating system's initial key-repeat delay can cause a brief pause.
+Expect `Stopped and disarmed (encoder feedback).` on exit, then stop the agent
+with Ctrl-C. The helper does not automatically rearm after a fault.
+
+For the 30-second straight-wheel regression, run this in terminal 2 after the
+keyboard controller has exited:
+
+```bash
+python firmware/orbo/bench_tests/control_wheels.py drive --left 1.2 --right 1.2 --seconds 30
+```
+
+See the [firmware instructions](firmware/orbo/README.md#manual-cli-and-keyboard-wheel-control)
+for feedback diagnostics and an independent ROS stop command. First-time setup
+is above; agent build and additional ROS observers are below.
+
 ### Connect the ESP32 micro-ROS firmware to ROS 2
 
 The current firmware `sdkconfig` enables wheel arming for a lifted-base bench
@@ -134,7 +181,26 @@ were tested. A subsequent timing check failed: three health samples exceeded
 later raised-wheel tests passed at 1.2 rad/s. The reproduced motor-feedback
 CRC errors at 1 Mbps were addressed by the tested 115200-baud profile. Broader
 telemetry timing, ground driving, and full ros2_control/Nav2 qualification remain open.
-See the [recorded results](artifacts/test-evidence/esp32s3-usb-fix-2026-11-13/final/board-validation.json).
+Generated validation captures remain local and are ignored by Git.
+
+### Integrated ROS 2 base control on the Mac
+
+The native Pixi environment now includes the controller manager, differential-drive
+controller and joint-state broadcaster. See the [Mac control-stack runbook](docs/engineering/runbooks/ros-control-macos.md)
+for the build, agent, controller, keyboard and live-RViz commands. This path uses
+measured wheel positions for odometry and nominal CAD dimensions for a lifted bench.
+The 30-second physical test of this new path is still pending; initial runs expired,
+and the battery is charging before the revised command-rate test. Software-only
+validation can continue with `pixi run --locked ros-test-control` in isolated domain 96.
+
+The live description and preview now use the complete **v9 assembly**, including
+the v8 chassis, flippers and shells plus the v9 display mount. Use the runbook's
+internal preview to inspect beneath the shells. Flippers are fixed CAD references;
+their physical PWM configuration remains unresolved.
+
+Next: finish the sustained encoder-odometry and fault/recovery tests on the Mac,
+measure the physical geometry and ground odometry, then deploy the same controller
+stack on the Pi. Sensor integration, localization and Nav2 follow that validation.
 
 ### Python application development
 
