@@ -1,0 +1,12 @@
+{
+  "schema": "orbo.commons-patch-series.v1",
+  "generic": [
+    "generic/0001-preserve-trajectory-observations.patch",
+    "generic/0002-approve-exact-reviewed-envelope.patch"
+  ],
+  "orbo": [
+    "orbo/0001-task-preparation-fixture.patch",
+    "orbo/0002-authorized-task-event-delivery.patch",
+    "orbo/0003-recovery-and-targeted-evidence.patch"
+  ]
+}

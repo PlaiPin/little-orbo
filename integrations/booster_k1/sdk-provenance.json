@@ -1,0 +1,9 @@
+{
+  "robot": "Booster K1",
+  "selection": "owner confirmation 2026-11-13",
+  "boosteros_version": "1.2.5",
+  "native_sdk_version": "1.6.3",
+  "official_sdk_docs": "https://docs.booster.tech/docs/developer-guide/booster-os-python-sdk/sdk-overview/",
+  "wheel_sha256": "4d8f55f81648668e32876a9cc45e79fd29395f57943dac6032d20c993ba1cf22",
+  "physical_deployment": "not performed"
+}

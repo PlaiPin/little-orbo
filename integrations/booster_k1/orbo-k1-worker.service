@@ -1,0 +1,15 @@
+# User service on the actual K1, using its existing vendor ROS environment.
+# Set K1_ROS_SETUP to the verified installed setup path in the environment file.
+[Unit]
+Description=Orbo Booster K1 vendor SDK bridge
+
+[Service]
+Type=simple
+EnvironmentFile=%h/.config/orbo-k1/environment
+ExecStart=%h/.local/share/orbo-k1/run-worker.sh
+Restart=no
+TimeoutStopSec=10
+UMask=0077
+
+[Install]
+WantedBy=default.target

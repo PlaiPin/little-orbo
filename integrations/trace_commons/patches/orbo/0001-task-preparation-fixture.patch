@@ -1,0 +1,44 @@
+--- /dev/null
++++ b/crates/trace-commons-contributor/fixtures/orbo-task.jsonl
+@@ -0,0 +1,6 @@
++{"role":"meta","source":"orbo"}
++{"content":"{\"manifest\":{\"disclosure\":{\"images\":false,\"includes_request_text\":true,\"limitations\":[\"No automatic PII removal\",\"Metadata and text may reveal private context\",\"Software acknowledgments are not independent physical observations\"],\"modalities\":[\"text\",\"event_metadata\"],\"raw_audio\":false,\"risk\":\"owner_review_required\"},\"episode\":{\"ended\":1800000001.25,\"id\":\"18338729-ce6a-4340-a221-cfdf181f9985\",\"owner\":\"synthetic-owner\",\"profile\":\"attention.v1\",\"provenance\":\"synthetic\",\"started\":1800000000.0,\"state\":\"completed\"},\"evaluation\":{\"ack_latency_seconds\":[1.25],\"complete_boundaries\":true,\"declared_outcome\":\"completed\",\"event_count\":4,\"gap_event_ids\":[],\"independent_observation_count\":0,\"interruption_count\":0,\"no_ack_count\":0,\"physical_success\":\"not_established\",\"provenance\":\"synthetic\",\"unknown_event_ids\":[]},\"purpose\":\"attention_timing\",\"recipient\":\"commons-test-recipient\",\"schema\":\"orbo.task-export.v1\"},\"record_type\":\"orbo_export_manifest\",\"source_export_digest\":\"4e80bea5286b3c5b7d7a89b2d86d135330084b80b0e9c02b78b754d1f38c5566\"}","role":"observation","timestamp":"2027-01-15T08:00:00+00:00"}
++{"content":"{\"event\":{\"boot\":\"6c8ef690-3b24-45e2-bcf2-a9c6d7ddc377\",\"episode_id\":\"18338729-ce6a-4340-a221-cfdf181f9985\",\"id\":\"0f32b30b-d3b3-49f6-b885-0a753f4290e5\",\"kind\":\"episode.started\",\"mono\":0.0,\"payload\":{\"profile\":\"attention.v1\",\"provenance\":\"synthetic\"},\"seq\":1,\"utc\":1800000000.0},\"event_id\":\"0f32b30b-d3b3-49f6-b885-0a753f4290e5\",\"kind\":\"episode.started\",\"payload\":{\"profile\":\"attention.v1\",\"provenance\":\"synthetic\"},\"provenance\":\"synthetic\",\"record_type\":\"orbo_event\"}","role":"observation","timestamp":"2027-01-15T08:00:00+00:00"}
++{"content":"{\"event\":{\"boot\":\"6c8ef690-3b24-45e2-bcf2-a9c6d7ddc377\",\"episode_id\":\"18338729-ce6a-4340-a221-cfdf181f9985\",\"id\":\"5c7fdfeb-e6d4-401b-98f6-b6e0f3cfe7d7\",\"kind\":\"attention.awaiting_ack\",\"mono\":0.0,\"payload\":{\"generation\":1,\"reminder_id\":\"synthetic-reminder\"},\"seq\":2,\"utc\":1800000000.0},\"event_id\":\"5c7fdfeb-e6d4-401b-98f6-b6e0f3cfe7d7\",\"kind\":\"attention.awaiting_ack\",\"payload\":{\"generation\":1,\"reminder_id\":\"synthetic-reminder\"},\"provenance\":\"synthetic\",\"record_type\":\"orbo_event\"}","role":"observation","timestamp":"2027-01-15T08:00:00+00:00"}
++{"content":"{\"event\":{\"boot\":\"6c8ef690-3b24-45e2-bcf2-a9c6d7ddc377\",\"episode_id\":\"18338729-ce6a-4340-a221-cfdf181f9985\",\"id\":\"7224268e-bf1d-42a8-865d-eb9eed66e73d\",\"kind\":\"attention.acknowledged\",\"mono\":1.25,\"payload\":{\"generation\":1,\"reminder_id\":\"synthetic-reminder\"},\"seq\":3,\"utc\":1800000001.25},\"event_id\":\"7224268e-bf1d-42a8-865d-eb9eed66e73d\",\"kind\":\"attention.acknowledged\",\"payload\":{\"generation\":1,\"reminder_id\":\"synthetic-reminder\"},\"provenance\":\"synthetic\",\"record_type\":\"orbo_event\"}","role":"observation","timestamp":"2027-01-15T08:00:01.250000+00:00"}
++{"content":"{\"event\":{\"boot\":\"6c8ef690-3b24-45e2-bcf2-a9c6d7ddc377\",\"episode_id\":\"18338729-ce6a-4340-a221-cfdf181f9985\",\"id\":\"34d100cb-2f81-47b2-a312-fe34d18436fb\",\"kind\":\"episode.ended\",\"mono\":1.25,\"payload\":{\"outcome\":\"completed\"},\"seq\":4,\"utc\":1800000001.25},\"event_id\":\"34d100cb-2f81-47b2-a312-fe34d18436fb\",\"kind\":\"episode.ended\",\"payload\":{\"outcome\":\"completed\"},\"provenance\":\"synthetic\",\"record_type\":\"orbo_event\"}","role":"observation","timestamp":"2027-01-15T08:00:01.250000+00:00"}
+--- a/crates/trace-commons-contributor/src/envelope.rs
++++ b/crates/trace-commons-contributor/src/envelope.rs
+@@ -1424,6 +1424,32 @@
+         }
+     }
+ 
++    #[tokio::test]
++    async fn orbo_full_task_preparation_emits_consumer_fixture() {
++        let fixture = include_bytes!("../fixtures/orbo-task.jsonl");
++        let parsed =
++            trace_commons_contributor_sources::source::trajectory::parse_trajectory(fixture)
++                .unwrap();
++        let mut transcript = fixture_transcript();
++        transcript.source = parsed.source.into();
++        transcript.events = parsed.events;
++        let raw = build_raw_contribution(&transcript, &test_config(), Utc::now());
++        let prepared = redact_to_envelope(&build_deterministic_preview_redactor(None), raw)
++            .await
++            .unwrap();
++        let body = serde_json::to_vec_pretty(&prepared.events).unwrap();
++        assert!(
++            prepared
++                .events
++                .iter()
++                .any(|e| e.structured_payload["record_type"] == "trajectory_observation")
++        );
++        let output = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
++            .join("../../target/orbo-prepared-events.json");
++        std::fs::create_dir_all(output.parent().unwrap()).unwrap();
++        std::fs::write(output, body).unwrap();
++    }
++
+     fn fixture_transcript() -> crate::source::SessionTranscript {
+         let root =
+             std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("fixtures/claude-code");

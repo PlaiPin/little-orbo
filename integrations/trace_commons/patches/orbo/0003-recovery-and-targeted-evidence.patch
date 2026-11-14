@@ -1,0 +1,794 @@
+--- /dev/null
++++ b/crates/trace-commons-contributor/fixtures/orbo-minimized.jsonl
+@@ -0,0 +1,7 @@
++{"role":"meta","source":"orbo"}
++{"content":"{\"manifest\":{\"derivation\":{\"approval_inherited\":false,\"parent_sha256\":\"a62519b12d9a9e628e8d4305307c6f6da8f8394b59b8ae21d653b396e0ba8a7e\",\"redacted_event_ids\":[\"3fe8ec0a-1ad6-4678-a15c-9fa85591d672\",\"d879b0ac-4665-4013-9f3d-146d0fd41c61\"]},\"disclosure\":{\"images\":false,\"includes_request_text\":true,\"limitations\":[\"No automatic PII removal\",\"Metadata and text may reveal private context\",\"Software acknowledgments are not independent physical observations\",\"Owner-minimized derivative; affected events excluded from outcome/timing metrics; remaining content requires review\"],\"may_include_named_places_and_poses\":true,\"modalities\":[\"text\",\"event_metadata\"],\"raw_audio\":false,\"risk\":\"owner_review_required\",\"robot_control_metadata\":true},\"episode\":{\"ended\":1800000000.0,\"id\":\"11471b78-84ee-487a-a14a-664daeccafce\",\"owner\":\"[redacted]\",\"profile\":\"attention.v1\",\"provenance\":\"synthetic\",\"started\":1800000000.0,\"state\":\"completed\"},\"evaluation\":{\"ack_latency_seconds\":[],\"complete_boundaries\":true,\"declared_outcome\":\"completed\",\"event_count\":4,\"gap_event_ids\":[\"3fe8ec0a-1ad6-4678-a15c-9fa85591d672\"],\"independent_observation_count\":0,\"interruption_count\":0,\"metrics_complete\":false,\"no_ack_count\":0,\"physical_success\":\"not_established\",\"provenance\":\"synthetic\",\"redacted_event_ids\":[\"3fe8ec0a-1ad6-4678-a15c-9fa85591d672\",\"d879b0ac-4665-4013-9f3d-146d0fd41c61\"],\"unknown_event_ids\":[]},\"purpose\":\"attention_timing\",\"recipient\":\"commons\",\"schema\":\"orbo.task-export.v1\"},\"record_type\":\"orbo_export_manifest\",\"source_export_digest\":\"67d647a1a3c16b24cf5324586282ebe342b5c8e7ceb7f2afb38550512e194301\"}","role":"observation","timestamp":"2027-01-15T08:00:00+00:00"}
++{"content":"{\"event\":{\"boot\":\"064573c9-7c39-4796-aff7-f682a43a40d2\",\"episode_id\":\"11471b78-84ee-487a-a14a-664daeccafce\",\"id\":\"4155e19e-82a5-47b7-a846-afd51d800e0f\",\"kind\":\"episode.started\",\"mono\":0.0,\"payload\":{\"profile\":\"attention.v1\",\"provenance\":\"synthetic\"},\"seq\":1,\"utc\":1800000000.0},\"event_id\":\"4155e19e-82a5-47b7-a846-afd51d800e0f\",\"kind\":\"episode.started\",\"payload\":{\"profile\":\"attention.v1\",\"provenance\":\"synthetic\"},\"provenance\":\"synthetic\",\"record_type\":\"orbo_event\"}","role":"observation","timestamp":"2027-01-15T08:00:00+00:00"}
++{"content":"{\"event\":{\"boot\":\"064573c9-7c39-4796-aff7-f682a43a40d2\",\"episode_id\":\"11471b78-84ee-487a-a14a-664daeccafce\",\"id\":\"d879b0ac-4665-4013-9f3d-146d0fd41c61\",\"kind\":\"turn.started\",\"mono\":0.0,\"payload\":{\"text\":\"[redacted]\"},\"seq\":2,\"utc\":1800000000.0},\"record_type\":\"orbo_event\"}","role":"observation","timestamp":"2027-01-15T08:00:00+00:00"}
++{"content":"[redacted]","role":"user","timestamp":"2027-01-15T08:00:00+00:00"}
++{"content":"{\"event\":{\"boot\":\"064573c9-7c39-4796-aff7-f682a43a40d2\",\"episode_id\":\"11471b78-84ee-487a-a14a-664daeccafce\",\"id\":\"3fe8ec0a-1ad6-4678-a15c-9fa85591d672\",\"kind\":\"evidence.gap\",\"mono\":0.0,\"payload\":{\"reason\":\"owner_omitted_event\"},\"seq\":3,\"utc\":1800000000.0},\"event_id\":\"3fe8ec0a-1ad6-4678-a15c-9fa85591d672\",\"kind\":\"evidence.gap\",\"payload\":{\"reason\":\"owner_omitted_event\"},\"provenance\":\"synthetic\",\"record_type\":\"orbo_event\"}","role":"observation","timestamp":"2027-01-15T08:00:00+00:00"}
++{"content":"{\"event\":{\"boot\":\"064573c9-7c39-4796-aff7-f682a43a40d2\",\"episode_id\":\"11471b78-84ee-487a-a14a-664daeccafce\",\"id\":\"3465be09-b09b-44a5-8c4f-521b1dfe2e85\",\"kind\":\"episode.ended\",\"mono\":0.0,\"payload\":{\"outcome\":\"completed\"},\"seq\":4,\"utc\":1800000000.0},\"event_id\":\"3465be09-b09b-44a5-8c4f-521b1dfe2e85\",\"kind\":\"episode.ended\",\"payload\":{\"outcome\":\"completed\"},\"provenance\":\"synthetic\",\"record_type\":\"orbo_event\"}","role":"observation","timestamp":"2027-01-15T08:00:00+00:00"}
+--- a/crates/trace-commons-contributor/src/daemon/ipc.rs
++++ b/crates/trace-commons-contributor/src/daemon/ipc.rs
+@@ -487,6 +487,8 @@
+     "list_audit",
+     "list_history",
+     "list_pending",
++    "orbo_entry_status",
++    "orbo_revoke_reviewed",
+     "list_past_sessions",
+     "include_past_sessions",
+     "list_kept",
+@@ -599,6 +601,8 @@
+     "inference_call_proof",
+     "private_ai",
+     "list_pending",
++    "orbo_entry_status",
++    "orbo_revoke_reviewed",
+     "list_kept",
+     "keep",
+     "undo_keep",
+@@ -4219,6 +4223,8 @@
+         "insights_submitted" => super::insights_submitted::handle_submitted(shared, req),
+         "inference_call_proof" => super::network_data::handle_proof(shared, req),
+         "private_ai" => super::network_data::handle_private_ai(shared, req),
++        "orbo_entry_status" => handle_orbo_entry_status(shared, req),
++        "orbo_revoke_reviewed" => handle_orbo_revoke(shared, req),
+         "list_pending" => handle_list_pending(shared, req),
+         "list_past_sessions" => handle_list_past_sessions(shared, req),
+         "list_kept" => handle_list_kept(shared, req),
+@@ -6660,6 +6666,100 @@
+     Response::ok(
+         req.id,
+         serde_json::json!({ "paused": true, "paused_until": until }),
++    )
++}
++
++fn handle_orbo_revoke(shared: &DaemonShared, req: &Request) -> Response {
++    let Some(id) = req
++        .params
++        .get("entry_id")
++        .and_then(|v| v.as_str())
++        .and_then(|s| Uuid::parse_str(s).ok())
++    else {
++        return Response::err(req.id, ERR_BAD_PARAMS, "entry-id-required");
++    };
++    let mut queue = shared.queue.lock().expect("queue lock");
++    let before = queue.clone();
++    if !queue.orbo_revoke(id) {
++        return Response::err(req.id, ERR_BAD_PARAMS, "unknown-entry-id");
++    }
++    if queue.save(&shared.store).is_err() {
++        *queue = before;
++        return Response::err(req.id, ERR_UNAVAILABLE, "queue-write-failed");
++    }
++    let state = queue.get(id).unwrap().state;
++    Response::ok(
++        req.id,
++        serde_json::json!({"schema":"orbo.revocation.v1", "entry_id":id,
++        "fenced":true, "queue_state":state,
++        "upload_may_have_started":matches!(state, QueueState::Uploading | QueueState::Uploaded),
++        "already_delivered_copies_recalled":false}),
++    )
++}
++
++fn handle_orbo_entry_status(shared: &DaemonShared, req: &Request) -> Response {
++    let Some(id) = req
++        .params
++        .get("entry_id")
++        .and_then(|v| v.as_str())
++        .and_then(|s| Uuid::parse_str(s).ok())
++    else {
++        return Response::err(req.id, ERR_BAD_PARAMS, "entry-id-required");
++    };
++    let Some(hash) = req
++        .params
++        .get("session_hash")
++        .and_then(|v| v.as_str())
++        .filter(|s| s.len() == 71 && s.starts_with("sha256:"))
++    else {
++        return Response::err(req.id, ERR_BAD_PARAMS, "source-hash-required");
++    };
++    let entry = {
++        let queue = shared.queue.lock().expect("queue lock");
++        match queue.get(id) {
++            Some(e) if e.session_hash != hash => {
++                return Response::err(req.id, ERR_BAD_PARAMS, "source-mismatch");
++            }
++            Some(e) => Some(
++                serde_json::json!({"state":e.state, "envelope_digest":e.previewed_envelope_digest,
++                                             "revoked":e.orbo_revoked}),
++            ),
++            None => None,
++        }
++    };
++    let Ok(records) = HistoryCache::load(&shared.store) else {
++        return Response::err(req.id, ERR_UNAVAILABLE, "history-read-failed");
++    };
++    let records: Vec<_> = records
++        .into_iter()
++        .filter(|r| r.session_hash == hash && !r.previous_account)
++        .collect();
++    let digest = format!(
++        "sha256:{:x}",
++        Sha256::digest(serde_json::to_vec(&records).unwrap())
++    );
++    if req
++        .params
++        .get("history_digest")
++        .and_then(|v| v.as_str())
++        .is_some_and(|v| v != digest)
++    {
++        return Response::err(req.id, ERR_BAD_PARAMS, "history-changed-restart-read");
++    }
++    let offset = req
++        .params
++        .get("offset")
++        .and_then(|v| v.as_u64())
++        .unwrap_or(0) as usize;
++    if offset > records.len() {
++        return Response::err(req.id, ERR_BAD_PARAMS, "invalid-offset");
++    }
++    let end = (offset + 100).min(records.len());
++    Response::ok(
++        req.id,
++        serde_json::json!({"schema":"orbo.entry-status.v1", "entry_id":id,
++        "session_hash":hash, "queue":entry, "history":&records[offset..end],
++        "history_digest":digest, "offset":offset, "next_offset":if end < records.len() { Some(end) } else { None }}),
+     )
+ }
+ 
+@@ -8247,6 +8347,7 @@
+         if ids.len() != 1
+             || queue.get(ids[0]).is_none_or(|e| {
+                 e.state != QueueState::Pending
++                    || e.orbo_revoked
+                     || e.previewed_envelope_digest.as_deref() != Some(expected)
+             })
+         {
+@@ -12687,6 +12788,189 @@
+             QueueState::Pending,
+             "a refused call must approve nothing"
+         );
++    }
++
++    #[test]
++    fn orbo_history_filters_before_paging_and_binds_snapshot() {
++        let s = shared();
++        let key = "synthetic";
++        let mut record = crate::daemon::history::HistoryRecord {
++            submission_id: uuid::Uuid::new_v4(),
++            submitted_at: chrono::Utc::now(),
++            project_id: crate::daemon::policy::project_id_for(key),
++            project_label: crate::daemon::policy::project_label_for(key),
++            source: "claude_code".to_string(),
++            session_hash: "sha256:abc".to_string(),
++            status: "accepted".to_string(),
++            consent_scopes: vec![],
++            credit_points_pending: 0.0,
++            credit_points_final: None,
++            credit_outcome_reason: None,
++            explanations: vec![],
++            last_refreshed_at: None,
++            withdrawn_at: None,
++            revoked_at: None,
++            approved_unattended: None,
++            approved_verdict: None,
++            uploaded_bytes: None,
++            previous_account: false,
++        };
++        let hash = format!("sha256:{}", "c".repeat(64));
++        let id = seed_queue_entry(
++            &s,
++            super::super::queue::QueueEntry {
++                session_hash: hash.clone(),
++                ..queue_entry_fixture()
++            },
++        );
++        let mut records = vec![record.clone(); 1100];
++        record.session_hash = hash.clone();
++        for _ in 0..101 {
++            record.submission_id = Uuid::new_v4();
++            records.push(record.clone());
++        }
++        record.previous_account = true;
++        records.push(record.clone());
++        HistoryCache::save(&s.store, &records).unwrap();
++        let first = handle_request(
++            &s,
++            &req(
++                "orbo_entry_status",
++                serde_json::json!({
++                    "entry_id":id, "session_hash":hash
++                }),
++            ),
++        )
++        .result
++        .unwrap();
++        assert_eq!(first["history"].as_array().unwrap().len(), 100);
++        assert_eq!(first["next_offset"], 100);
++        let params = serde_json::json!({"entry_id":id, "session_hash":hash,
++            "offset":100, "history_digest":first["history_digest"]});
++        let last = handle_request(&s, &req("orbo_entry_status", params.clone()))
++            .result
++            .unwrap();
++        assert_eq!(last["history"].as_array().unwrap().len(), 1);
++        assert!(last["next_offset"].is_null());
++        record.previous_account = false;
++        records.push(record);
++        HistoryCache::save(&s.store, &records).unwrap();
++        assert_eq!(
++            handle_request(&s, &req("orbo_entry_status", params))
++                .error
++                .unwrap()
++                .message,
++            "history-changed-restart-read"
++        );
++    }
++
++    #[test]
++    fn orbo_revoke_does_not_acknowledge_failed_persistence() {
++        let s = shared();
++        let id = seed_queue_entry(&s, queue_entry_fixture());
++        let path = s.store.daemon_path(crate::config::DAEMON_QUEUE_FILE);
++        if path.exists() {
++            std::fs::remove_file(&path).unwrap();
++        }
++        std::fs::create_dir(&path).unwrap();
++        let r = handle_request(
++            &s,
++            &req("orbo_revoke_reviewed", serde_json::json!({"entry_id":id})),
++        );
++        assert_eq!(r.error.unwrap().message, "queue-write-failed");
++        assert!(!s.queue.lock().unwrap().get(id).unwrap().orbo_revoked);
++    }
++
++    #[tokio::test]
++    async fn orbo_revoke_fences_delayed_approval_across_restart() {
++        let s = shared();
++        let digest = format!("sha256:{}", "a".repeat(64));
++        let id = seed_queue_entry(
++            &s,
++            super::super::queue::QueueEntry {
++                previewed_envelope_digest: Some(digest.clone()),
++                ..queue_entry_fixture()
++            },
++        );
++        let r = handle_request(
++            &s,
++            &req("orbo_revoke_reviewed", serde_json::json!({"entry_id":id})),
++        );
++        assert_eq!(r.result.unwrap()["fenced"], true);
++        *s.queue.lock().unwrap() = super::super::queue::Queue::load(&s.store).unwrap();
++        assert!(s.queue.lock().unwrap().get(id).unwrap().orbo_revoked);
++        let r = handle_request_async(
++            &s,
++            &req(
++                "approve_reviewed",
++                serde_json::json!({
++                    "entry_id":id, "expected_envelope_digest":digest
++                }),
++            ),
++        )
++        .await;
++        assert!(r.error.is_some());
++        let mut q = s.queue.lock().unwrap();
++        // Even a retry or stale worker restoring Approved cannot bypass the fence.
++        q.set_state(id, QueueState::Approved, None);
++        assert!(!q.claim_for_upload(id, Utc::now()));
++        q.set_state(id, QueueState::Pending, None);
++        assert!(!q.approve(id, &[], None, None, None, None));
++    }
++
++    #[test]
++    fn orbo_revoke_is_idempotent_and_preserves_inflight_uncertainty() {
++        let s = shared();
++        let id = seed_queue_entry(
++            &s,
++            super::super::queue::QueueEntry {
++                state: QueueState::Uploading,
++                ..queue_entry_fixture()
++            },
++        );
++        for _ in 0..2 {
++            let r = handle_request(
++                &s,
++                &req("orbo_revoke_reviewed", serde_json::json!({"entry_id":id})),
++            );
++            let body = r.result.unwrap();
++            assert_eq!(body["fenced"], true);
++            assert_eq!(body["upload_may_have_started"], true);
++            assert_eq!(body["queue_state"], "uploading");
++        }
++    }
++
++    #[test]
++    fn orbo_exact_status_rejects_source_mismatch_and_reads_queue() {
++        let s = shared();
++        let hash = format!("sha256:{}", "c".repeat(64));
++        let id = seed_queue_entry(
++            &s,
++            super::super::queue::QueueEntry {
++                session_hash: hash.clone(),
++                ..queue_entry_fixture()
++            },
++        );
++        let r = handle_request(
++            &s,
++            &req(
++                "orbo_entry_status",
++                serde_json::json!({"entry_id":id, "session_hash":hash}),
++            ),
++        );
++        let body = r.result.unwrap();
++        assert_eq!(body["queue"]["state"], "pending");
++        assert!(body["next_offset"].is_null());
++        let r = handle_request(
++            &s,
++            &req(
++                "orbo_entry_status",
++                serde_json::json!({
++                    "entry_id":id, "session_hash":format!("sha256:{}", "d".repeat(64))
++                }),
++            ),
++        );
++        assert_eq!(r.error.unwrap().message, "source-mismatch");
+     }
+ 
+     #[tokio::test]
+@@ -20961,7 +21245,7 @@
+             src,
+             "pub async fn handle_request_async(shared",
+         ));
+-        assert_eq!(sync.len(), 114, "synchronous dispatcher arms: {sync:?}");
++        assert_eq!(sync.len(), 116, "synchronous dispatcher arms: {sync:?}");
+         assert_eq!(asy.len(), 86, "asynchronous dispatcher arms: {asy:?}");
+ 
+         let dispatched: std::collections::BTreeSet<String> = sync.union(&asy).cloned().collect();
+--- a/crates/trace-commons-contributor/src/daemon/queue.rs
++++ b/crates/trace-commons-contributor/src/daemon/queue.rs
+@@ -223,6 +223,9 @@
+ /// `daemon-queue.jsonl` is still required.
+ #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+ pub struct QueueEntry {
++    /// Permanent owner fence for this entry; new review requires a new entry.
++    #[serde(default)]
++    pub orbo_revoked: bool,
+     pub entry_id: Uuid,
+     pub session_hash: String,
+     pub source: String,
+@@ -798,6 +801,7 @@
+     /// closed.
+     pub(crate) fn ready_for_upload(&self, now: DateTime<Utc>) -> bool {
+         self.state == QueueState::Approved
++            && !self.orbo_revoked
+             && (!self.waiting_on_a_retry() || self.retry_after.is_some_and(|due| due <= now))
+     }
+ 
+@@ -2021,7 +2025,7 @@
+         let Some(e) = self.entries.iter_mut().find(|e| e.entry_id == entry_id) else {
+             return false;
+         };
+-        if e.state != QueueState::Pending {
++        if e.state != QueueState::Pending || e.orbo_revoked {
+             return false;
+         }
+         e.state = QueueState::Approved;
+@@ -2944,6 +2948,19 @@
+     /// five seconds could find the upload already sent, and `cancel`
+     /// answered `not-cancelable` for a decision the contributor had been
+     /// told was still theirs to make.
++    pub fn orbo_revoke(&mut self, id: Uuid) -> bool {
++        let Some(e) = self.entries.iter_mut().find(|e| e.entry_id == id) else {
++            return false;
++        };
++        e.orbo_revoked = true;
++        // An already claimed upload may complete. Never rewrite it as unsent.
++        if !matches!(e.state, QueueState::Uploading | QueueState::Uploaded) {
++            self.revoke_approval(id, "orbo-owner-revoked");
++            self.set_state(id, QueueState::Refused, Some("orbo-owner-revoked".into()));
++        }
++        true
++    }
++
+     pub fn cancel(&mut self, entry_id: Uuid) -> Result<()> {
+         let Some(e) = self.entries.iter_mut().find(|e| e.entry_id == entry_id) else {
+             bail!("unknown-entry-id");
+--- a/crates/trace-commons-contributor/src/daemon/watcher.rs
++++ b/crates/trace-commons-contributor/src/daemon/watcher.rs
+@@ -2216,6 +2216,7 @@
+     );
+ 
+     QueueEntry {
++        orbo_revoked: false,
+         entry_id: entry_id_for(&transcript.session_hash),
+         // Follows `armed`, because the `state` below is `Approved` on the
+         // same condition: a settled session in an armed project is approved
+@@ -6975,6 +6976,7 @@
+             .unwrap()
+             .upsert(
+                 QueueEntry {
++                    orbo_revoked: false,
+                     entry_id: uuid::Uuid::new_v4(),
+                     session_hash: "sha256:k6-pass".to_string(),
+                     source: "claude-code".to_string(),
+@@ -8042,6 +8044,7 @@
+                 queue
+                     .upsert(
+                         QueueEntry {
++                            orbo_revoked: false,
+                             entry_id: uuid::Uuid::new_v4(),
+                             session_hash: format!("sha256:filler-{i}"),
+                             source: "claude-code".into(),
+@@ -8406,6 +8409,7 @@
+                 queue
+                     .upsert(
+                         QueueEntry {
++                            orbo_revoked: false,
+                             entry_id: uuid::Uuid::new_v4(),
+                             session_hash: format!("sha256:included-{i}"),
+                             source: "claude-code".into(),
+--- a/crates/trace-commons-contributor/src/envelope.rs
++++ b/crates/trace-commons-contributor/src/envelope.rs
+@@ -1425,6 +1425,30 @@
+     }
+ 
+     #[tokio::test]
++    async fn orbo_minimized_task_survives_ordinary_preparation() {
++        let fixture = include_bytes!("../fixtures/orbo-minimized.jsonl");
++        let parsed =
++            trace_commons_contributor_sources::source::trajectory::parse_trajectory(fixture)
++                .unwrap();
++        let mut transcript = fixture_transcript();
++        transcript.source = parsed.source.into();
++        transcript.events = parsed.events;
++        let raw = build_raw_contribution(&transcript, &test_config(), Utc::now());
++        let prepared = redact_to_envelope(&build_deterministic_preview_redactor(None), raw)
++            .await
++            .unwrap();
++        let body = serde_json::to_string(&prepared.events).unwrap();
++        assert!(!body.contains("PRIVATE_DERIVATIVE_SENTINEL"));
++        assert!(!body.contains("PRIVATE_OMITTED_SENTINEL"));
++        assert!(body.contains("parent_sha256"));
++        assert!(body.contains("owner_omitted_event"));
++        let output = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
++            .join("../../target/orbo-minimized-prepared.json");
++        std::fs::create_dir_all(output.parent().unwrap()).unwrap();
++        std::fs::write(output, body).unwrap();
++    }
++
++    #[tokio::test]
+     async fn orbo_full_task_preparation_emits_consumer_fixture() {
+         let fixture = include_bytes!("../fixtures/orbo-task.jsonl");
+         let parsed =
+--- a/crates/trace-commons-ingest/src/bin/trace-commons-ingest.rs
++++ b/crates/trace-commons-ingest/src/bin/trace-commons-ingest.rs
+@@ -45000,13 +45000,64 @@
+ /// Opt-in event delivery for an explicit evaluation purpose, under the same
+ /// exporter authentication, tenant policy, consent, risk and retention gates.
+ /// Rich-content risk floors remain in force; this route never lowers them.
++#[derive(Debug, Deserialize)]
++#[serde(from = "TaskEvidenceParams")]
++struct TaskEvidenceQuery {
++    scope: DatasetExportQuery,
++    submission_ids: Option<String>,
++}
++
++// Avoid flatten's untyped buffering of URL query numbers.
++#[derive(Deserialize)]
++struct TaskEvidenceParams {
++    limit: Option<usize>,
++    purpose: Option<String>,
++    status: Option<TraceCorpusStatus>,
++    privacy_risk: Option<ResidualPiiRisk>,
++    consent_scope: Option<String>,
++    submission_ids: Option<String>,
++}
++impl From<TaskEvidenceParams> for TaskEvidenceQuery {
++    fn from(p: TaskEvidenceParams) -> Self {
++        Self {
++            submission_ids: p.submission_ids,
++            scope: DatasetExportQuery {
++                limit: p.limit,
++                purpose: p.purpose,
++                status: p.status,
++                privacy_risk: p.privacy_risk,
++                consent_scope: p.consent_scope,
++            },
++        }
++    }
++}
++
+ async fn dataset_task_evidence_handler(
+     State(state): State<Arc<AppState>>,
+     headers: HeaderMap,
+-    Query(mut query): Query<DatasetExportQuery>,
+-) -> ApiResult<Json<TraceReplayDatasetExport>> {
++    Query(target): Query<TaskEvidenceQuery>,
++) -> ApiResult<(HeaderMap, Json<TraceReplayDatasetExport>)> {
+     let tenant = authenticate_with_tenant_access_grant(state.as_ref(), &headers).await?;
+     require_exporter(&tenant)?;
++    let mut query = target.scope;
++    let ids = target
++        .submission_ids
++        .as_deref()
++        .unwrap_or("")
++        .split(',')
++        .map(Uuid::parse_str)
++        .collect::<Result<Vec<_>, _>>()
++        .map_err(|_| api_error(StatusCode::BAD_REQUEST, "explicit_submission_ids_required"))?;
++    if ids.is_empty()
++        || ids.len() > 10
++        || ids.iter().collect::<std::collections::BTreeSet<_>>().len() != ids.len()
++        || ids.len() > query.limit.unwrap_or(1)
++    {
++        return Err(api_error(
++            StatusCode::BAD_REQUEST,
++            "bounded_unique_submission_ids_required",
++        ));
++    }
+     if query
+         .purpose
+         .as_deref()
+@@ -45035,7 +45086,27 @@
+         query.limit,
+         now,
+     );
+-    run_dataset_replay_export_with_events(state.as_ref(), &tenant, query, grant, now, true).await
++    let selection = ids
++        .iter()
++        .map(Uuid::to_string)
++        .collect::<Vec<_>>()
++        .join(",");
++    let result = run_dataset_replay_export_with_events(
++        state.as_ref(),
++        &tenant,
++        query,
++        grant,
++        now,
++        true,
++        Some(ids),
++    )
++    .await?;
++    let mut headers = HeaderMap::new();
++    headers.insert(
++        "x-orbo-task-selection",
++        axum::http::HeaderValue::from_str(&selection).map_err(internal_error)?,
++    );
++    Ok((headers, result))
+ }
+ 
+ async fn worker_replay_export_handler(
+@@ -45084,7 +45155,7 @@
+     grant: TraceExportAccessGrant,
+     now: DateTime<Utc>,
+ ) -> ApiResult<Json<TraceReplayDatasetExport>> {
+-    run_dataset_replay_export_with_events(state, tenant, query, grant, now, false).await
++    run_dataset_replay_export_with_events(state, tenant, query, grant, now, false, None).await
+ }
+ 
+ async fn run_dataset_replay_export_with_events(
+@@ -45094,6 +45165,7 @@
+     grant: TraceExportAccessGrant,
+     now: DateTime<Utc>,
+     include_events: bool,
++    target_ids: Option<Vec<Uuid>>,
+ ) -> ApiResult<Json<TraceReplayDatasetExport>> {
+     let (consent_scope, tenant_policy, purpose) =
+         prepare_replay_export_execution(state, tenant, &query).await?;
+@@ -45115,6 +45187,12 @@
+                 );
+                 if include_events {
+                     metadata.insert("include_task_events".to_string(), "true".to_string());
++                }
++                if let Some(ids) = target_ids {
++                    metadata.insert(
++                        "orbo_submission_ids".into(),
++                        serde_json::to_string(&ids).unwrap(),
++                    );
+                 }
+                 metadata
+             },
+@@ -45205,8 +45283,19 @@
+     let limit = job.max_item_cap;
+     let mut items = Vec::new();
+     let mut candidate_records = Vec::new();
++    let targets: Option<Vec<Uuid>> = job
++        .metadata
++        .get("orbo_submission_ids")
++        .map(|s| serde_json::from_str(s))
++        .transpose()
++        .map_err(internal_error)?;
+     for record in records
+         .into_iter()
++        .filter(|record| {
++            targets
++                .as_ref()
++                .is_none_or(|ids| ids.contains(&record.submission_id))
++        })
+         .filter(|record| query.status.is_none_or(|status| record.status == status))
+         .filter(|record| {
+             query
+--- a/crates/trace-commons-ingest/src/bin/trace_commons_ingest_internal/tests.rs
++++ b/crates/trace-commons-ingest/src/bin/trace_commons_ingest_internal/tests.rs
+@@ -104257,10 +104257,13 @@
+             .is_none(),
+         "legacy summary stays unchanged"
+     );
+-    let Json(export) = dataset_task_evidence_handler(
++    let (_, Json(export)) = dataset_task_evidence_handler(
+         State(state.clone()),
+         auth_headers("review-token-a"),
+-        Query(query()),
++        Query(TaskEvidenceQuery {
++            scope: query(),
++            submission_ids: Some(submission_id.to_string()),
++        }),
+     )
+     .await
+     .unwrap();
+@@ -104275,7 +104278,10 @@
+         dataset_task_evidence_handler(
+             State(state.clone()),
+             auth_headers("token-a"),
+-            Query(query())
++            Query(TaskEvidenceQuery {
++                scope: query(),
++                submission_ids: Some(submission_id.to_string())
++            })
+         )
+         .await
+         .unwrap_err()
+@@ -104286,7 +104292,10 @@
+         dataset_task_evidence_handler(
+             State(state.clone()),
+             auth_headers("review-token-a"),
+-            Query(test_dataset_query())
++            Query(TaskEvidenceQuery {
++                scope: test_dataset_query(),
++                submission_ids: None
++            })
+         )
+         .await
+         .unwrap_err()
+@@ -104298,10 +104307,13 @@
+         .unwrap();
+     record.status = TraceCorpusStatus::Revoked;
+     write_submission_record(&state.root, &record).unwrap();
+-    let Json(after) = dataset_task_evidence_handler(
++    let (_, Json(after)) = dataset_task_evidence_handler(
+         State(state.clone()),
+         auth_headers("review-token-a"),
+-        Query(query()),
++        Query(TaskEvidenceQuery {
++            scope: query(),
++            submission_ids: Some(submission_id.to_string()),
++        }),
+     )
+     .await
+     .unwrap();
+@@ -104317,7 +104329,10 @@
+         dataset_task_evidence_handler(
+             State(guarded),
+             auth_headers("review-token-a"),
+-            Query(medium)
++            Query(TaskEvidenceQuery {
++                scope: medium,
++                submission_ids: Some(submission_id.to_string())
++            })
+         )
+         .await
+         .unwrap_err()
+@@ -104357,15 +104372,18 @@
+     )
+     .await
+     .unwrap();
+-    let Json(delivered) = dataset_task_evidence_handler(
++    let (_, Json(delivered)) = dataset_task_evidence_handler(
+         State(state.clone()),
+         auth_headers("review-token-a"),
+-        Query(DatasetExportQuery {
+-            limit: Some(1),
+-            purpose: Some("orbo.attention_timing.v1".into()),
+-            status: Some(TraceCorpusStatus::Accepted),
+-            privacy_risk: Some(ResidualPiiRisk::Medium),
+-            consent_scope: Some("debugging-evaluation".into()),
++        Query(TaskEvidenceQuery {
++            submission_ids: Some(submission.to_string()),
++            scope: DatasetExportQuery {
++                limit: Some(1),
++                purpose: Some("orbo.attention_timing.v1".into()),
++                status: Some(TraceCorpusStatus::Accepted),
++                privacy_risk: Some(ResidualPiiRisk::Medium),
++                consent_scope: Some("debugging-evaluation".into()),
++            },
+         }),
+     )
+     .await
+@@ -104380,3 +104398,86 @@
+     std::fs::create_dir_all(output.parent().unwrap()).unwrap();
+     std::fs::write(output, serde_json::to_vec_pretty(&delivered).unwrap()).unwrap();
+ }
++
++#[tokio::test]
++async fn orbo_targeted_evidence_selects_before_limit_and_keeps_policy() {
++    let temp = tempfile::tempdir().unwrap();
++    let state = test_state(temp.path().to_path_buf());
++    let mut ids = Vec::new();
++    for _ in 0..12 {
++        let mut envelope = low_risk_envelope().await;
++        envelope.consent.scopes = vec![ConsentScope::DebuggingEvaluation];
++        ids.push(envelope.submission_id);
++        let _ = test_submit(state.clone(), "token-a", envelope)
++            .await
++            .unwrap();
++    }
++    let query = |id: Uuid| TaskEvidenceQuery {
++        submission_ids: Some(id.to_string()),
++        scope: DatasetExportQuery {
++            limit: Some(1),
++            purpose: Some("orbo.attention_timing.v1".into()),
++            status: Some(TraceCorpusStatus::Accepted),
++            privacy_risk: Some(ResidualPiiRisk::Low),
++            consent_scope: Some("debugging-evaluation".into()),
++        },
++    };
++    use tower::ServiceExt;
++    let response = app(state.clone()).oneshot(axum::http::Request::builder()
++        .uri(format!("/v1/datasets/task-evidence?limit=1&purpose=orbo.attention_timing.v1&status=accepted&privacy_risk=low&consent_scope=debugging-evaluation&submission_ids={}", ids[11]))
++        .header("authorization", "Bearer review-token-a")
++        .body(axum::body::Body::empty()).unwrap()).await.unwrap();
++    assert_eq!(response.status(), StatusCode::OK);
++    assert_eq!(
++        response.headers()["x-orbo-task-selection"],
++        ids[11].to_string()
++    );
++    // Every one of twelve records is addressable with limit=1, regardless of ordering.
++    for id in &ids {
++        let (_, Json(result)) = dataset_task_evidence_handler(
++            State(state.clone()),
++            auth_headers("review-token-a"),
++            Query(query(*id)),
++        )
++        .await
++        .unwrap();
++        assert_eq!(result.item_count, 1);
++        assert_eq!(result.items[0].submission_id, *id);
++    }
++    let (_, Json(absent)) = dataset_task_evidence_handler(
++        State(state.clone()),
++        auth_headers("review-token-a"),
++        Query(query(Uuid::new_v4())),
++    )
++    .await
++    .unwrap();
++    assert_eq!(absent.item_count, 0);
++    // A foreign tenant cannot retrieve by guessing a known submission UUID.
++    let (_, Json(foreign)) = dataset_task_evidence_handler(
++        State(state.clone()),
++        auth_headers("review-token-b"),
++        Query(query(ids[0])),
++    )
++    .await
++    .unwrap();
++    assert_eq!(foreign.item_count, 0);
++    for bad in [
++        None,
++        Some("invalid".into()),
++        Some(format!("{},{}", ids[0], ids[0])),
++    ] {
++        let mut q = query(ids[0]);
++        q.submission_ids = bad;
++        assert_eq!(
++            dataset_task_evidence_handler(
++                State(state.clone()),
++                auth_headers("review-token-a"),
++                Query(q)
++            )
++            .await
++            .unwrap_err()
++            .0,
++            StatusCode::BAD_REQUEST
++        );
++    }
++}

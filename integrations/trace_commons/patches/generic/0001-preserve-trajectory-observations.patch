@@ -1,0 +1,135 @@
+--- a/crates/trace-commons-contributor-sources/src/source/trajectory.rs
++++ b/crates/trace-commons-contributor-sources/src/source/trajectory.rs
+@@ -165,7 +165,7 @@
+                     kind: SessionEventKind::Opaque,
+                     timestamp: parse_timestamp(record)?,
+                     content: Some(required_str(record, "content")?),
+-                    structured: Value::Null,
++                    structured: json!({"record_type": "trajectory_observation"}),
+                     tool_name: None,
+                     token_counts: None,
+                     tool_call_id: None,
+--- a/crates/trace-commons-contributor/src/envelope.rs
++++ b/crates/trace-commons-contributor/src/envelope.rs
+@@ -1200,6 +1200,19 @@
+             e.content.clone(),
+             e.structured.clone(),
+         ),
++        // Recognized environment feedback is not a tool result. Preserve text
++        // through the normal redaction path with a narrow provenance marker.
++        // System and unrecognized opaque records retain the prior content drop.
++        SessionEventKind::Opaque
++            if e.structured.get("record_type").and_then(Value::as_str)
++                == Some("trajectory_observation") =>
++        {
++            (
++                TraceContributionEventType::Feedback,
++                e.content.clone(),
++                e.structured.clone(),
++            )
++        }
+         // There is no generic/opaque event type in the v1 schema; map to
+         // ToolResult with no content. The `structured_payload`'s
+         // `{"record_type": ...}` marker (set by the source adapter)
+@@ -1334,6 +1347,81 @@
+         .await
+         .expect_err("a panicking redactor must not produce an envelope");
+         assert_eq!(label, REASON_REDACTION_PANICKED);
++    }
++
++    #[tokio::test]
++    async fn trajectory_observation_survives_parser_and_envelope() {
++        let fixture = br#"[
++          {"role":"meta","source":"trajectory-test"},
++          {"role":"system","timestamp":"2026-11-13T12:00:00Z","content":"TRAJECTORY_SYSTEM_PRIVATE_SENTINEL"},
++          {"role":"assistant","timestamp":"2026-11-13T12:00:01Z","tool_calls":[{"id":"call-1","name":"inspect","args":"{}"}]},
++          {"role":"tool","timestamp":"2026-11-13T12:00:02Z","tool_call_id":"call-1","content":"accepted"},
++          {"role":"observation","timestamp":"2026-11-13T12:00:03Z","content":"TRAJECTORY_OBSERVATION_SENTINEL: operation still pending; outcome unknown"}
++        ]"#;
++        let parsed =
++            trace_commons_contributor_sources::source::trajectory::parse_trajectory(fixture)
++                .unwrap();
++        assert!(parsed.events.iter().any(|e| {
++            e.content
++                .as_deref()
++                .is_some_and(|s| s.contains("TRAJECTORY_OBSERVATION_SENTINEL"))
++        }));
++        let mut transcript = fixture_transcript();
++        transcript.source = parsed.source.into();
++        transcript.events = parsed.events;
++        let raw = build_raw_contribution(&transcript, &test_config(), Utc::now());
++        assert_eq!(
++            raw.outcome.user_feedback,
++            trace_commons_protocol::trace_contribution::UserFeedback::None
++        );
++        let encoded = serde_json::to_string(&raw).unwrap();
++        assert!(!encoded.contains("TRAJECTORY_SYSTEM_PRIVATE_SENTINEL"));
++        assert!(encoded.contains("call-1"));
++        assert!(
++            encoded.contains("TRAJECTORY_OBSERVATION_SENTINEL"),
++            "trajectory observation lost at envelope conversion"
++        );
++        let observation = raw
++            .events
++            .iter()
++            .find(|event| {
++                event
++                    .content
++                    .as_deref()
++                    .is_some_and(|s| s.contains("TRAJECTORY_OBSERVATION_SENTINEL"))
++            })
++            .unwrap();
++        assert_eq!(observation.event_type, TraceContributionEventType::Feedback);
++        assert!(observation.tool_call_id.is_none());
++        assert!(observation.tool_name.is_none());
++        assert_eq!(
++            observation.structured_payload["record_type"],
++            "trajectory_observation"
++        );
++        let prepared = redact_to_envelope(&build_deterministic_preview_redactor(None), raw)
++            .await
++            .unwrap();
++        let preview = serde_json::to_string(&prepared).unwrap();
++        assert!(preview.contains("TRAJECTORY_OBSERVATION_SENTINEL"));
++        assert!(!preview.contains("TRAJECTORY_SYSTEM_PRIVATE_SENTINEL"));
++    }
++
++    #[test]
++    fn unrecognized_opaque_content_is_still_excluded() {
++        let parsed = trace_commons_contributor_sources::source::trajectory::parse_trajectory(br#"[
++          {"role":"meta","source":"trajectory-test"},
++          {"role":"observation","timestamp":"2026-11-13T12:00:00Z","content":"OPAQUE_PRIVATE_SENTINEL"}
++        ]"#).unwrap();
++        let mut event = parsed.events[0].clone();
++        for marker in [
++            serde_json::Value::Null,
++            serde_json::json!({"record_type":"other"}),
++        ] {
++            event.structured = marker;
++            let raw = raw_event_for(&event, Utc::now());
++            assert!(raw.content.is_none());
++            assert_eq!(raw.event_type, TraceContributionEventType::ToolResult);
++        }
+     }
+ 
+     fn fixture_transcript() -> crate::source::SessionTranscript {
+--- /dev/null
++++ b/docs/trajectory-observations.md
+@@ -0,0 +1,17 @@
++# Trajectory observations in contribution envelopes
++
++Trajectory-v1 `observation` records describe environment output. The parser
++preserves their text and marks them with `record_type=trajectory_observation`.
++Envelope conversion carries these records as `Feedback`, with the marker intact,
++through the ordinary content redactor. It does not assign a tool identity,
++tool-call result, user rating or physical-success outcome.
++
++System records and unrelated opaque records retain their content exclusion.
++An observation is not trusted proof that an action succeeded. Consumers must
++interpret the provenance marker rather than treating every Feedback event as a
++user evaluation. This is an additive projection onto the existing v1 event enum;
++no server route, consent scope, reward rule or protocol enum is introduced.
++
++Regression coverage runs an ordinary trajectory through parsing, envelope
++conversion and deterministic local redaction, checks the marker and missing tool
++identity, and verifies that system and unrecognized opaque text remain excluded.
