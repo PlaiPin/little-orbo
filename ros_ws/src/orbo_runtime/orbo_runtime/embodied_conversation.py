@@ -133,6 +133,7 @@ class ConversationBackend:
         ):
             raise Rejected("invalid allowed place catalog")
         self.allowed_places = allowed_places
+        self.configured_task_id = active_task_id
         self.latest_task = self._owned_task(active_task_id) if active_task_id else None
         self.lock = asyncio.Lock()
         self.store.db.executescript(SCHEMA)
@@ -261,6 +262,7 @@ class ConversationBackend:
             "budget": self.budgets,
             "provenance": self.provenance,
             "allowed_places": self.allowed_places,
+            "configured_task_id": self.configured_task_id,
         }
         async with self.lock:
             previous = self.store.db.execute(

@@ -319,6 +319,64 @@ class LiveBridge:
         self._worker = None
         self._send_lock = asyncio.Lock()
 
+    def _delivery_event(self, delivery_id, state, **extra):
+        """Copy only released delivery metadata into the task's exportable episode."""
+        row = self.store.db.execute(
+            "SELECT d.*,t.episode_id FROM live_deliveries d "
+            "JOIN live_sessions s ON s.id=d.session_id "
+            "JOIN embodied_tasks t ON t.id=d.task_id "
+            "WHERE d.id=? AND s.owner=? AND t.owner=?",
+            (delivery_id, self.owner, self.owner),
+        ).fetchone()
+        if row is None:
+            return
+        self.store.event(
+            row["episode_id"],
+            "task.voice_delivery",
+            {
+                "task_id": row["task_id"],
+                "revision": row["revision"],
+                "session_id": row["session_id"],
+                "delegation_id": row["delegation_id"],
+                "delivery_id": delivery_id,
+                "provider": "openai",
+                "destination": "openai",
+                "state": state,
+                "update_kind": row["kind"],
+                "spoken_result": "unconfirmed",
+                "acoustic_audibility_verified": False,
+                **extra,
+            },
+        )
+
+    def _session_audio_evidence(self):
+        # GPT-Live supplies no task-correlated audio timestamps/done markers.
+        # Record observed totals with an explicit attribution gap, never a
+        # statement that any particular result was heard or finished playing.
+        rows = self.store.db.execute(
+            "SELECT DISTINCT d.task_id,d.revision,t.episode_id FROM live_deliveries d "
+            "JOIN embodied_tasks t ON t.id=d.task_id WHERE d.session_id=? AND t.owner=?",
+            (self.session_id, self.owner),
+        ).fetchall()
+        for row in rows:
+            self.store.event(
+                row["episode_id"],
+                "task.voice_audio_evidence",
+                {
+                    "task_id": row["task_id"],
+                    "revision": row["revision"],
+                    "session_id": self.session_id,
+                    "provider": "openai",
+                    "generated_frames": self.audio.generated_frames,
+                    "played_frames": self.audio.played_frames,
+                    "session_finalized": self.finalized.is_set(),
+                    "evidence": "software_playback_only",
+                    "attribution": "uncorrelated_session_totals",
+                    "gap": "no_audio_to_task_or_transcript_alignment",
+                    "acoustic_audibility_verified": False,
+                },
+            )
+
     def _permission(self):
         self.store.require_episode(self.episode_id, self.owner)
         self.store.permission(self.owner, "cloud.voice", "openai")
@@ -465,6 +523,7 @@ class LiveBridge:
                     "spoken_result_audibility": "unknown",
                 },
             )
+            self._session_audio_evidence()
             if self.provider_id:
                 Ledger(self.store).observe(
                     "openai",
@@ -536,6 +595,14 @@ class LiveBridge:
     async def handle(self, event):
         kind = event.get("type")
         if kind == "error":
+            event_id = event.get("error", {}).get("client_event_id")
+            changed = self.store.db.execute(
+                "UPDATE live_deliveries SET state='rejected' WHERE id=? AND session_id=? "
+                "AND state='submitted'",
+                (event_id, self.session_id),
+            )
+            if changed.rowcount:
+                self._delivery_event(event_id, "rejected")
             # Provider error bodies may include caller data; never journal them.
             self.store.event(
                 self.episode_id, "live.error", {"session_id": self.session_id}
@@ -636,11 +703,13 @@ class LiveBridge:
             )
             self.work.put_nowait((item["id"], offset))
         elif kind in {"session.commentary.appended", "session.thinking.appended"}:
-            self.store.db.execute(
+            changed = self.store.db.execute(
                 "UPDATE live_deliveries SET state='context_accepted' "
                 "WHERE id=? AND session_id=? AND state='submitted'",
                 (event.get("client_event_id"), self.session_id),
             )
+            if changed.rowcount:
+                self._delivery_event(event.get("client_event_id"), "context_accepted")
 
     def _usage(self, event):
         seconds = event.get("usage", {}).get("seconds")
@@ -750,6 +819,7 @@ class LiveBridge:
                 self.store.clock.utc(),
             ),
         )
+        self._delivery_event(delivery, "pending", released_text=update.text)
         if self.closing or not self.started.is_set():
             return delivery
         self._permission()
@@ -771,24 +841,42 @@ class LiveBridge:
                 self.store.db.execute(
                     "UPDATE live_deliveries SET state='stale' WHERE id=?", (delivery,)
                 )
+                self._delivery_event(delivery, "stale")
                 raise Rejected("stale task result before transmission")
             # Persist before send; failure remains uncertain, never auto-replayed.
             self.store.db.execute(
                 "UPDATE live_deliveries SET state='submitted' WHERE id=?", (delivery,)
             )
-            await self.transport.send(
-                {
-                    "type": kind,
-                    "event_id": delivery,
-                    "delegation_id": delegation_id,
-                    "content": update.text,
-                }
-            )
+            self._delivery_event(delivery, "submitted")
+            try:
+                await self.transport.send(
+                    {
+                        "type": kind,
+                        "event_id": delivery,
+                        "delegation_id": delegation_id,
+                        "content": update.text,
+                    }
+                )
+            except BaseException:
+                self.store.db.execute(
+                    "UPDATE live_deliveries SET state='send_unknown' WHERE id=?",
+                    (delivery,),
+                )
+                self._delivery_event(delivery, "send_unknown")
+                raise
         self.last_activity = time.monotonic()
         return delivery
 
     def interrupt_speech(self):
         self.audio.interrupt()
+        rows = self.store.db.execute(
+            "SELECT id FROM live_deliveries WHERE session_id=? AND state IN ('submitted','context_accepted')",
+            (self.session_id,),
+        ).fetchall()
+        for row in rows:
+            self._delivery_event(
+                row["id"], "interrupted", playback_attribution="session_only"
+            )
         self.store.db.execute(
             "UPDATE live_deliveries SET state='interrupted' WHERE session_id=? "
             "AND state IN ('submitted','context_accepted')",
