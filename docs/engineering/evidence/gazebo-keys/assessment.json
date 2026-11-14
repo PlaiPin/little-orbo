@@ -1,0 +1,41 @@
+{
+  "pipeline_passed": true,
+  "successful_attempt": "run-10",
+  "recognition": {
+    "object": "keys",
+    "surface": "floor",
+    "nearby": "sofa",
+    "matches_scene": true,
+    "matched_attributes": [
+      "two metal keys",
+      "blue key fob"
+    ],
+    "identity": "visual_similarity",
+    "ownership_confirmed": false,
+    "absence_on_sofa_proven": false
+  },
+  "reference_supplied": "Prior owner description of two metal keys and a blue fob; no reference image or location. This is reference-assisted recognition, not a blind category/count benchmark.",
+  "ground_truth_location_sent_to_model": false,
+  "spoken_response": "I can see keys on the floor near the sofa. I can't confirm whether they're yours. Some areas haven't been checked yet, so I can't say if there are any others.",
+  "goal_position_error_m": 0.04310584444484003,
+  "timing_seconds": {
+    "request_interpretation": 21.356,
+    "navigation_and_capture": 50.186,
+    "verified_vision": 43.312,
+    "voice_start_to_first_response_transcript": 118.895
+  },
+  "near_usage_tokens_successful_run": 4014,
+  "live_usage_seconds": 240.0,
+  "recording": "Actual Gazebo third-person and ROS robot-camera frames at 5 Hz, composed with provider audio and captions. Playback retains recorded elapsed time. No schematic substitutes for robot movement; not a desktop GUI screen capture. The robot inset holds the last accepted localized frame during travel; the third-person camera records continuous movement.",
+  "navigation": "Predefined couch viewpoint, known occupancy map, AMCL localization and Nav2; not online SLAM.",
+  "scope": "One successful synthetic scene after documented failures and fixes. Does not establish real-home accuracy, reliable production performance, physical audibility or acoustic echo cancellation.",
+  "checks": {
+    "tests_passed": 203,
+    "credential_value_scan": "passed",
+    "signature_check": "signature-check.json"
+  },
+  "scene_assets_sha256": {
+    "model.sdf": "c2fda81cab37b109de6aca1e10c49701ca20e1b846c698b74055d918ec876e21",
+    "keys.obj": "13bfcaedc4d2cb3c816304e9db57baa6687fd6818255c179cc0bed432981f386"
+  }
+}

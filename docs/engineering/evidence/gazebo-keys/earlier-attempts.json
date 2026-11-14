@@ -1,0 +1,411 @@
+[
+  {
+    "attempt": "run-01",
+    "passed": false,
+    "near_events": [
+      {
+        "seconds": 49.115,
+        "kind": "near_failed",
+        "call": 1,
+        "error": "Rejected"
+      }
+    ],
+    "operations": []
+  },
+  {
+    "attempt": "run-02",
+    "passed": false,
+    "near_events": [
+      {
+        "seconds": 65.058,
+        "kind": "near_failed",
+        "call": 1,
+        "error": "Rejected",
+        "reason": "incomplete response"
+      }
+    ],
+    "operations": [],
+    "completion_metadata": {
+      "response_id": "947ebe134bbe48938d4aa1bb119d03f1",
+      "model": "z-ai/glm-5.3-flash",
+      "finish_reasons": [
+        "length"
+      ],
+      "usage": {
+        "completion_tokens": 2048,
+        "prompt_tokens": 1003,
+        "total_tokens": 3051,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": null,
+          "audio_tokens": null,
+          "reasoning_tokens": 2049,
+          "rejected_prediction_tokens": null
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cache_write_tokens": null,
+          "cached_tokens": 0
+        },
+        "reasoning_tokens": 2049
+      },
+      "max_completion_tokens": 2048,
+      "verification": "metadata only; see response receipt for verification"
+    }
+  },
+  {
+    "attempt": "run-03",
+    "passed": false,
+    "near_events": [
+      {
+        "seconds": 39.482,
+        "kind": "near_completed",
+        "call": 1,
+        "elapsed": 21.392,
+        "message": {
+          "content": "{\"action\":\"submit\",\"baseline_id\":null,\"clarification\":null,\"complete_request\":true,\"identity\":\"specific\",\"kind\":\"find\",\"places\":[\"couch\"],\"reference_id\":\"4af5ecc2-6407-4708-81ef-162fd57498ac\",\"target\":\"my keys\"}"
+        },
+        "usage": {
+          "completion_tokens": 574,
+          "prompt_tokens": 955,
+          "total_tokens": 1529,
+          "completion_tokens_details": {
+            "accepted_prediction_tokens": null,
+            "audio_tokens": null,
+            "reasoning_tokens": 508,
+            "rejected_prediction_tokens": null
+          },
+          "prompt_tokens_details": {
+            "audio_tokens": null,
+            "cache_write_tokens": null,
+            "cached_tokens": 0
+          },
+          "reasoning_tokens": 508
+        }
+      }
+    ],
+    "operations": [
+      {
+        "task_id": "9792d684-88e1-41b5-bc5d-9fcf71f71606",
+        "capability": "navigate",
+        "state": "completed",
+        "result": "{\"command_id\":\"7316b0f0-0865-40ab-a0f2-144bb575b55e\",\"evidence\":\"simulation\",\"waypoint\":\"sofa\"}"
+      },
+      {
+        "task_id": "9792d684-88e1-41b5-bc5d-9fcf71f71606",
+        "capability": "capture",
+        "state": "failed",
+        "result": "{}"
+      }
+    ],
+    "completion_metadata": {
+      "response_id": "a052afb9de2f404788613e55de1bc61b",
+      "model": "z-ai/glm-5.3-flash",
+      "finish_reasons": [
+        "stop"
+      ],
+      "usage": {
+        "completion_tokens": 574,
+        "prompt_tokens": 955,
+        "total_tokens": 1529,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": null,
+          "audio_tokens": null,
+          "reasoning_tokens": 508,
+          "rejected_prediction_tokens": null
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cache_write_tokens": null,
+          "cached_tokens": 0
+        },
+        "reasoning_tokens": 508
+      },
+      "max_completion_tokens": 4096,
+      "verification": "metadata only; see response receipt for verification"
+    },
+    "diagnosis": "Navigation succeeded. Native Gazebo rendered a 640x480 image, but the ROS image subscriber received no image during the diagnostic interval; capture failed. Operator interrupted the idle session after failure. Next run uses the previously working 320x240 ROS stream."
+  },
+  {
+    "attempt": "run-04",
+    "passed": false,
+    "operations": [
+      {
+        "task_id": "3754cbcb-eb67-406a-a5f9-aacfb030d4a5",
+        "capability": "navigate",
+        "state": "unknown",
+        "result": "{\"error_type\":\"Rejected\",\"reason\":\"navigation authority expired or controller changed\"}"
+      }
+    ],
+    "completion_metadata": {
+      "response_id": "ca0a0fd50a6c4847bd28721ffe10fa2b",
+      "model": "z-ai/glm-5.3-flash",
+      "finish_reasons": [
+        "stop"
+      ],
+      "usage": {
+        "completion_tokens": 902,
+        "prompt_tokens": 1033,
+        "total_tokens": 1935,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": null,
+          "audio_tokens": null,
+          "reasoning_tokens": 832,
+          "rejected_prediction_tokens": null
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cache_write_tokens": null,
+          "cached_tokens": 0
+        },
+        "reasoning_tokens": 832
+      },
+      "max_completion_tokens": 4096,
+      "verification": "metadata only; see response receipt for verification"
+    },
+    "diagnosis": "320x240 ROS image delivery worked. The velocity gate stopped motion when source command age reached 256 ms. Recording writes were moved off the asyncio control loop for the next run; the 250 ms watchdog was not relaxed. Idle session interrupted after task failure."
+  },
+  {
+    "attempt": "run-05",
+    "passed": false,
+    "operations": [
+      {
+        "task_id": "6c7a312b-4ec4-4976-9a91-394eb4ba89f0",
+        "capability": "navigate",
+        "state": "completed",
+        "result": "{\"command_id\":\"7630ac7d-9435-42a3-9a4a-36b5777626b2\",\"evidence\":\"simulation\",\"waypoint\":\"sofa\"}"
+      },
+      {
+        "task_id": "6c7a312b-4ec4-4976-9a91-394eb4ba89f0",
+        "capability": "capture",
+        "state": "completed",
+        "result": "{\"record_id\":\"622dc963-238c-422b-8981-1e509500e18f\"}"
+      },
+      {
+        "task_id": "6c7a312b-4ec4-4976-9a91-394eb4ba89f0",
+        "capability": "infer",
+        "state": "failed",
+        "result": "{}"
+      }
+    ],
+    "vision_response": "earlier-response-05.json",
+    "vision_image": "earlier-capture-05.png",
+    "diagnosis": "Navigation and camera capture passed. NEAR correctly reported keys/floor/sofa, but omitted task_id/revision and claimed exact identity without a reference image. Response rejected; no finding released to Live. Prompt now explicitly requires binding fields and excludes exact from identity enum when no reference image exists."
+  },
+  {
+    "attempt": "run-06",
+    "passed": false,
+    "diagnosis": "GPT-Live answered conversationally without client delegation. No robot task or NEAR call occurred. Session instructions now explicitly route object-location questions through the robot application. Idle session interrupted after observing this failure.",
+    "transcript": [
+      {
+        "seconds": 14.575,
+        "kind": "transcript",
+        "role": "user",
+        "text": " Hey"
+      },
+      {
+        "seconds": 15.013,
+        "kind": "transcript",
+        "role": "user",
+        "text": " Orbo"
+      },
+      {
+        "seconds": 15.201,
+        "kind": "transcript",
+        "role": "user",
+        "text": ", are"
+      },
+      {
+        "seconds": 15.394,
+        "kind": "transcript",
+        "role": "user",
+        "text": " my"
+      },
+      {
+        "seconds": 15.638,
+        "kind": "transcript",
+        "role": "user",
+        "text": " keys"
+      },
+      {
+        "seconds": 15.766,
+        "kind": "transcript",
+        "role": "user",
+        "text": " on the"
+      },
+      {
+        "seconds": 16.168,
+        "kind": "transcript",
+        "role": "user",
+        "text": " couch"
+      },
+      {
+        "seconds": 17.103,
+        "kind": "transcript",
+        "role": "assistant",
+        "text": " I can"
+      },
+      {
+        "seconds": 17.276,
+        "kind": "transcript",
+        "role": "assistant",
+        "text": "\u2019t actually"
+      },
+      {
+        "seconds": 17.494,
+        "kind": "transcript",
+        "role": "assistant",
+        "text": " see"
+      },
+      {
+        "seconds": 17.669,
+        "kind": "transcript",
+        "role": "assistant",
+        "text": " your couch"
+      },
+      {
+        "seconds": 18.092,
+        "kind": "transcript",
+        "role": "assistant",
+        "text": " or"
+      },
+      {
+        "seconds": 18.294,
+        "kind": "transcript",
+        "role": "assistant",
+        "text": " your keys"
+      },
+      {
+        "seconds": 18.499,
+        "kind": "transcript",
+        "role": "assistant",
+        "text": ","
+      },
+      {
+        "seconds": 19.103,
+        "kind": "transcript",
+        "role": "assistant",
+        "text": " so"
+      },
+      {
+        "seconds": 19.254,
+        "kind": "transcript",
+        "role": "assistant",
+        "text": " I\u2019m"
+      },
+      {
+        "seconds": 19.703,
+        "kind": "transcript",
+        "role": "assistant",
+        "text": " not"
+      },
+      {
+        "seconds": 19.865,
+        "kind": "transcript",
+        "role": "assistant",
+        "text": " sure."
+      },
+      {
+        "seconds": 20.471,
+        "kind": "transcript",
+        "role": "assistant",
+        "text": " Want"
+      },
+      {
+        "seconds": 20.891,
+        "kind": "transcript",
+        "role": "assistant",
+        "text": " me to"
+      },
+      {
+        "seconds": 21.094,
+        "kind": "transcript",
+        "role": "assistant",
+        "text": " help"
+      },
+      {
+        "seconds": 21.301,
+        "kind": "transcript",
+        "role": "assistant",
+        "text": " you"
+      },
+      {
+        "seconds": 21.471,
+        "kind": "transcript",
+        "role": "assistant",
+        "text": " think of"
+      },
+      {
+        "seconds": 21.672,
+        "kind": "transcript",
+        "role": "assistant",
+        "text": " some"
+      },
+      {
+        "seconds": 21.908,
+        "kind": "transcript",
+        "role": "assistant",
+        "text": " likely"
+      },
+      {
+        "seconds": 22.079,
+        "kind": "transcript",
+        "role": "assistant",
+        "text": " places"
+      },
+      {
+        "seconds": 22.308,
+        "kind": "transcript",
+        "role": "assistant",
+        "text": " they"
+      },
+      {
+        "seconds": 22.5,
+        "kind": "transcript",
+        "role": "assistant",
+        "text": " could"
+      },
+      {
+        "seconds": 22.653,
+        "kind": "transcript",
+        "role": "assistant",
+        "text": " be?"
+      }
+    ]
+  },
+  {
+    "attempt": "run-07",
+    "passed": false,
+    "diagnosis": "Live delegated correctly. NEAR raised APIConnectionError before request interpretation; no navigation task admitted. Session interrupted after failure. This is retained as a provider transport failure, not a model recognition result."
+  },
+  {
+    "attempt": "run-08",
+    "passed": false,
+    "operations": [
+      {
+        "task_id": "20fb74af-cd15-402d-b756-3f86249111aa",
+        "capability": "navigate",
+        "state": "completed",
+        "result": "{\"command_id\":\"39537f82-740f-46a9-8ead-61e39c8a8cb2\",\"evidence\":\"simulation\",\"waypoint\":\"sofa\"}"
+      },
+      {
+        "task_id": "20fb74af-cd15-402d-b756-3f86249111aa",
+        "capability": "capture",
+        "state": "completed",
+        "result": "{\"record_id\":\"b88173a8-ebf2-4059-b01d-b6361f7b09fc\"}"
+      },
+      {
+        "task_id": "20fb74af-cd15-402d-b756-3f86249111aa",
+        "capability": "infer",
+        "state": "failed",
+        "result": "{}"
+      }
+    ],
+    "vision_response": "earlier-response-08.json",
+    "diagnosis": "Navigation and capture passed. NEAR correctly reported keys/floor/sofa with visual_similarity, but next_viewpoint was [null] instead of null. Rejected before release. The prompt now explicitly prohibits arrays for this field and uses literal null when no next viewpoint is available."
+  },
+  {
+    "attempt": "run-09",
+    "passed": false,
+    "diagnosis": "Motion lease rejected under simulated clock skew (future 63 ms, exceeding existing 50 ms alignment bound). Motion stopped. Overview sensor and recording cadence reduced from 10 to 5 Hz to reduce load; motion safety limits unchanged."
+  }
+]

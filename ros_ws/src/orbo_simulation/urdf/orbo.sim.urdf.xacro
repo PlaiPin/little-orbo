@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="orbo">
   <xacro:arg name="sensors" default="true"/>
+  <xacro:arg name="camera_width" default="320"/>
+  <xacro:arg name="camera_height" default="240"/>
   <xacro:arg name="physics" default="$(find orbo_simulation)/config/physics.yaml"/>
   <xacro:arg name="controllers" default="$(find orbo_simulation)/config/controllers.yaml"/>
   <xacro:property name="p" value="${xacro.load_yaml('$(arg physics)')}"/>
@@ -98,7 +100,7 @@
         <topic>/orbo_sim/camera/image_raw</topic><gz_frame_id>camera_optical_frame</gz_frame_id>
         <update_rate>10</update_rate><always_on>true</always_on>
         <camera><horizontal_fov>1.3962634</horizontal_fov>
-          <image><width>320</width><height>240</height><format>R8G8B8</format></image>
+          <image><width>$(arg camera_width)</width><height>$(arg camera_height)</height><format>R8G8B8</format></image>
           <clip><near>0.02</near><far>12</far></clip>
           <camera_info_topic>/orbo_sim/camera/camera_info</camera_info_topic>
         </camera>

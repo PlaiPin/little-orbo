@@ -233,3 +233,24 @@ def test_structured_reply_rejects_surrounding_content(text):
 
     with pytest.raises(ValueError):
         parse_json_reply(text)
+
+
+async def test_completion_budget_is_forwarded_without_disabling_verification():
+    client = SDK()
+    seen = {}
+
+    async def create(**kwargs):
+        seen.update(kwargs)
+        return await client.create(**kwargs)
+
+    client.chat.completions.create = create
+    reasoner = NearReasoner(client=client, max_completion_tokens=2048)
+    reply = await reasoner.complete([{"role": "user", "content": "inspect"}], [])
+    assert seen["max_completion_tokens"] == 2048
+    assert reply.evidence["signature_kind"] == "provider_tee"
+
+
+@pytest.mark.parametrize("budget", [True, 0, 4097, 2048.5])
+def test_completion_budget_is_bounded(budget):
+    with pytest.raises(Rejected):
+        NearReasoner(client=SDK(), max_completion_tokens=budget)

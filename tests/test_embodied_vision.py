@@ -1159,3 +1159,76 @@ async def test_description_reuses_scope_revision_and_stale_capture_gates(setup):
             check_revision=lambda: None,
         )
     assert reasoner.messages is None
+
+
+async def test_inspection_releases_bounded_location_without_claiming_ownership(setup):
+    observation = await capture(setup)
+    location = {"item": "keys", "surface": "floor", "nearby": "sofa"}
+    finding, _ = await inspect(
+        setup,
+        observation,
+        output(observation, object_location=location, occluded=False),
+    )
+    released = release_finding(
+        setup[1], "owner", "lab", finding["id"], "openai", check_revision=lambda: None
+    )
+    assert (
+        released["text"]
+        == "I can see keys on the floor near the sofa. I cannot confirm ownership or exact identity."
+    )
+
+
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {
+            "status": "unknown",
+            "identity": "unconfirmed",
+            "object_location": {"item": "keys", "surface": "floor", "nearby": "sofa"},
+        },
+        {
+            "object_location": {
+                "item": "keys",
+                "surface": "floor",
+                "nearby": "private user address",
+            }
+        },
+        {"object_location": {"item": "keys", "surface": ["floor"], "nearby": "sofa"}},
+        {
+            "object_location": {
+                "item": "keys",
+                "surface": "floor",
+                "nearby": "sofa",
+                "ownership": "confirmed",
+            }
+        },
+    ],
+)
+async def test_location_cannot_expand_release_or_claim_unseen_objects(setup, changes):
+    observation = await capture(setup)
+    with pytest.raises(Rejected):
+        await inspect(setup, observation, output(observation, **changes))
+
+
+async def test_text_reference_never_permits_exact_identity(setup):
+    _, memory, _ = setup
+    observation = await capture(setup)
+    reference = memory.reference("owner", "lab", "red wrench", attributes=["red"])
+    finding, reasoner = await inspect(setup, observation, reference_id=reference["id"])
+    context = json.loads(reasoner.messages[1]["content"][0]["text"])
+    assert "exact" not in context["required_json"]["identity"]
+    assert finding["identity"] == "visual_similarity"
+    with pytest.raises(Rejected, match="unsupported exact identity"):
+        await inspect(
+            setup,
+            observation,
+            output(
+                observation,
+                identity="exact",
+                status="present",
+                occluded=False,
+                reason="clear_view",
+                matched_attributes=["red"],
+            ),
+            reference_id=reference["id"],
+        )

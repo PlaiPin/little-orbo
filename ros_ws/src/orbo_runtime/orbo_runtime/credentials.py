@@ -18,6 +18,7 @@ from .contracts import Rejected
 NAMES = (
     "NEARAI_API_KEY",
     "OPENAI_API_KEY",
+    "ELEVENLABS_API_KEY",
     "COMMONS_EXPORT_TOKEN",
     "COMMONS_CONTRIBUTOR_TOKEN",
     "NEARAI_REPORTING_TOKEN",

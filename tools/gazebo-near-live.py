@@ -15,6 +15,7 @@ import math
 import os
 from pathlib import Path
 import signal
+import shutil
 import subprocess
 import time
 import tomllib
@@ -105,6 +106,26 @@ async def main(args):
         raise SystemExit(
             "Use tools/run-gazebo-near-live.sh in the isolated simulation environment"
         )
+    keys = args.scenario == "keys"
+    if keys and args.voice and not args.request_audio:
+        raise SystemExit(
+            "The keys scenario requires explicitly generated --request-audio"
+        )
+    waypoint, place = ("sofa", "couch") if keys else ("tv", "tv area")
+    goal = (0.9, 0.85) if keys else (1.0, -0.55)
+    width, height = 320, 240
+    recording_fps = 5 if keys else 10
+    model_path = (
+        ROOT
+        / "ros_ws/src/orbo_simulation/models"
+        / ("keys_scene" if keys else "vision_props")
+        / "model.sdf"
+    )
+    phrase = (
+        "Hey Orbo, are my keys on the couch?"
+        if keys
+        else "Please go to the TV area and describe the visible objects and their colors."
+    )
     out = args.output.resolve()
     out.mkdir(parents=True, exist_ok=False, mode=0o700)
     started = time.monotonic()
@@ -123,7 +144,11 @@ async def main(args):
     # Unix socket paths on macOS are limited to 104 bytes.
     config["runtime"]["socket"] = f"/tmp/orbo-live-{os.getpid()}.sock"
     config["near"].update(enabled=True, timeout_seconds=120)
+    if keys:
+        config["near"]["max_completion_tokens"] = 4096
     config["embodied"]["image_directory"] = str(out / "private-images")
+    if keys:
+        config["embodied"]["camera_calibration"] = "gazebo-pinhole-320x240"
     save(out / "runtime-config.json", config)
     labels = {
         "provenance": "synthetic",
@@ -144,6 +169,23 @@ async def main(args):
             ).read_bytes()
         ).hexdigest(),
     }
+    if keys:
+        labels = {
+            "provenance": "synthetic",
+            "expected_props": [
+                {
+                    "item": "keys",
+                    "count": 2,
+                    "accessory": "blue key fob",
+                    "surface": "floor",
+                    "nearby": "sofa",
+                    "position": [0.24, 1.03],
+                }
+            ],
+            "location_labels_sent_to_model": False,
+            "reference_description": "Two metal keys on a ring with a blue rectangular fob",
+            "model_sha256": hashlib.sha256(model_path.read_bytes()).hexdigest(),
+        }
     save(out / "ground-truth.json", labels)
     log = (out / "gazebo.log").open("w")
     proc = subprocess.Popen(
@@ -154,6 +196,8 @@ async def main(args):
             "room.launch.py",
             "gui:=false",
             "embodied:=true",
+            f"camera_width:={width}",
+            f"camera_height:={height}",
         ],
         stdout=log,
         stderr=subprocess.STDOUT,
@@ -161,12 +205,17 @@ async def main(args):
     )
     service = server = recorder = None
     recording = None
+    overview_recorder = None
+    overview = {}
+    overview_times = []
     frame_times = []
     report = {
         "passed": False,
         "provenance": "synthetic",
         "provider": "live NEAR, E2EE and provider_tee verification",
         "voice_requested": args.voice,
+        "scenario": args.scenario,
+        "goal": {"waypoint": waypoint, "x": goal[0], "y": goal[1]},
     }
     body = {}
     poses = []
@@ -191,6 +240,18 @@ async def main(args):
     transport.subscribe(
         Pose_V, "/world/orbo_room/dynamic_pose/info", body_received, options
     )
+    if keys:
+        from gz.msgs10.image_pb2 import Image
+
+        def overview_received(message):
+            if (
+                message.width == 960
+                and message.height == 640
+                and len(message.data) == 960 * 640 * 3
+            ):
+                overview.update(data=bytes(message.data))
+
+        transport.subscribe(Image, "/orbo_demo/overview", overview_received, options)
     try:
         service = LocalService(config)
         await service.broker.adapter.ready()
@@ -203,9 +264,9 @@ async def main(args):
             "-world",
             "orbo_room",
             "-file",
-            str(ROOT / "ros_ws/src/orbo_simulation/models/vision_props/model.sdf"),
+            str(model_path),
             "-name",
-            "vision_props",
+            "keys_scene" if keys else "vision_props",
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.STDOUT,
         )
@@ -233,11 +294,69 @@ async def main(args):
         await service.call(
             {
                 "method": "place.register",
-                "args": {"name": "tv area", "viewpoints": ["tv"]},
+                "args": {
+                    "name": place,
+                    "aliases": ["sofa"] if keys else [],
+                    "viewpoints": [waypoint],
+                },
             }
         )
+        if keys:
+            service.embodied.memory.reference(
+                owner,
+                environment,
+                "My keys: two metal keys on a ring with a blue rectangular key fob.",
+                attributes=["two metal keys", "blue key fob"],
+            )
+            overview_recorder = subprocess.Popen(
+                [
+                    "ffmpeg",
+                    "-y",
+                    "-loglevel",
+                    "error",
+                    "-f",
+                    "rawvideo",
+                    "-pixel_format",
+                    "rgb24",
+                    "-video_size",
+                    "960x640",
+                    "-framerate",
+                    str(recording_fps),
+                    "-i",
+                    "-",
+                    "-c:v",
+                    "libx264",
+                    "-preset",
+                    "veryfast",
+                    "-pix_fmt",
+                    "yuv420p",
+                    str(out / "overview.mp4"),
+                ],
+                stdin=subprocess.PIPE,
+            )
         complete = service.reasoner.complete
         call_number = 0
+
+        sdk_create = service.reasoner.client.chat.completions.create
+
+        async def observed_create(**kwargs):
+            completion = await sdk_create(**kwargs)
+            save(
+                out / f"completion-metadata-{call_number:02d}.json",
+                {
+                    "response_id": completion.id,
+                    "model": completion.model,
+                    "finish_reasons": [c.finish_reason for c in completion.choices],
+                    "usage": completion.usage.model_dump(mode="json")
+                    if completion.usage
+                    else {},
+                    "max_completion_tokens": kwargs.get("max_completion_tokens"),
+                    "verification": "metadata only; see response receipt for verification",
+                },
+            )
+            return completion
+
+        service.reasoner.client.chat.completions.create = observed_create
 
         async def recorded_complete(messages, tools):
             nonlocal call_number
@@ -276,7 +395,12 @@ async def main(args):
                 )
                 return reply
             except Exception as error:
-                event("near_failed", call=number, error=type(error).__name__)
+                event(
+                    "near_failed",
+                    call=number,
+                    error=type(error).__name__,
+                    reason=str(error) if type(error).__name__ == "Rejected" else None,
+                )
                 raise
 
         service.reasoner.complete = recorded_complete
@@ -291,9 +415,9 @@ async def main(args):
                 "-pixel_format",
                 "rgb24",
                 "-video_size",
-                "320x240",
+                f"{width}x{height}",
                 "-framerate",
-                "10",
+                str(recording_fps),
                 "-i",
                 "-",
                 "-c:v",
@@ -316,13 +440,21 @@ async def main(args):
                 except Exception:
                     pass
                 if last:
-                    recorder.stdin.write(last)
+                    await asyncio.to_thread(recorder.stdin.write, last)
                     frame_times.append(round(time.monotonic() - started, 3))
                     if len(frame_times) % 10 == 0:
                         from orbo_runtime.observations import encode_png
 
-                        (out / "latest.png").write_bytes(encode_png(frame)[0])
-                await asyncio.sleep(0.1)
+                        def write_preview():
+                            (out / "latest.png").write_bytes(encode_png(frame)[0])
+
+                        await asyncio.to_thread(write_preview)
+                if overview_recorder and overview.get("data"):
+                    await asyncio.to_thread(
+                        overview_recorder.stdin.write, overview["data"]
+                    )
+                    overview_times.append(round(time.monotonic() - started, 3))
+                await asyncio.sleep(1 / recording_fps)
 
         recording = asyncio.create_task(record())
         event("camera_started")
@@ -343,7 +475,7 @@ async def main(args):
                             "kind": "describe",
                             "target": "Describe the visible objects and their colors in this view.",
                             "purpose": "owner-requested synthetic live navigation and vision test",
-                            "places": ["tv area"],
+                            "places": [place],
                             "allowed_actions": [
                                 "navigate",
                                 "capture",
@@ -373,59 +505,73 @@ async def main(args):
                 provider_evidence=proof,
                 navigation_start=start,
                 navigation_end=dict(body),
-                tv_position_error_m=math.hypot(body["x"] - 1, body["y"] + 0.55),
+                goal_position_error_m=math.hypot(
+                    body["x"] - goal[0], body["y"] - goal[1]
+                ),
             )
             event(
                 "structured_task_finished",
                 state=task["state"],
                 release=release,
-                tv_position_error_m=report["tv_position_error_m"],
+                goal_position_error_m=report["goal_position_error_m"],
             )
             report["passed"] = (
                 task["state"] == "completed"
                 and proof["live_service"]
-                and report["tv_position_error_m"] < 0.15
+                and report["goal_position_error_m"] < 0.15
             )
             save(out / "report.json", report)
         if args.voice:
-            phrase = "Please go to the TV area and describe the visible objects and their colors."
             (out / "spoken-request.txt").write_text(phrase + "\n")
-            subprocess.run(
-                [
-                    "say",
-                    "-v",
-                    "Samantha",
-                    "-r",
-                    "155",
-                    "-o",
-                    str(out / "request.aiff"),
-                    phrase,
-                ],
-                check=True,
-            )
-            subprocess.run(
-                [
-                    "ffmpeg",
-                    "-y",
-                    "-loglevel",
-                    "error",
-                    "-i",
-                    str(out / "request.aiff"),
-                    "-ar",
-                    "24000",
-                    "-ac",
-                    "1",
-                    "-c:a",
-                    "pcm_s16le",
-                    str(out / "request.wav"),
-                ],
-                check=True,
-            )
+            if args.request_audio:
+                from orbo_runtime.live_e2e import read_audio
+
+                read_audio(args.request_audio)
+                shutil.copyfile(args.request_audio, out / "request.wav")
+                if args.request_audio.with_suffix(".json").exists():
+                    shutil.copyfile(
+                        args.request_audio.with_suffix(".json"),
+                        out / "input-voice.json",
+                    )
+            else:
+                subprocess.run(
+                    [
+                        "say",
+                        "-v",
+                        "Samantha",
+                        "-r",
+                        "155",
+                        "-o",
+                        str(out / "request.aiff"),
+                        phrase,
+                    ],
+                    check=True,
+                )
+                subprocess.run(
+                    [
+                        "ffmpeg",
+                        "-y",
+                        "-loglevel",
+                        "error",
+                        "-i",
+                        str(out / "request.aiff"),
+                        "-ar",
+                        "24000",
+                        "-ac",
+                        "1",
+                        "-c:a",
+                        "pcm_s16le",
+                        str(out / "request.wav"),
+                    ],
+                    check=True,
+                )
             event(
                 "voice_started",
                 body=dict(body),
                 text=phrase,
-                input_voice="macOS Samantha synthetic speech",
+                input_voice=args.input_voice
+                if args.request_audio
+                else "macOS Samantha synthetic speech",
             )
             voice = RecordedTransport(out, event)
             try:
@@ -436,12 +582,12 @@ async def main(args):
                             "near_model": config["near"]["model"],
                             "live_backend": "runtime",
                             "socket": config["runtime"]["socket"],
-                            "live_seconds": 120,
-                            "stage_seconds": 240,
+                            "live_seconds": 240 if keys else 120,
+                            "stage_seconds": 360 if keys else 240,
                         },
                         transport=voice,
                     ),
-                    260,
+                    380 if keys else 260,
                 )
             except Exception as error:
                 report["voice"] = {
@@ -460,8 +606,8 @@ async def main(args):
                     report["voice"].get("finalized")
                     and report["voice"].get("verified_delegations")
                 )
-                report["tv_position_error_m"] = math.hypot(
-                    body["x"] - 1, body["y"] + 0.55
+                report["goal_position_error_m"] = math.hypot(
+                    body["x"] - goal[0], body["y"] - goal[1]
                 )
         report["operations"] = [
             dict(row)
@@ -476,7 +622,7 @@ async def main(args):
         }
         report["passed"] = bool(
             report["passed"]
-            and report["tv_position_error_m"] < 0.15
+            and report["goal_position_error_m"] < 0.15
             and {"navigate", "capture", "infer"} <= completed
             and (not args.voice or report["voice"].get("finalized"))
         )
@@ -496,12 +642,16 @@ async def main(args):
     finally:
         save(out / "poses.json", poses)
         save(out / "camera-frame-times.json", frame_times)
+        save(out / "overview-frame-times.json", overview_times)
         if recording:
             recording.cancel()
             await asyncio.gather(recording, return_exceptions=True)
         if recorder:
             recorder.stdin.close()
             recorder.wait(timeout=30)
+        if overview_recorder:
+            overview_recorder.stdin.close()
+            overview_recorder.wait(timeout=30)
         if server:
             server.close()
             await server.wait_closed()
@@ -525,6 +675,9 @@ if __name__ == "__main__":
     parser.add_argument("--allow-cloud", action="store_true")
     parser.add_argument("--allow-motion", action="store_true")
     parser.add_argument("--voice", action="store_true")
+    parser.add_argument("--scenario", choices=["props", "keys"], default="props")
+    parser.add_argument("--request-audio", type=Path)
+    parser.add_argument("--input-voice", default="external synthetic speech")
     parser.add_argument("--voice-only", action="store_true")
     parser.add_argument("--output", type=Path, required=True)
     asyncio.run(main(parser.parse_args()))

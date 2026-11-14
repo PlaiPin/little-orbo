@@ -117,6 +117,7 @@ class LocalService:
             self.reasoner = NearReasoner(
                 model=config["near"]["model"],
                 timeout=finite(config["near"].get("timeout_seconds", 40), 1, 120),
+                max_completion_tokens=config["near"].get("max_completion_tokens", 1024),
             )
         self.coordinator = Coordinator(self.store, self.broker, self.reasoner)
         self.exports = Exports(self.store)

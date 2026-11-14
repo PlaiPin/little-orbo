@@ -1,0 +1,29 @@
+{
+  "scope": "Signature over saved signed_text only; SDK verified deployment and encrypted request/response binding during the live call. This offline check does not independently replay attestation trust or encrypted traffic, and does not establish recognition accuracy.",
+  "responses": [
+    {
+      "file": "earlier-response-05.json",
+      "response_id": "e5a83225629a41b3bb11667fc5961c86",
+      "saved_ed25519_signature_valid": true,
+      "signature_kind": "provider_tee"
+    },
+    {
+      "file": "earlier-response-08.json",
+      "response_id": "f2d93e0ff7a543c382b7b2cbbba3b079",
+      "saved_ed25519_signature_valid": true,
+      "signature_kind": "provider_tee"
+    },
+    {
+      "file": "response-01.json",
+      "response_id": "20f823f86cb64eaf9ca4029c0b6fb380",
+      "saved_ed25519_signature_valid": true,
+      "signature_kind": "provider_tee"
+    },
+    {
+      "file": "response-02.json",
+      "response_id": "c4b913525bba45f7a614a2d34c880299",
+      "saved_ed25519_signature_valid": true,
+      "signature_kind": "provider_tee"
+    }
+  ]
+}

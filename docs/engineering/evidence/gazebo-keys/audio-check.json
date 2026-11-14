@@ -1,0 +1,12 @@
+{
+  "non_silent_samples": 149988,
+  "peak": 11392,
+  "spoken_clip_seconds": 9.179666666666666,
+  "trim": "Leading/trailing silence only; provider samples unchanged.",
+  "physical_speaker_or_microphone_tested": false,
+  "encoded_video_audio": {
+    "input_window_rms": 1797.46,
+    "response_window_rms": 1421.2,
+    "duration_seconds": 134.784
+  }
+}

@@ -60,7 +60,7 @@ def load_config(path):
     ):
         raise Rejected("explicit unique stages required")
     for name, default, low, high in (
-        ("live_seconds", 60, 10, 120),
+        ("live_seconds", 60, 10, 300),
         ("stage_seconds", 180, 30, 600),
     ):
         value = config.get(name, default)
@@ -435,7 +435,7 @@ async def live_stage(config, *, factory=NearReasoner, transport=None, bridge_typ
         config=LiveConfig(
             max_session_seconds=config["live_seconds"],
             idle_seconds=config["live_seconds"],
-            backend_seconds=min(config["live_seconds"], 120),
+            backend_seconds=min(config["live_seconds"], 300),
             max_delegations=1,
         ),
     )

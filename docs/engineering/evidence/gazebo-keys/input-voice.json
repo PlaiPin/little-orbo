@@ -1,0 +1,17 @@
+{
+  "provider": "elevenlabs",
+  "voice_id": "cgSgspJ2msm6clMCkdW9",
+  "text": "Hey Orbo, are my keys on the couch?",
+  "model_id": "eleven_multilingual_v2",
+  "voice_settings": {
+    "stability": 0.45,
+    "similarity_boost": 0.75,
+    "style": 0.15,
+    "use_speaker_boost": true
+  },
+  "sample_rate": 24000,
+  "seconds": 2.275541666666667,
+  "sha256": "d9f22721369bc382a0b9673dd8bb1e2de76d822d1663badc840f5ed533268c4a",
+  "request_id": "4bkCWvctocCcAzgQJlIg",
+  "synthetic_speech": true
+}

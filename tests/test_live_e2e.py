@@ -387,3 +387,16 @@ async def test_live_silent_pcm_after_context_does_not_prove_a_spoken_reply(confi
 
     with pytest.raises(Rejected):
         await e2e.live_stage(config, factory=Reasoner, transport=SilentTransport())
+
+
+@pytest.mark.parametrize("duration,accepted", [(240, True), (300, True), (301, False)])
+def test_long_navigation_live_session_remains_bounded(tmp_path, duration, accepted):
+    path = tmp_path / "budget.json"
+    path.write_text(
+        json.dumps({"stages": ["live"], "live_seconds": duration, "stage_seconds": 360})
+    )
+    if accepted:
+        assert e2e.load_config(path)["live_seconds"] == duration
+    else:
+        with pytest.raises(Rejected, match="duration budget"):
+            e2e.load_config(path)

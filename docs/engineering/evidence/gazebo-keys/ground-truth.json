@@ -1,0 +1,19 @@
+{
+  "provenance": "synthetic",
+  "expected_props": [
+    {
+      "item": "keys",
+      "count": 2,
+      "accessory": "blue key fob",
+      "surface": "floor",
+      "nearby": "sofa",
+      "position": [
+        0.24,
+        1.03
+      ]
+    }
+  ],
+  "location_labels_sent_to_model": false,
+  "reference_description": "Two metal keys on a ring with a blue rectangular fob",
+  "model_sha256": "c2fda81cab37b109de6aca1e10c49701ca20e1b846c698b74055d918ec876e21"
+}

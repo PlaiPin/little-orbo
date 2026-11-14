@@ -44,10 +44,22 @@ class VerifiedReply:
 
 class NearReasoner:
     def __init__(
-        self, *, model="z-ai/glm-5.3-flash", timeout=40, client=None, api_key=None
+        self,
+        *,
+        model="z-ai/glm-5.3-flash",
+        timeout=40,
+        max_completion_tokens=1024,
+        client=None,
+        api_key=None,
     ):
         if not model or timeout <= 0 or timeout > 120:
             raise Rejected("invalid reasoning configuration")
+        if (
+            type(max_completion_tokens) is not int
+            or not 256 <= max_completion_tokens <= 4096
+        ):
+            raise Rejected("invalid completion token budget")
+        self.max_completion_tokens = max_completion_tokens
         # Provider provenance is independent of whether the robot is simulated.
         # An injected SDK client is test evidence until separately established.
         self.provenance = "live_service" if client is None else "fixture"
@@ -71,7 +83,7 @@ class NearReasoner:
                 model=self.model,
                 messages=messages,
                 tools=tools,
-                max_completion_tokens=1024,
+                max_completion_tokens=self.max_completion_tokens,
                 stream=False,
             )
             verified = await self.client.verify_response(completion.id)

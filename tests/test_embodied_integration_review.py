@@ -601,7 +601,7 @@ async def test_configured_near_timeout_reaches_provider_and_conversation(
         }
     )
     try:
-        assert configured == {"model": "test", "timeout": timeout}
+        assert configured == {"model": "test", "timeout": timeout, "max_completion_tokens": 1024}
         assert local.embodied.backend().timeout == timeout
     finally:
         await local.close()

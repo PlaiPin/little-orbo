@@ -46,7 +46,11 @@ def setup(context):
         raise RuntimeError("Nav2 requires sensors and the matching living_room map")
     robot = xacro.process_file(
         str(share / "urdf/orbo.sim.urdf.xacro"),
-        mappings={"sensors": str(sensors).lower()},
+        mappings={
+            "sensors": str(sensors).lower(),
+            "camera_width": LaunchConfiguration("camera_width").perform(context),
+            "camera_height": LaunchConfiguration("camera_height").perform(context),
+        },
     ).toxml()
     robot = robot.replace("package://orbo_description/", description.as_uri() + "/")
     gui = LaunchConfiguration("gui").perform(context).lower() == "true"
@@ -215,6 +219,8 @@ def generate_launch_description():
             DeclareLaunchArgument("sensors", default_value="true"),
             DeclareLaunchArgument("navigation", default_value="true"),
             DeclareLaunchArgument("embodied", default_value="false"),
+            DeclareLaunchArgument("camera_width", default_value="320"),
+            DeclareLaunchArgument("camera_height", default_value="240"),
             OpaqueFunction(function=setup),
         ]
     )

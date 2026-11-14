@@ -1,0 +1,129 @@
+{
+  "scope": "SHA-256 asset integrity; saved signature checks are described separately in signature-check.json.",
+  "files": {
+    "assessment.json": {
+      "sha256": "e20dafe9f3ad2dc7217a0854516a2cc9e8c05fbf50a8bc2fe3a1eeb593cf37da",
+      "bytes": 2124
+    },
+    "audio-check.json": {
+      "sha256": "ce49e16c10eb51f83f2de84d5af6a3f3c3d8cabce99b7d7b487bbbe002005529",
+      "bytes": 350
+    },
+    "camera-frame-times.json": {
+      "sha256": "2725b6903a05bc824d66c98f6fc43580c4f6d23ba391e7ac6dfe3c2d53eb2d20",
+      "bytes": 11295
+    },
+    "camera.mp4": {
+      "sha256": "7ae4b5c2b845d6a4a642b71f51d5c45120d80bd787eb2cbaa9f267c0e2e9bbe6",
+      "bytes": 75827
+    },
+    "capture-02.png": {
+      "sha256": "a7ccef4856d2d5b55532767c53d7cf6c55ba791e865525e358835782c677bf51",
+      "bytes": 9960
+    },
+    "completion-metadata-01.json": {
+      "sha256": "8890c07fd670de9c4dd36e99dc73c155e89f61e18e051b7c849ac80b6060c976",
+      "bytes": 672
+    },
+    "completion-metadata-02.json": {
+      "sha256": "f35f60a9b43249cd422dcd0dff29a2b2d98061027b0352a5e84513db5fda807c",
+      "bytes": 674
+    },
+    "earlier-attempts.json": {
+      "sha256": "d1f51e7e1fe0bc01579b8bbabc42b41d01f5e1f7f3b29901b455226b3988fd6a",
+      "bytes": 12177
+    },
+    "earlier-capture-05.png": {
+      "sha256": "bfd0de649c23f6d641943a6359e12dfd16d451a2ee4834656bcf6a0fa5ce8630",
+      "bytes": 9915
+    },
+    "earlier-response-05.json": {
+      "sha256": "9432000a3d239c9147c51898a95252d9d8179f1676f61f7dd1d9ac5d3566f3fa",
+      "bytes": 619193
+    },
+    "earlier-response-08.json": {
+      "sha256": "0c6acab00f037b58d60825c788d6e98488a638bed3be2325399569ffd9e450f1",
+      "bytes": 623153
+    },
+    "ground-truth.json": {
+      "sha256": "2aca33a6e5022bd9b2502f8c6dfdd56470fe116a2e211c8f768679269d564b7b",
+      "bytes": 462
+    },
+    "input-voice.json": {
+      "sha256": "768596059a0b985fc800cf34160d516ac1a6e7e870f7dcc0c8887a731de9f405",
+      "bytes": 491
+    },
+    "interaction-screenshot.jpg": {
+      "sha256": "56538ce98ed8e06fb872bae113717164121432961c5f11f79562da927b6dd07c",
+      "bytes": 61634
+    },
+    "interaction.mp4": {
+      "sha256": "d96fb7ec945991ff4546aa9c63574453c1fa6ce4d29b8abac83e8728d8b4a182",
+      "bytes": 1225125
+    },
+    "live-audio-timing.json": {
+      "sha256": "3fb9d7ff5e3d5051982157418531e687684cd78316763e1fa06820c217473191",
+      "bytes": 170024
+    },
+    "live-events.json": {
+      "sha256": "9b0dff7c5974f84f9e8f4de6eec39d88419a348281739e6aab081ef49ad63ae4",
+      "bytes": 341903
+    },
+    "overview-frame-times.json": {
+      "sha256": "ece310aba7f30b7addfac0399136f93120fa4427124ae19c8d893adc2b4ed947",
+      "bytes": 12627
+    },
+    "overview.mp4": {
+      "sha256": "65b59e88404a18b03e4b252f2ac745b21ce2f0b0da3c4e7e11db9ac201bb3315",
+      "bytes": 332444
+    },
+    "poses.json": {
+      "sha256": "4e98d22492c7c4eda7e2dc035b58539973abaae92a2fe99661c33f35c3f6c8cc",
+      "bytes": 211383
+    },
+    "prompt-01.json": {
+      "sha256": "b7a4a625f88fd655f295f1d76db987cec460d0d861a3a05a5032e2838d9f99cc",
+      "bytes": 4203
+    },
+    "prompt-02.json": {
+      "sha256": "cb882460034e37a5a7cebf46740973c24d6c6dca0d220fb8af20a6912b0764a4",
+      "bytes": 3433
+    },
+    "report.json": {
+      "sha256": "b38d9544a7dd1822371152bd0e120244f44cf5becad1bb0cea31386ccfbf8a2c",
+      "bytes": 4501
+    },
+    "request.wav": {
+      "sha256": "d9f22721369bc382a0b9673dd8bb1e2de76d822d1663badc840f5ed533268c4a",
+      "bytes": 109270
+    },
+    "response-01.json": {
+      "sha256": "290846a4b65007878763d8664653ab881a2120d7b85718f1b28bf2bc64f33258",
+      "bytes": 618595
+    },
+    "response-02.json": {
+      "sha256": "650c84cf89ab9817e6b4d96324d4cadf2fcb63aaf40d6c3a238b536a51683fe8",
+      "bytes": 623253
+    },
+    "signature-check.json": {
+      "sha256": "b52458515d0b866a38f8c5e606e27e1e862d5424a0b1703785b85b7093fb5680",
+      "bytes": 1064
+    },
+    "spoken-request.txt": {
+      "sha256": "9092577245446f630fba9cd9fe70e4b0b3344a1a2e10d72b423fd84aa4c9cd28",
+      "bytes": 36
+    },
+    "spoken-response.wav": {
+      "sha256": "09f7852a00743bed5adabc88f55c8dac3986dd54366b847a3c055f5543ff105f",
+      "bytes": 440668
+    },
+    "timeline.json": {
+      "sha256": "79dd194e72ece3cdaa4d6276d1022a24cceb38e44cbdd3b5dae66d6652b86d6b",
+      "bytes": 8881
+    },
+    "transcript.json": {
+      "sha256": "e5f01733f3f7b24d06c66362c6b9e369574bd2f14c46a27334bcdc2b90597425",
+      "bytes": 3412
+    }
+  }
+}

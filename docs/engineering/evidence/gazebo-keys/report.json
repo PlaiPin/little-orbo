@@ -1,0 +1,139 @@
+{
+  "passed": true,
+  "provenance": "synthetic",
+  "provider": "live NEAR, E2EE and provider_tee verification",
+  "voice_requested": true,
+  "scenario": "keys",
+  "goal": {
+    "waypoint": "sofa",
+    "x": 0.9,
+    "y": 0.85
+  },
+  "voice": {
+    "seconds": 240.0,
+    "finalized": true,
+    "verified_delegations": 1,
+    "near": [
+      {
+        "evidence": [
+          {
+            "e2ee": true,
+            "live_verified": true,
+            "model": "z-ai/glm-5.3-flash",
+            "proof_sha256": "db97d2dd859ce392a1c55e771de7fedf55a5a1f0f74061e08918e7ae93a2e7a2",
+            "record_id": "2c48b149-f535-4543-80fe-d99930bb1b6b",
+            "response_id": "c4b913525bba45f7a614a2d34c880299",
+            "signature_kind": "provider_tee",
+            "task_revision": 1
+          }
+        ],
+        "live_service": true,
+        "revision": 1,
+        "runtime_near_enabled": true,
+        "task_id": "ffee7870-60d4-42a0-b39f-ecb2b3e58fe1",
+        "truncated": false,
+        "verification": "recorded_at_inference_not_reverified",
+        "verified_response_count": 1
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "ffee7870-60d4-42a0-b39f-ecb2b3e58fe1",
+        "episode_id": "9c74ab00-13a2-4e77-9669-6077cc813500",
+        "state": "completed",
+        "revision": 1,
+        "result_released": true,
+        "provider_evidence": {
+          "evidence": [
+            {
+              "e2ee": true,
+              "live_verified": true,
+              "model": "z-ai/glm-5.3-flash",
+              "proof_sha256": "db97d2dd859ce392a1c55e771de7fedf55a5a1f0f74061e08918e7ae93a2e7a2",
+              "record_id": "2c48b149-f535-4543-80fe-d99930bb1b6b",
+              "response_id": "c4b913525bba45f7a614a2d34c880299",
+              "signature_kind": "provider_tee",
+              "task_revision": 1
+            }
+          ],
+          "live_service": true,
+          "revision": 1,
+          "runtime_near_enabled": true,
+          "task_id": "ffee7870-60d4-42a0-b39f-ecb2b3e58fe1",
+          "truncated": false,
+          "verification": "recorded_at_inference_not_reverified",
+          "verified_response_count": 1
+        },
+        "provenance": "synthetic",
+        "physical_success": "requires_scene_review"
+      }
+    ],
+    "context_accepted": 1,
+    "generated_frames": 5705760,
+    "frames_after_context_acceptance": 2895360,
+    "non_silent_frames_after_context_acceptance": 210779,
+    "audibility": "not_tested",
+    "acoustic_echo": "not_tested",
+    "spoken_semantics": "requires_listener_review"
+  },
+  "goal_position_error_m": 0.04310584444484003,
+  "operations": [
+    {
+      "task_id": "ffee7870-60d4-42a0-b39f-ecb2b3e58fe1",
+      "capability": "navigate",
+      "state": "completed",
+      "result": "{\"command_id\":\"4bfd23a9-479e-49d5-ac29-932d23e6e87a\",\"evidence\":\"simulation\",\"waypoint\":\"sofa\"}"
+    },
+    {
+      "task_id": "ffee7870-60d4-42a0-b39f-ecb2b3e58fe1",
+      "capability": "capture",
+      "state": "completed",
+      "result": "{\"record_id\":\"6e01130e-e7af-46c5-8abc-40af81c03a52\"}"
+    },
+    {
+      "task_id": "ffee7870-60d4-42a0-b39f-ecb2b3e58fe1",
+      "capability": "infer",
+      "state": "completed",
+      "result": "{\"record_id\":\"2c48b149-f535-4543-80fe-d99930bb1b6b\"}"
+    }
+  ],
+  "observations": [
+    {
+      "boot": "9175c444-912e-4917-aaf5-55794862508b",
+      "calibration_version": "gazebo-pinhole-320x240",
+      "captured_at": 1794697664.282752,
+      "clock_domain": "gazebo",
+      "environment": "gazebo-living-room",
+      "expires": 1794701264.288717,
+      "frame_id": "camera_optical_frame",
+      "height": 240,
+      "id": "6e01130e-e7af-46c5-8abc-40af81c03a52",
+      "image_bytes": 9960,
+      "image_hash": "a7ccef4856d2d5b55532767c53d7cf6c55ba791e865525e358835782c677bf51",
+      "map_version": "living-room-map",
+      "owner": "simulation-owner",
+      "permitted_uses": [
+        "private_memory"
+      ],
+      "pose": {
+        "frame_id": "map",
+        "x": 0.883490890150757,
+        "y": 0.8135803479219192,
+        "yaw": 3.05073595435178
+      },
+      "pose_received_mono": 668068.9221285,
+      "quality": {
+        "exposure_mean_sample": 117.87,
+        "exposure_usable": true,
+        "focus_verified": false,
+        "visibility_verified": false
+      },
+      "received_mono": 668069.122606208,
+      "revision": 1,
+      "source_stamp_ns": 78500000000,
+      "task_id": "ffee7870-60d4-42a0-b39f-ecb2b3e58fe1",
+      "viewpoint": "sofa",
+      "width": 320
+    }
+  ]
+}

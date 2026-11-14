@@ -1,0 +1,26 @@
+{
+  "response_id": "c4b913525bba45f7a614a2d34c880299",
+  "model": "z-ai/glm-5.3-flash",
+  "finish_reasons": [
+    "stop"
+  ],
+  "usage": {
+    "completion_tokens": 1650,
+    "prompt_tokens": 754,
+    "total_tokens": 2404,
+    "completion_tokens_details": {
+      "accepted_prediction_tokens": null,
+      "audio_tokens": null,
+      "reasoning_tokens": 1492,
+      "rejected_prediction_tokens": null
+    },
+    "prompt_tokens_details": {
+      "audio_tokens": null,
+      "cache_write_tokens": null,
+      "cached_tokens": 0
+    },
+    "reasoning_tokens": 1492
+  },
+  "max_completion_tokens": 4096,
+  "verification": "metadata only; see response receipt for verification"
+}

@@ -1,0 +1,381 @@
+[
+  {
+    "seconds": 10.323,
+    "kind": "ready"
+  },
+  {
+    "seconds": 11.227,
+    "kind": "props_spawned"
+  },
+  {
+    "seconds": 11.239,
+    "kind": "camera_started"
+  },
+  {
+    "seconds": 13.246,
+    "kind": "voice_started",
+    "body": {
+      "seconds": 13.211,
+      "x": -0.7999999996986121,
+      "y": -0.8
+    },
+    "text": "Hey Orbo, are my keys on the couch?",
+    "input_voice": "Jessica (ElevenLabs)"
+  },
+  {
+    "seconds": 13.854,
+    "kind": "live",
+    "type": "session.started"
+  },
+  {
+    "seconds": 15.076,
+    "kind": "transcript",
+    "role": "user",
+    "text": " Hey"
+  },
+  {
+    "seconds": 15.295,
+    "kind": "transcript",
+    "role": "user",
+    "text": " Or"
+  },
+  {
+    "seconds": 15.565,
+    "kind": "transcript",
+    "role": "user",
+    "text": "bo"
+  },
+  {
+    "seconds": 15.712,
+    "kind": "transcript",
+    "role": "user",
+    "text": ", are"
+  },
+  {
+    "seconds": 15.918,
+    "kind": "transcript",
+    "role": "user",
+    "text": " my"
+  },
+  {
+    "seconds": 16.139,
+    "kind": "transcript",
+    "role": "user",
+    "text": " keys"
+  },
+  {
+    "seconds": 16.263,
+    "kind": "transcript",
+    "role": "user",
+    "text": " on the"
+  },
+  {
+    "seconds": 16.686,
+    "kind": "transcript",
+    "role": "user",
+    "text": " couch"
+  },
+  {
+    "seconds": 16.691,
+    "kind": "near_started",
+    "call": 1
+  },
+  {
+    "seconds": 38.046,
+    "kind": "near_completed",
+    "call": 1,
+    "elapsed": 21.356,
+    "message": {
+      "content": "{\"action\":\"submit\",\"baseline_id\":null,\"clarification\":null,\"complete_request\":true,\"identity\":\"specific\",\"kind\":\"find\",\"places\":[\"couch\"],\"reference_id\":\"8f181380-52cc-4b0d-9e10-e6faca9a639a\",\"target\":\"keys\"}"
+    },
+    "usage": {
+      "completion_tokens": 572,
+      "prompt_tokens": 1038,
+      "total_tokens": 1610,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": null,
+        "reasoning_tokens": 505,
+        "rejected_prediction_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 0
+      },
+      "reasoning_tokens": 505
+    }
+  },
+  {
+    "seconds": 88.232,
+    "kind": "near_started",
+    "call": 2
+  },
+  {
+    "seconds": 131.544,
+    "kind": "near_completed",
+    "call": 2,
+    "elapsed": 43.312,
+    "message": {
+      "content": "{\n  \"task_id\": \"ffee7870-60d4-42a0-b39f-ecb2b3e58fe1\",\n  \"revision\": 1,\n  \"status\": \"similar\",\n  \"identity\": \"visual_similarity\",\n  \"matched_attributes\": [\"two metal keys\", \"blue key fob\"],\n  \"observation_ids\": [\"6e01130e-e7af-46c5-8abc-40af81c03a52\"],\n  \"object_location\": {\n    \"item\": \"keys\",\n    \"surface\": \"floor\",\n    \"nearby\": \"sofa\"\n  },\n  \"occluded\": false,\n  \"reason\": \"clear_view\",\n  \"next_viewpoint\": null\n}"
+    },
+    "usage": {
+      "completion_tokens": 1650,
+      "prompt_tokens": 754,
+      "total_tokens": 2404,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": null,
+        "reasoning_tokens": 1492,
+        "rejected_prediction_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 0
+      },
+      "reasoning_tokens": 1492
+    }
+  },
+  {
+    "seconds": 132.141,
+    "kind": "transcript",
+    "role": "assistant",
+    "text": "I can"
+  },
+  {
+    "seconds": 132.326,
+    "kind": "transcript",
+    "role": "assistant",
+    "text": " see keys"
+  },
+  {
+    "seconds": 132.327,
+    "kind": "live",
+    "type": "session.commentary.appended"
+  },
+  {
+    "seconds": 132.741,
+    "kind": "transcript",
+    "role": "assistant",
+    "text": " on"
+  },
+  {
+    "seconds": 132.918,
+    "kind": "transcript",
+    "role": "assistant",
+    "text": " the floor"
+  },
+  {
+    "seconds": 133.307,
+    "kind": "transcript",
+    "role": "assistant",
+    "text": " near"
+  },
+  {
+    "seconds": 133.52,
+    "kind": "transcript",
+    "role": "assistant",
+    "text": " the"
+  },
+  {
+    "seconds": 133.706,
+    "kind": "transcript",
+    "role": "assistant",
+    "text": " sofa."
+  },
+  {
+    "seconds": 134.73,
+    "kind": "transcript",
+    "role": "assistant",
+    "text": " I can't"
+  },
+  {
+    "seconds": 135.073,
+    "kind": "transcript",
+    "role": "assistant",
+    "text": " confirm"
+  },
+  {
+    "seconds": 135.514,
+    "kind": "transcript",
+    "role": "assistant",
+    "text": " whether"
+  },
+  {
+    "seconds": 135.712,
+    "kind": "transcript",
+    "role": "assistant",
+    "text": " they're"
+  },
+  {
+    "seconds": 135.974,
+    "kind": "transcript",
+    "role": "assistant",
+    "text": " yours."
+  },
+  {
+    "seconds": 136.854,
+    "kind": "transcript",
+    "role": "assistant",
+    "text": " Some"
+  },
+  {
+    "seconds": 137.278,
+    "kind": "transcript",
+    "role": "assistant",
+    "text": " areas"
+  },
+  {
+    "seconds": 137.749,
+    "kind": "transcript",
+    "role": "assistant",
+    "text": " haven't"
+  },
+  {
+    "seconds": 137.88,
+    "kind": "transcript",
+    "role": "assistant",
+    "text": " been"
+  },
+  {
+    "seconds": 138.091,
+    "kind": "transcript",
+    "role": "assistant",
+    "text": " checked"
+  },
+  {
+    "seconds": 138.547,
+    "kind": "transcript",
+    "role": "assistant",
+    "text": " yet,"
+  },
+  {
+    "seconds": 138.732,
+    "kind": "transcript",
+    "role": "assistant",
+    "text": " so"
+  },
+  {
+    "seconds": 139.221,
+    "kind": "transcript",
+    "role": "assistant",
+    "text": " I can't"
+  },
+  {
+    "seconds": 139.288,
+    "kind": "transcript",
+    "role": "assistant",
+    "text": " say"
+  },
+  {
+    "seconds": 139.529,
+    "kind": "transcript",
+    "role": "assistant",
+    "text": " if"
+  },
+  {
+    "seconds": 139.769,
+    "kind": "transcript",
+    "role": "assistant",
+    "text": " there"
+  },
+  {
+    "seconds": 139.927,
+    "kind": "transcript",
+    "role": "assistant",
+    "text": " are any"
+  },
+  {
+    "seconds": 140.109,
+    "kind": "transcript",
+    "role": "assistant",
+    "text": " others."
+  },
+  {
+    "seconds": 253.967,
+    "kind": "live",
+    "type": "session.closed"
+  },
+  {
+    "seconds": 256.101,
+    "kind": "voice_finished",
+    "result": {
+      "seconds": 240.0,
+      "finalized": true,
+      "verified_delegations": 1,
+      "near": [
+        {
+          "evidence": [
+            {
+              "e2ee": true,
+              "live_verified": true,
+              "model": "z-ai/glm-5.3-flash",
+              "proof_sha256": "db97d2dd859ce392a1c55e771de7fedf55a5a1f0f74061e08918e7ae93a2e7a2",
+              "record_id": "2c48b149-f535-4543-80fe-d99930bb1b6b",
+              "response_id": "c4b913525bba45f7a614a2d34c880299",
+              "signature_kind": "provider_tee",
+              "task_revision": 1
+            }
+          ],
+          "live_service": true,
+          "revision": 1,
+          "runtime_near_enabled": true,
+          "task_id": "ffee7870-60d4-42a0-b39f-ecb2b3e58fe1",
+          "truncated": false,
+          "verification": "recorded_at_inference_not_reverified",
+          "verified_response_count": 1
+        }
+      ],
+      "tasks": [
+        {
+          "task_id": "ffee7870-60d4-42a0-b39f-ecb2b3e58fe1",
+          "episode_id": "9c74ab00-13a2-4e77-9669-6077cc813500",
+          "state": "completed",
+          "revision": 1,
+          "result_released": true,
+          "provider_evidence": {
+            "evidence": [
+              {
+                "e2ee": true,
+                "live_verified": true,
+                "model": "z-ai/glm-5.3-flash",
+                "proof_sha256": "db97d2dd859ce392a1c55e771de7fedf55a5a1f0f74061e08918e7ae93a2e7a2",
+                "record_id": "2c48b149-f535-4543-80fe-d99930bb1b6b",
+                "response_id": "c4b913525bba45f7a614a2d34c880299",
+                "signature_kind": "provider_tee",
+                "task_revision": 1
+              }
+            ],
+            "live_service": true,
+            "revision": 1,
+            "runtime_near_enabled": true,
+            "task_id": "ffee7870-60d4-42a0-b39f-ecb2b3e58fe1",
+            "truncated": false,
+            "verification": "recorded_at_inference_not_reverified",
+            "verified_response_count": 1
+          },
+          "provenance": "synthetic",
+          "physical_success": "requires_scene_review"
+        }
+      ],
+      "context_accepted": 1,
+      "generated_frames": 5705760,
+      "frames_after_context_acceptance": 2895360,
+      "non_silent_frames_after_context_acceptance": 210779,
+      "audibility": "not_tested",
+      "acoustic_echo": "not_tested",
+      "spoken_semantics": "requires_listener_review"
+    },
+    "body": {
+      "seconds": 256.007,
+      "x": 0.8931557979052107,
+      "y": 0.8074409736602395
+    }
+  },
+  {
+    "seconds": 257.356,
+    "kind": "finished",
+    "passed": true
+  }
+]

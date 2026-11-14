@@ -292,3 +292,98 @@ and picture are now supported bounded description categories. The live smoke tes
 also requires nonzero PCM samples after result-context acceptance, since Live can
 stream all-zero audio while waiting. That check alone does not prove intelligible
 speech; the saved transcript and output audio support reviewing this run.
+
+
+### Keys beside the couch, with ElevenLabs input
+
+The keys scenario uses Jessica (`cgSgspJ2msm6clMCkdW9`) to ask “Hey Orbo,
+are my keys on the couch?” ElevenLabs generates only the synthetic user's
+request; the robot's returned speech comes from GPT-Live. Set
+`ELEVENLABS_API_KEY` in the ignored root `.env` alongside the existing NEAR and
+OpenAI keys. Generate the selected voice once, then reuse the WAV for test runs:
+
+```bash
+uv run --frozen python tools/elevenlabs-request.py \
+  --allow-cloud --voice-id cgSgspJ2msm6clMCkdW9 \
+  --text 'Hey Orbo, are my keys on the couch?' \
+  --output artifacts/gazebo-keys/jessica-request.wav
+pixi run --frozen bash tools/run-gazebo-near-live.sh \
+  --allow-cloud --allow-motion --voice --voice-only --scenario keys \
+  --request-audio artifacts/gazebo-keys/jessica-request.wav \
+  --input-voice 'Jessica (ElevenLabs)' \
+  --output artifacts/gazebo-keys/new-run
+uv run --frozen --with pillow python tools/render-keys-video.py \
+  artifacts/gazebo-keys/new-run
+```
+
+The scene adds original keyring geometry with two metal keys and a blue fob,
+positioned on the floor beside the couch. `tools/build-keys-scene.py` reproduces
+the checked-in mesh and SDF. A separate Gazebo camera records the robot moving
+through the room; only the robot's 320 × 240 snapshot goes to NEAR. This uses
+known-map AMCL localization and Nav2, not online SLAM. The couch is registered
+as a semantic place with a predefined safe viewpoint.
+
+The demo seeds an owner-provided description: “My keys: two metal keys on a ring
+with a blue rectangular key fob.” The reference contains no location or image;
+it cannot establish ownership or exact identity. Ground-truth placement stays
+outside the model prompt. The vision schema permits bounded object, surface and
+nearby-landmark values, and the release preserves identity uncertainty. Finding
+keys on the floor does not establish that no other keys exist on an unseen seat.
+
+This scenario explicitly uses a 4,096-token completion budget, a 120-second NEAR
+timeout and a 240-second Live session to accommodate reasoning and navigation.
+`near.max_completion_tokens` is configurable from 256 to 4,096; other profiles
+retain the 1,024-token default. Incomplete completions remain rejected before
+motion. The video contains recorded simulator views and actual provider audio,
+aligned using local receipt times and a software playback queue.
+
+
+The recording loop writes video on worker threads so a slow encoder does not
+block the asyncio navigation lease updates. The existing motion watchdog remains
+unchanged. A higher-resolution trial produced native Gazebo images but no ROS
+image delivery during diagnosis; the documented end-to-end configuration uses
+320 × 240. Earlier failed attempts are retained with their causes in
+[earlier-attempts.json](../../../docs/engineering/evidence/gazebo-keys/earlier-attempts.json).
+
+Live instructions explicitly route object-location questions to the application.
+Vision prompts require task/revision binding fields, exclude exact identity when
+there is no reference image, and spell out nullable scalar fields. The runtime
+still rejects unsupported identity, missing binding fields and malformed enum or
+nullable fields; signed model output is not automatically accepted as a finding.
+
+
+**Keys flow verified:** the recorded run completed navigation, capture, verified
+NEAR inference, result release and finalized GPT-Live speech. Orbo stopped
+0.0431 m from the couch viewpoint. NEAR located the keys on the floor near the
+sofa and matched the supplied key/fob description while retaining visual
+similarity rather than exact identity. Live said:
+
+> I can see keys on the floor near the sofa. I can't confirm whether they're
+> yours. Some areas haven't been checked yet, so I can't say if there are any others.
+
+- [Interaction video](../../../docs/engineering/evidence/gazebo-keys/interaction.mp4)
+  and [interaction screenshot](../../../docs/engineering/evidence/gazebo-keys/interaction-screenshot.jpg).
+- [Jessica's request](../../../docs/engineering/evidence/gazebo-keys/request.wav),
+  [actual Live reply](../../../docs/engineering/evidence/gazebo-keys/spoken-response.wav)
+  and [transcript](../../../docs/engineering/evidence/gazebo-keys/transcript.json).
+- [Exact robot snapshot](../../../docs/engineering/evidence/gazebo-keys/capture-02.png),
+  [vision prompt](../../../docs/engineering/evidence/gazebo-keys/prompt-02.json),
+  [verified model response](../../../docs/engineering/evidence/gazebo-keys/response-02.json)
+  and [scene ground truth](../../../docs/engineering/evidence/gazebo-keys/ground-truth.json).
+- [Pass report](../../../docs/engineering/evidence/gazebo-keys/report.json),
+  [accuracy/timing assessment](../../../docs/engineering/evidence/gazebo-keys/assessment.json),
+  [saved-signature checks](../../../docs/engineering/evidence/gazebo-keys/signature-check.json)
+  and [asset manifest](../../../docs/engineering/evidence/gazebo-keys/manifest.json).
+
+The successful run took 21.4 seconds for request interpretation, 50.2 seconds for
+navigation/capture and 43.3 seconds for verified vision. The first spoken-result
+transcript arrived 118.9 seconds after voice startup. The video retains these
+waits and uses five-frame-per-second simulator recordings. Nine preceding
+attempts exposed output-budget/schema failures, a missed delegation, provider
+transport failure and simulation timing problems. This is one working synthetic
+demonstration after fixes, not evidence of production reliability or real-home
+recognition accuracy. The new and affected runtime paths passed 203 tests.
+
+The third-person view records continuous robot movement. The robot-camera inset
+holds the last accepted localized frame during travel; its final snapshot is the
+exact image submitted to NEAR. The overlay labels this behavior explicitly.

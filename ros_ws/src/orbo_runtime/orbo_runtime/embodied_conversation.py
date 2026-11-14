@@ -338,6 +338,8 @@ class ConversationBackend:
             "Interpret the owner's embodied-assistant request using ONLY supplied context and catalog. "
             "Return exactly one JSON object matching the supplied schema, no markdown or tools. "
             "Transcripts can be partial, mistaken, or corrected; a delegation is NOT a complete turn. "
+            "complete_turn false is normal for Live and does not alone make a request incomplete. "
+            "Judge complete_request from the available meaning; never invent missing words. "
             "Set complete_request false and action clarify when meaning or authorization is incomplete. "
             "Set identity specific for 'this', 'same', or a uniquely owned object and select a permitted "
             "reference only when unambiguous; otherwise clarify reference. Category queries need no reference. "
