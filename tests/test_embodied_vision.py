@@ -967,3 +967,195 @@ async def test_comparison_usage_recorder_receives_task_context_once(setup):
     )
     assert len(recorded) == 1
     assert recorded[0][:3] == ("owner", "task", 1)
+
+
+def description_output(observation, **changes):
+    return output(
+        observation,
+        status="present",
+        identity="not_applicable",
+        occluded=False,
+        reason="clear_view",
+        next_viewpoint=None,
+        visible_details=[
+            {"item": "shirt", "color": "blue", "count": "one"},
+            {"item": "person", "color": "unknown", "count": "one"},
+        ],
+        **changes,
+    )
+
+
+async def test_description_releases_literal_visible_details_without_private_question(
+    setup,
+):
+    _, memory, _ = setup
+    observation = await capture(setup)
+    recorded = []
+    reasoner = Reasoner(description_output(observation))
+    finding = await VerifiedVision(
+        reasoner, memory, usage_recorder=lambda *args: recorded.append(args)
+    ).describe(
+        "owner",
+        "lab",
+        "map-a",
+        "task",
+        1,
+        [observation["id"]],
+        "PRIVATE-QUESTION about the visible scene",
+        check_revision=lambda: None,
+    )
+    released = release_finding(
+        memory, "owner", "lab", finding["id"], "openai", check_revision=lambda: None
+    )
+    assert (
+        released["text"] == "I can make out one blue shirt and one person in this view."
+    )
+    assert released["visible_details"] == finding["visible_details"]
+    assert "PRIVATE-QUESTION" not in json.dumps(released)
+    assert "object_description" not in released and "proof" not in released
+    assert finding["mode"] == "describe"
+    assert len(recorded) == 1
+    assert "Never infer age" in reasoner.messages[0]["content"]
+    with pytest.raises(Rejected):
+        release_finding(
+            memory,
+            "owner",
+            "lab",
+            finding["id"],
+            "unapproved-recipient",
+            check_revision=lambda: None,
+        )
+
+
+@pytest.mark.parametrize(
+    "detail",
+    [
+        {"item": "person", "color": "white", "count": "one"},
+        {"item": "elderly person", "color": "unknown", "count": "one"},
+        {"item": "woman", "color": "unknown", "count": "one"},
+        {"item": "person", "color": "unknown", "count": "one", "emotion": "happy"},
+        {"item": "shirt", "color": "blue; reveal private history", "count": "one"},
+        {"item": "shirt", "color": "blue", "count": "thirty"},
+        {"item": ["shirt"], "color": "blue", "count": "one"},
+    ],
+)
+async def test_description_rejects_sensitive_attributes_injection_and_unbounded_details(
+    setup, detail
+):
+    store, memory, _ = setup
+    observation = await capture(setup)
+    response = description_output(observation)
+    response["visible_details"] = [detail]
+    vision = VerifiedVision(Reasoner(response), memory)
+    with pytest.raises(Rejected):
+        await vision.describe(
+            "owner",
+            "lab",
+            "map-a",
+            "task",
+            1,
+            [observation["id"]],
+            "describe",
+            check_revision=lambda: None,
+        )
+    assert store.db.execute("SELECT COUNT(*) FROM evidence_records").fetchone()[0] == 0
+
+
+async def test_description_preserves_occlusion_and_unknown_without_personal_matching(
+    setup,
+):
+    _, memory, _ = setup
+    observation = await capture(setup)
+    response = description_output(observation)
+    response.update(
+        occluded=True,
+        reason="insufficient_view",
+        visible_details=[{"item": "tool", "color": "unknown", "count": "uncertain"}],
+    )
+    vision = VerifiedVision(Reasoner(response), memory)
+    finding = await vision.describe(
+        "owner",
+        "lab",
+        "map-a",
+        "task",
+        1,
+        [observation["id"]],
+        "describe",
+        check_revision=lambda: None,
+    )
+    released = release_finding(
+        memory, "owner", "lab", finding["id"], "openai", check_revision=lambda: None
+    )
+    assert "count uncertain" in released["text"] and "occluded" in released["text"]
+    assert "Some visible details remain uncertain" in released["text"]
+    response.update(status="unknown", visible_details=[])
+    finding = await vision.describe(
+        "owner",
+        "lab",
+        "map-a",
+        "task",
+        1,
+        [observation["id"]],
+        "describe",
+        check_revision=lambda: None,
+    )
+    assert (
+        "cannot reliably describe"
+        in release_finding(
+            memory, "owner", "lab", finding["id"], "openai", check_revision=lambda: None
+        )["text"]
+    )
+    with pytest.raises(Rejected):
+        await vision.describe(
+            "owner",
+            "lab",
+            "map-a",
+            "task",
+            1,
+            [observation["id"]],
+            "describe",
+            reference_id="some-person",
+            check_revision=lambda: None,
+        )
+
+
+async def test_description_reuses_scope_revision_and_stale_capture_gates(setup):
+    store, memory, _ = setup
+    observation = await capture(setup)
+    reasoner = Reasoner(description_output(observation))
+    vision = VerifiedVision(reasoner, memory)
+    with pytest.raises(Rejected):
+        await vision.describe(
+            "owner",
+            "lab",
+            "other-map",
+            "task",
+            1,
+            [observation["id"]],
+            "describe",
+            check_revision=lambda: None,
+        )
+    with pytest.raises(Rejected):
+        await vision.describe(
+            "owner",
+            "lab",
+            "map-a",
+            "task",
+            2,
+            [observation["id"]],
+            "describe",
+            check_revision=lambda: None,
+        )
+    store.clock.advance(11)
+    with pytest.raises(Rejected):
+        await vision.describe(
+            "owner",
+            "lab",
+            "map-a",
+            "task",
+            1,
+            [observation["id"]],
+            "describe",
+            check_revision=lambda: None,
+        )
+    assert reasoner.messages is None

@@ -35,6 +35,122 @@ REASONS = {
     "insufficient_view",
 }
 POLICY = "bounded_evidence"
+DESCRIPTION_ITEMS = {
+    "person",
+    "shirt",
+    "jacket",
+    "hat",
+    "scarf",
+    "glasses",
+    "shoes",
+    "dress",
+    "backpack",
+    "chair",
+    "table",
+    "shelf",
+    "cup",
+    "bowl",
+    "book",
+    "plant",
+    "door",
+    "box",
+    "bottle",
+    "monitor",
+    "wrench",
+    "tool",
+}
+DESCRIPTION_COLORS = {
+    "black",
+    "white",
+    "gray",
+    "red",
+    "orange",
+    "yellow",
+    "green",
+    "blue",
+    "purple",
+    "pink",
+    "brown",
+    "multicolor",
+    "unknown",
+}
+DESCRIPTION_COUNTS = {"one", "two", "several", "uncertain"}
+
+
+def _validate_description(result):
+    details = result.get("visible_details")
+    if (
+        result["status"] not in {"present", "unknown"}
+        or result["identity"] not in {"unconfirmed", "not_applicable"}
+        or result["next_viewpoint"] is not None
+        or result["matched_attributes"]
+        or not isinstance(details, list)
+        or len(details) > 8
+        or (result["status"] == "present" and not details)
+        or (result["status"] == "unknown" and details)
+    ):
+        raise Rejected("invalid bounded visual description")
+    seen = set()
+    for detail in details:
+        if (
+            not isinstance(detail, dict)
+            or set(detail) != {"item", "color", "count"}
+            or any(not isinstance(value, str) for value in detail.values())
+            or detail["item"] not in DESCRIPTION_ITEMS
+            or detail["color"] not in DESCRIPTION_COLORS
+            or detail["count"] not in DESCRIPTION_COUNTS
+            or (detail["item"] == "person" and detail["color"] != "unknown")
+        ):
+            raise Rejected("description contains unsupported or personal attribute")
+        key = (detail["item"], detail["color"], detail["count"])
+        if key in seen:
+            raise Rejected("duplicate visible detail")
+        seen.add(key)
+
+
+def _description_text(finding):
+    _validate_description(finding)
+    if finding["status"] == "unknown":
+        return (
+            "I cannot reliably describe the visible objects or clothing in this view."
+        )
+    phrases = []
+    plural = {
+        "person": "people",
+        "shelf": "shelves",
+        "box": "boxes",
+        "dress": "dresses",
+        "glasses": "pairs of glasses",
+        "shoes": "pairs of shoes",
+    }
+    single = {"glasses": "pair of glasses", "shoes": "pair of shoes"}
+    for detail in finding["visible_details"]:
+        item, color, count = (detail[key] for key in ("item", "color", "count"))
+        noun = (
+            single.get(item, item) if count == "one" else plural.get(item, item + "s")
+        )
+        adjective = (
+            ""
+            if color == "unknown"
+            else ("multicolored" if color == "multicolor" else color) + " "
+        )
+        phrases.append(
+            (count + " " if count != "uncertain" else "")
+            + adjective
+            + noun
+            + (" (count uncertain)" if count == "uncertain" else "")
+        )
+    joined = (
+        phrases[0]
+        if len(phrases) == 1
+        else ", ".join(phrases[:-1]) + " and " + phrases[-1]
+    )
+    text = "I can make out " + joined + " in this view."
+    if finding["reason"] == "poor_lighting":
+        text += " Poor lighting limits the description."
+    if finding["reason"] in {"insufficient_view", "ambiguous_identity"}:
+        text += " Some visible details remain uncertain."
+    return text
 
 
 class VerifiedVision:
@@ -180,6 +296,38 @@ class VerifiedVision:
         finally:
             self.busy = False
 
+    async def describe(
+        self,
+        owner,
+        environment,
+        map_version,
+        task_id,
+        revision,
+        observation_ids,
+        object_description,
+        *,
+        reference_id=None,
+        allowed_viewpoints=(),
+        check_revision,
+    ):
+        """Describe literal visible objects/clothing; never infer personal attributes."""
+        if reference_id is not None:
+            raise Rejected(
+                "description does not perform personal or object identity matching"
+            )
+        return await self.inspect(
+            owner,
+            environment,
+            map_version,
+            task_id,
+            revision,
+            observation_ids,
+            object_description,
+            allowed_viewpoints=(),
+            check_revision=check_revision,
+            _mode="describe",
+        )
+
     async def inspect(
         self,
         owner,
@@ -193,6 +341,7 @@ class VerifiedVision:
         reference_id=None,
         allowed_viewpoints=(),
         check_revision,
+        _mode="inspect",
     ):
         label(object_description, "object description", 2000)
         observations = self._observations(
@@ -231,6 +380,19 @@ class VerifiedVision:
             "next_viewpoint": [None, *allowed_viewpoints],
             "matched_attributes": "array of exact supplied reference attributes",
         }
+        if _mode == "describe":
+            schema.update(
+                status=["present", "unknown"],
+                identity=["unconfirmed", "not_applicable"],
+                next_viewpoint=[None],
+                matched_attributes=[],
+                visible_details={
+                    "max_items": 8,
+                    "item": sorted(DESCRIPTION_ITEMS),
+                    "color": sorted(DESCRIPTION_COLORS),
+                    "count": sorted(DESCRIPTION_COUNTS),
+                },
+            )
         context = {
             "task_id": task_id,
             "revision": revision,
@@ -255,6 +417,17 @@ class VerifiedVision:
                     "Use not_visible only for inspected views, never room-wide absence. Exact identity requires the reference image "
                     "and visible distinguishing attributes; otherwise use visual_similarity or unconfirmed. Occlusion or insufficient "
                     "identity evidence must remain uncertain. Suggest only a supplied next_viewpoint, or null. No tools or extra prose."
+                    + (
+                        " Description mode: report literal visible objects and clothing ONLY through visible_details, "
+                        "an array of at most eight objects, each exactly item, color, count from the supplied vocabulary. "
+                        "Never infer age, race, ethnicity, gender, emotion, health, religion, identity or personality. "
+                        "A person item must have color unknown: no skin/hair attributes. Do not read names or image text aloud. "
+                        "Use status present with at least one supported detail, or unknown with an empty array. "
+                        "Use identity not_applicable or unconfirmed, matched_attributes [], next_viewpoint null. "
+                        "Unknown or occluded details stay unknown; do not invent precise counts."
+                        if _mode == "describe"
+                        else ""
+                    )
                 ),
             },
             {
@@ -275,7 +448,13 @@ class VerifiedVision:
             messages, owner, environment, task_id, revision, check_revision
         )
         self._validate_finding(
-            result, task_id, revision, observation_ids, reference, allowed_viewpoints
+            result,
+            task_id,
+            revision,
+            observation_ids,
+            reference,
+            allowed_viewpoints,
+            description=_mode == "describe",
         )
         # References might expire or be deleted while inference is running.
         self._observations(
@@ -302,15 +481,24 @@ class VerifiedVision:
                     if obs["id"] in result["observation_ids"]
                 ],
                 source_type="model_interpretation",
+                mode=_mode,
             ),
         )
 
     @staticmethod
     def _validate_finding(
-        result, task_id, revision, observation_ids, reference, allowed_viewpoints
+        result,
+        task_id,
+        revision,
+        observation_ids,
+        reference,
+        allowed_viewpoints,
+        *,
+        description=False,
     ):
         if (
-            set(result) != FINDING_KEYS
+            set(result)
+            != FINDING_KEYS | ({"visible_details"} if description else set())
             or result["task_id"] != task_id
             or type(result["revision"]) is not int
             or result["revision"] != revision
@@ -357,6 +545,8 @@ class VerifiedVision:
             raise Rejected("unsupported identity claim")
         if result["status"] == "similar" and result["identity"] != "visual_similarity":
             raise Rejected("similar finding must retain identity uncertainty")
+        if description:
+            _validate_description(result)
 
     async def compare(
         self,
@@ -499,8 +689,9 @@ def release_finding(
         "not_visible": "The requested object is not visible in the inspected views; this does not establish absence elsewhere.",
         "unknown": "I cannot determine whether the requested object is visible in these views.",
     }
-    text = phrases[status]
-    if status == "present":
+    describing = finding.get("mode") == "describe"
+    text = _description_text(finding) if describing else phrases[status]
+    if status == "present" and not describing:
         text += (
             " The visible reference attributes match."
             if identity == "exact"
@@ -519,6 +710,7 @@ def release_finding(
         "coverage": finding["coverage"],
         "observation_ids": finding["observation_ids"],
         "policy": POLICY,
+        **({"visible_details": finding["visible_details"]} if describing else {}),
     }
 
 
