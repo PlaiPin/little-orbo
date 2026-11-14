@@ -1,0 +1,31 @@
+# Copy to /etc/orbo/calibration.yaml and replace nulls with measurements.
+# Qualification flags are operator records, not proof produced by this template.
+wheels_qualified: false
+evidence_record: null
+wheel_radius: null
+wheel_separation: null
+wheel_width: null
+base_length: null
+base_width: null
+base_height: null
+max_wheel_rad_s: null
+max_linear_m_s: null
+max_angular_rad_s: null
+navigation:
+  qualified: false
+  operating_surface: null
+  sensor_type: null
+  scan_topic: null
+  sensor_frame: null
+  range_max: null
+  obstacle_max: null
+  raytrace_max: null
+  inflation_radius: null
+  max_linear_accel: null
+  max_angular_accel: null
+  goal_xy_tolerance: null
+  goal_yaw_tolerance: null
+  scan_timeout: null
+  collision_time_horizon: null
+  waypoints: {} # Surveyed names -> {x: metres, y: metres, yaw: radians} in map frame.
+# Sensor driver and base_link-to-sensor calibrated transform are supplied separately.

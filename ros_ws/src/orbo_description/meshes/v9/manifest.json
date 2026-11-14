@@ -1,0 +1,2187 @@
+{
+  "source": "v9_display_mount/CAD/Orbo_V9_DisplayMount.step",
+  "source_sha256": "a452fcfd4f22bf502e153534a83d64d9a2d2935dbf379a409926a835684e0560",
+  "units": "millimetres",
+  "transform": "ROS=(8-CAD_Y, CAD_X, CAD_Z-33); wheel meshes additionally centered on their axle",
+  "groups": [
+    {
+      "group": "chassis_and_equipment",
+      "parts": 147,
+      "sha256": "fe6f0c048454f3e5299ec0180bab09512a9d86366ca2632bb09c22d262ee3681"
+    },
+    {
+      "group": "display_module",
+      "parts": 1,
+      "sha256": "f47eaa7d3317fab5ba8e54f1b0ecd6e99720e14239b94023ca5d9b63bb34d21a"
+    },
+    {
+      "group": "display_mount",
+      "parts": 15,
+      "sha256": "bcba17468608f5e08fc17b1e05adccc0a280f55ac56bb759752aab3f9ba8a17a"
+    },
+    {
+      "group": "eyes",
+      "parts": 2,
+      "sha256": "3e25b02093672b02799e6b8f74f45ef5aee8637abbdade1da60a9c60b16a8605"
+    },
+    {
+      "group": "face_cover",
+      "parts": 1,
+      "sha256": "5b67ed8c499a2ad9ea02ea8ca512ad9993f0f45296f124486ba7b80c2c760d38"
+    },
+    {
+      "group": "face_mask",
+      "parts": 1,
+      "sha256": "dac231cb1090897b54e40bbcee00a87f246184ad3a71cce53b1f9f914810fe52"
+    },
+    {
+      "group": "flipper_covers",
+      "parts": 2,
+      "sha256": "75dc3cbb363e55456a85e887105f76cf3f5f680db2f51448bac0a823555a53b8"
+    },
+    {
+      "group": "head_shell",
+      "parts": 1,
+      "sha256": "2e8242868d47a9da99d89fb160f48aaf55d8c01976b212826499c224292b4c46"
+    },
+    {
+      "group": "left_wheel",
+      "parts": 1,
+      "sha256": "5f146d39805fbeeb5d82a085e3245832c09ce2641bb87c6bf51d441355785596"
+    },
+    {
+      "group": "neck_diffuser",
+      "parts": 1,
+      "sha256": "1da97cb3606685d270b5b060bc49bd6e356c5234e9b1821d82f1f5d9ee268e85"
+    },
+    {
+      "group": "right_wheel",
+      "parts": 1,
+      "sha256": "1234a0435e9eb97a7318d0d4924d7ba1d070210e09338491bcdb59d063d17d56"
+    },
+    {
+      "group": "servos",
+      "parts": 2,
+      "sha256": "5373d9c9aa27eea9035a34dca65ce0ce0e21e2aaab2e10a2e5919081e0bbc23f"
+    },
+    {
+      "group": "torso_shell",
+      "parts": 1,
+      "sha256": "28e56fa298f256a888f4ee6c9f10e97458660bdc006998ff5388722a5add5265"
+    }
+  ],
+  "parts": [
+    {
+      "name": "07L servo - 9g servo envelope 23 x12.2 x24 - verify actual unit",
+      "group": "servos",
+      "cad_bounds_mm": [
+        -82.0,
+        -16.0,
+        110.9,
+        -53.0,
+        16.0,
+        123.10000000000001
+      ]
+    },
+    {
+      "name": "07R servo - 9g servo envelope 23 x12.2 x24 - verify actual unit",
+      "group": "servos",
+      "cad_bounds_mm": [
+        53.0,
+        -16.0,
+        110.9,
+        82.0,
+        16.0,
+        123.10000000000001
+      ]
+    },
+    {
+      "name": "V8 Neck diffuser - original geometry",
+      "group": "neck_diffuser",
+      "cad_bounds_mm": [
+        -88.1200001,
+        -74.12000010000001,
+        129.9999999,
+        88.12000009999998,
+        74.12018838940973,
+        134.8
+      ]
+    },
+    {
+      "name": "V8 Head - original exterior and underside neck fasteners",
+      "group": "head_shell",
+      "cad_bounds_mm": [
+        -88.00000010000001,
+        -74.01876457914798,
+        133.99999989999932,
+        88.0000001,
+        74.0199810584445,
+        245.87241530935492
+      ]
+    },
+    {
+      "name": "R2 07 Recessed black display mask",
+      "group": "face_mask",
+      "cad_bounds_mm": [
+        -54.19433174289415,
+        -72.39172314990282,
+        145.14750848777535,
+        54.195250062401485,
+        -48.455377005442074,
+        211.07000009999996
+      ]
+    },
+    {
+      "name": "R2 08 Left recessed LED eye graphic",
+      "group": "eyes",
+      "cad_bounds_mm": [
+        -27.75,
+        -61.25,
+        164.95,
+        -19.25,
+        -61.0,
+        188.45
+      ]
+    },
+    {
+      "name": "R2 08 Right recessed LED eye graphic",
+      "group": "eyes",
+      "cad_bounds_mm": [
+        21.75,
+        -61.25,
+        164.95,
+        30.25,
+        -61.0,
+        188.45
+      ]
+    },
+    {
+      "name": "R2 10 Camera lens outer rim",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -9.399999999999999,
+        -82.0,
+        75.6,
+        9.399999999999999,
+        -79.4,
+        94.4
+      ]
+    },
+    {
+      "name": "R2 11 Camera glass",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -9.27415764368925,
+        -85.0,
+        75.72584235631075,
+        9.27415764368925,
+        -81.0,
+        94.27415764368925
+      ]
+    },
+    {
+      "name": "R2 12 Warm belly lamp dome",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -12.081390648431201,
+        -85.0,
+        44.4186093515688,
+        12.081390648431201,
+        -78.0,
+        68.5813906484312
+      ]
+    },
+    {
+      "name": "R2 13 Audio port dark interior -24",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -27.400000000000002,
+        -78.0,
+        89.1,
+        -20.599999999999998,
+        -74.0,
+        90.9
+      ]
+    },
+    {
+      "name": "R2 13 Audio port dark interior 24",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        20.599999999999998,
+        -78.0,
+        89.1,
+        27.400000000000002,
+        -74.0,
+        90.9
+      ]
+    },
+    {
+      "name": "R2 16 Removable antenna stalk envelope",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -2.4581157895869583,
+        -1.4000001000000022,
+        244.999999899999,
+        4.400000100000005,
+        1.401138712559639,
+        279.0000001000001
+      ]
+    },
+    {
+      "name": "R2 17 Textile pom envelope",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -13.0,
+        -16.0,
+        269.5,
+        19.0,
+        16.0,
+        301.5
+      ]
+    },
+    {
+      "name": "R2 07A Continuous smoked face cover - optics provisional",
+      "group": "face_cover",
+      "cad_bounds_mm": [
+        -54.194225047631704,
+        -73.84010456373778,
+        145.1428861835572,
+        57.54499216089289,
+        -49.77280168396711,
+        211.0700001
+      ]
+    },
+    {
+      "name": "V8 Internal neck carrier - square mast and concealed M3 head screws",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -66.8,
+        -46.8,
+        112.0,
+        66.8,
+        63.0,
+        132.0
+      ]
+    },
+    {
+      "name": "V8 Motor plate - underside seating face and side-loaded M3 nut pockets",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -65.5,
+        -51.3,
+        9.999999899999981,
+        65.50000000000001,
+        65.36862348159805,
+        21.05
+      ]
+    },
+    {
+      "name": "V8 Electronics cage - triangulated walls and full servo foot supports",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -49.0,
+        -47.000000000000014,
+        51.999999999999986,
+        49.0,
+        53.000000000000014,
+        85.0
+      ]
+    },
+    {
+      "name": "V3 Battery envelope - relocated to shelf / Body1",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -37.50000000000001,
+        -7.00000000000001,
+        52.0,
+        37.50000000000001,
+        23.000000000000018,
+        77.0
+      ]
+    },
+    {
+      "name": "DDv3_PH_U2D2 / Body1",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -24.0,
+        -34.0,
+        67.2,
+        24.0,
+        -16.0,
+        81.8
+      ]
+    },
+    {
+      "name": "DDv3_PH_Pololu_D24V50F5 / Body1",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -12.7,
+        25.049999999999997,
+        67.4,
+        12.7,
+        47.95,
+        76.0
+      ]
+    },
+    {
+      "name": "DDv3_PH_RaspberryPi5 / Body1",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -28.000000000000018,
+        -39.500000000000014,
+        91.0,
+        28.000000000000018,
+        48.000000000000014,
+        108.6
+      ]
+    },
+    {
+      "name": "DDv3_PH_Pi5_ActiveCooler / Body1",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -20.00000000000001,
+        -31.00000000000001,
+        93.10000000000001,
+        26.00000000000001,
+        19.00000000000001,
+        101.6
+      ]
+    },
+    {
+      "name": "DDv3_DC11_A01_DUMMY / Body1",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        3.999999999999998,
+        -3.25000000000151,
+        18.7499999999985,
+        41.900000000000006,
+        43.250000000001506,
+        47.2500000000015
+      ]
+    },
+    {
+      "name": "DDv3_DC11_A01_DUMMY / Body2",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        3.999999999999998,
+        -3.2500000000000213,
+        29.099999999999874,
+        7.500000000000001,
+        -0.6500000000000015,
+        36.90000000000013
+      ]
+    },
+    {
+      "name": "DDv3_DX124_SCREW-COVER / Body2",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        5.2000000000000055,
+        6.24999990000049,
+        42.999999900000496,
+        35.84242862856291,
+        9.75000009999949,
+        46.500000099999504
+      ]
+    },
+    {
+      "name": "DDv3_B3B-EH / Body1",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        11.200000000000001,
+        17.1,
+        41.550000000000004,
+        20.4,
+        27.1,
+        45.35
+      ]
+    },
+    {
+      "name": "DDv3_B3B-EH / Body1 (1)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        11.2,
+        17.1,
+        20.65,
+        20.4,
+        27.1,
+        24.45
+      ]
+    },
+    {
+      "name": "DDv3_DC11_A01_CASE_CVR_DUMMY / Body2",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        3.9999999999999827,
+        17.0,
+        18.85,
+        10.100000000000106,
+        27.200000000000003,
+        47.15
+      ]
+    },
+    {
+      "name": "DDv3_DC11_A01_IDLER_DUMMY / Body1",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        1.99999999999985,
+        -2.25,
+        22.75,
+        5.500000000000003,
+        18.25,
+        43.25
+      ]
+    },
+    {
+      "name": "DDv3_DC11_A01_IDLER_CAP_DUMMY / Body1",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        0.9999998999999998,
+        2.6999998999999995,
+        27.949999899999998,
+        6.200000100000001,
+        13.0707382940794,
+        38.0500001
+      ]
+    },
+    {
+      "name": "DDv3_DC11_A01_IDLER_SCREW / Body2",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        4.3999999999999995,
+        5.5,
+        30.5,
+        9.4,
+        10.5,
+        35.5
+      ]
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        25.4,
+        -2.50000000000001,
+        41.5,
+        35.4,
+        2.49999999999999,
+        46.5
+      ]
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (1)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        25.4,
+        -2.50000000000001,
+        19.5,
+        35.4,
+        2.49999999999999,
+        24.5
+      ]
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (2)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        25.4,
+        37.5,
+        19.5,
+        35.4,
+        42.5,
+        24.5
+      ]
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (3)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        25.4,
+        37.5,
+        41.5,
+        35.4,
+        42.5,
+        46.5
+      ]
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (4)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        6.6,
+        -2.500000000000004,
+        19.5,
+        16.6,
+        2.499999999999996,
+        24.5
+      ]
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (5)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        6.6,
+        -2.500000000000004,
+        41.5,
+        16.6,
+        2.499999999999996,
+        46.5
+      ]
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (6)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        6.600000000000009,
+        37.5,
+        19.5,
+        16.6,
+        42.5,
+        24.5
+      ]
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (7)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        6.600000000000009,
+        37.5,
+        41.5,
+        16.6,
+        42.5,
+        46.5
+      ]
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        34.09999844653716,
+        -3.250000000000012,
+        40.7499999,
+        38.00000000000262,
+        3.250000100000003,
+        47.25
+      ]
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (1)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        34.09999844653716,
+        -3.25000000000001,
+        18.75,
+        38.00000000000262,
+        3.2500000999999896,
+        25.2500001
+      ]
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (2)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        34.09999844653716,
+        36.74999999999999,
+        18.7499999,
+        38.00000000000262,
+        43.2500001,
+        25.25
+      ]
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (3)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        34.09999844653716,
+        36.7499999,
+        40.7499999,
+        38.00000000000262,
+        43.25,
+        47.25
+      ]
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (4)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        3.9999999999973817,
+        -3.250000000000002,
+        40.7499999,
+        7.900001553462848,
+        3.2500000999999967,
+        47.25
+      ]
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (5)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        3.999999999997382,
+        -3.2500000000000004,
+        18.75,
+        7.900001553462848,
+        3.2500001000000096,
+        25.2500001
+      ]
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (6)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        3.999999999997392,
+        36.7499999,
+        40.7499999,
+        7.900001553462857,
+        43.25,
+        47.25
+      ]
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (7)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        3.9999999999973923,
+        36.7499999,
+        18.75,
+        7.900001553462857,
+        43.25,
+        25.2500001
+      ]
+    },
+    {
+      "name": "DDv3_TB3_Wheel_66x18 / Body1",
+      "group": "left_wheel",
+      "cad_bounds_mm": [
+        41.79999999999999,
+        -25.00000000000001,
+        0.0,
+        60.00000000000001,
+        40.99999999999999,
+        66.0
+      ]
+    },
+    {
+      "name": "V8 Front caster cup - rounded underside flange / Body1",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -18.500000000000004,
+        -49.50000000000001,
+        4.0,
+        18.500000000000004,
+        -25.499999999999993,
+        18.75
+      ]
+    },
+    {
+      "name": "V3 19.05mm ball - front caster repositioned / Body1",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -9.525000000000015,
+        -47.025,
+        0.0,
+        9.524999999999986,
+        -27.975,
+        19.05
+      ]
+    },
+    {
+      "name": "DDv3_DC11_A01_DUMMY / Body1 (1)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -41.900000000000006,
+        -3.25000000000149,
+        18.7499999999985,
+        -3.999999999999997,
+        43.250000000001506,
+        47.2500000000015
+      ]
+    },
+    {
+      "name": "DDv3_DC11_A01_DUMMY / Body2 (1)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -7.50000000000001,
+        -3.2500000000000204,
+        29.099999999999874,
+        -4.000000000000002,
+        -0.649999999999999,
+        36.90000000000013
+      ]
+    },
+    {
+      "name": "DDv3_DX124_SCREW-COVER / Body2 (1)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -35.84242862856291,
+        6.24999990000051,
+        19.4999999000005,
+        -5.20000000000001,
+        9.75000009999951,
+        23.0000000999995
+      ]
+    },
+    {
+      "name": "DDv3_B3B-EH / Body1 (2)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -20.4,
+        17.1,
+        20.65,
+        -11.2,
+        27.1,
+        24.45
+      ]
+    },
+    {
+      "name": "DDv3_B3B-EH / Body1 (3)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -20.4,
+        17.1,
+        41.550000000000004,
+        -11.200000000000001,
+        27.1,
+        45.35
+      ]
+    },
+    {
+      "name": "DDv3_DC11_A01_CASE_CVR_DUMMY / Body2 (1)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -10.100000000000106,
+        17.0,
+        18.85,
+        -3.9999999999999725,
+        27.200000000000003,
+        47.15
+      ]
+    },
+    {
+      "name": "DDv3_DC11_A01_IDLER_DUMMY / Body1 (1)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -5.500000000000003,
+        -2.25,
+        22.75,
+        -1.99999999999985,
+        18.25,
+        43.25
+      ]
+    },
+    {
+      "name": "DDv3_DC11_A01_IDLER_CAP_DUMMY / Body1 (1)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -6.200000100000006,
+        2.6999998999999995,
+        27.949999899999998,
+        -0.9999998999999998,
+        13.0707382940794,
+        38.0500001
+      ]
+    },
+    {
+      "name": "DDv3_DC11_A01_IDLER_SCREW / Body2 (1)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -9.4,
+        5.5,
+        30.5,
+        -4.3999999999999995,
+        10.5,
+        35.5
+      ]
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (8)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -35.4,
+        -2.4999999999999942,
+        19.5,
+        -25.4,
+        2.5000000000000058,
+        24.5
+      ]
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (9)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -35.4,
+        -2.4999999999999942,
+        41.5,
+        -25.399999999999995,
+        2.5000000000000058,
+        46.5
+      ]
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (10)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -35.4,
+        37.5,
+        41.5,
+        -25.399999999999995,
+        42.5,
+        46.5
+      ]
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (11)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -35.4,
+        37.5,
+        19.5,
+        -25.4,
+        42.5,
+        24.5
+      ]
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (12)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -16.599999999999998,
+        -2.5000000000000004,
+        41.5,
+        -6.600000000000009,
+        2.4999999999999996,
+        46.5
+      ]
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (13)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -16.6,
+        -2.5000000000000004,
+        19.5,
+        -6.600000000000009,
+        2.4999999999999996,
+        24.5
+      ]
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (14)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -16.599999999999998,
+        37.5,
+        41.5,
+        -6.6,
+        42.5,
+        46.5
+      ]
+    },
+    {
+      "name": "DDv3_FHS_M2_5X10 / Body2 (15)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -16.6,
+        37.5,
+        19.5,
+        -6.6,
+        42.5,
+        24.5
+      ]
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (8)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -38.000000000002615,
+        -3.2499999999999907,
+        18.75,
+        -34.09999844653716,
+        3.2500001000000185,
+        25.2500001
+      ]
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (9)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -38.00000000000262,
+        -3.2499999999999916,
+        40.7499999,
+        -34.09999844653716,
+        3.2500001000000056,
+        47.25
+      ]
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (10)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -38.000000000002615,
+        36.75,
+        40.75,
+        -34.09999844653716,
+        43.2500001,
+        47.2500001
+      ]
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (11)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -38.00000000000262,
+        36.7499999,
+        18.75,
+        -34.09999844653716,
+        43.25,
+        25.2500001
+      ]
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (12)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -7.900001553462848,
+        -3.2500000000000004,
+        18.75,
+        -3.9999999999973817,
+        3.2500000999999985,
+        25.2500001
+      ]
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (13)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -7.900001553462848,
+        -3.2500000000000004,
+        40.7499999,
+        -3.999999999997392,
+        3.250000100000012,
+        47.25
+      ]
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (14)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -7.900001553462848,
+        36.7499999,
+        18.75,
+        -3.999999999997382,
+        43.25,
+        25.2500001
+      ]
+    },
+    {
+      "name": "DDv3_DC11_A01_SPACER_DUMMY / Body1 (15)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -7.900001553462848,
+        36.7499999,
+        40.7499999,
+        -3.9999999999973817,
+        43.25,
+        47.25
+      ]
+    },
+    {
+      "name": "DDv3_TB3_Wheel_66x18 (1) / Body1",
+      "group": "right_wheel",
+      "cad_bounds_mm": [
+        -60.00000000000001,
+        -25.0,
+        0.0,
+        -41.79999999999999,
+        41.000000000000014,
+        66.0
+      ]
+    },
+    {
+      "name": "DDv3_Spacer_M2x6_Hex / Body1",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -12.5094010767585,
+        25.54999999999998,
+        76.0,
+        -7.8905989232415,
+        29.55,
+        82.0
+      ]
+    },
+    {
+      "name": "DDv3_Spacer_M2x6_Hex / Body1 (1)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        7.890598923241509,
+        25.55,
+        76.0,
+        12.509401076758538,
+        29.55,
+        82.0
+      ]
+    },
+    {
+      "name": "DDv3_Spacer_M2_5x6_Hex / Body1",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -27.0,
+        -38.88675134594815,
+        85.0,
+        -22.0,
+        -33.11324865405185,
+        91.0
+      ]
+    },
+    {
+      "name": "DDv3_Spacer_M2_5x6_Hex / Body1 (1)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        21.999999999999986,
+        -38.8867513459482,
+        85.0,
+        27.000000000000014,
+        -33.1132486540519,
+        91.0
+      ]
+    },
+    {
+      "name": "DDv3_Spacer_M2_5x6_Hex / Body1 (2)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -27.0,
+        19.11324865405185,
+        85.0,
+        -22.0,
+        24.886751345948152,
+        91.0
+      ]
+    },
+    {
+      "name": "DDv3_Spacer_M2_5x6_Hex / Body1 (3)",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        22.0,
+        19.11324865405185,
+        85.0,
+        27.0,
+        24.886751345948152,
+        91.0
+      ]
+    },
+    {
+      "name": "V8 Battery shelf - strap slots and removable standoff stack",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -40.4,
+        -47.0,
+        48.999999999999986,
+        40.4,
+        53.0,
+        55.0
+      ]
+    },
+    {
+      "name": "Hardware hidden head M3x16 X-62 Y-42",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -64.75,
+        -44.75,
+        123.5,
+        -59.25,
+        -39.25,
+        142.5
+      ]
+    },
+    {
+      "name": "Hardware hidden head M3x16 X-62 Y42",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -64.75,
+        39.25,
+        123.5,
+        -59.25,
+        44.75,
+        142.5
+      ]
+    },
+    {
+      "name": "Hardware hidden head M3x16 X62 Y-42",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        59.25,
+        -44.75,
+        123.5,
+        64.75,
+        -39.25,
+        142.5
+      ]
+    },
+    {
+      "name": "Hardware hidden head M3x16 X62 Y42",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        59.25,
+        39.25,
+        123.5,
+        64.75,
+        44.75,
+        142.5
+      ]
+    },
+    {
+      "name": "V8 Rear anti-tip ball cup left",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -12.5,
+        28.500147060095685,
+        3.3000000000000003,
+        -0.04999999999999897,
+        45.499852939904315,
+        14.0
+      ]
+    },
+    {
+      "name": "V8 Rear anti-tip ball cup right",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        0.049999999999999545,
+        28.500147060095685,
+        3.3000000000000003,
+        12.5,
+        45.499852939904315,
+        14.0
+      ]
+    },
+    {
+      "name": "Hardware rear anti-tip steel ball 12.7mm",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -6.35,
+        30.65,
+        0.3000000000000007,
+        6.35,
+        43.35,
+        13.0
+      ]
+    },
+    {
+      "name": "Hardware rear cup M2x8 X-10.5",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -12.3,
+        35.2,
+        4.0,
+        -8.7,
+        38.8,
+        14.0
+      ]
+    },
+    {
+      "name": "Hardware rear cup M2x8 X10.5",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        8.7,
+        35.2,
+        4.0,
+        12.3,
+        38.8,
+        14.0
+      ]
+    },
+    {
+      "name": "Hardware captive head M3 nut X-62 Y-42",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -65.175426480543,
+        -44.75,
+        137.3,
+        -58.824573519457076,
+        -39.25,
+        139.70000000000002
+      ]
+    },
+    {
+      "name": "Hardware captive head M3 nut X-62 Y42",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -65.175426480543,
+        39.25,
+        137.3,
+        -58.824573519457076,
+        44.75,
+        139.70000000000002
+      ]
+    },
+    {
+      "name": "Hardware captive head M3 nut X62 Y-42",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        58.824573519457076,
+        -44.75,
+        137.3,
+        65.175426480543,
+        -39.25,
+        139.70000000000002
+      ]
+    },
+    {
+      "name": "Hardware captive head M3 nut X62 Y42",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        58.824573519457076,
+        39.25,
+        137.3,
+        65.175426480543,
+        44.75,
+        139.70000000000002
+      ]
+    },
+    {
+      "name": "V8 Central aluminium square mast 10x10x2 L110",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -5.0,
+        49.0,
+        14.0,
+        5.0,
+        59.0,
+        124.0
+      ]
+    },
+    {
+      "name": "V8 Bottom square locating bushing",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -8.0,
+        46.0,
+        8.5,
+        8.0,
+        62.0,
+        14.0
+      ]
+    },
+    {
+      "name": "Hardware M4x125 central support screw",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -3.5,
+        50.5,
+        4.5,
+        3.5,
+        57.5,
+        133.5
+      ]
+    },
+    {
+      "name": "Hardware M4 central square nut",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -3.5,
+        50.5,
+        128.0,
+        3.5,
+        57.5,
+        131.2
+      ]
+    },
+    {
+      "name": "V8 Servo frame bracket L - bolted to electronics deck",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -78.0,
+        -29.0,
+        85.0,
+        -29.5,
+        29.0,
+        128.0
+      ]
+    },
+    {
+      "name": "V8 Servo frame bracket R - bolted to electronics deck",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        29.5,
+        -29.0,
+        85.0,
+        78.0,
+        29.0,
+        128.0
+      ]
+    },
+    {
+      "name": "07L servo supplied horn - retained spline and pilot holes",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -84.0,
+        -2.5,
+        109.0,
+        -81.0,
+        13.5,
+        125.0
+      ]
+    },
+    {
+      "name": "V8 Arm L keyed hub with replaceable clips",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -97.39999999999999,
+        -5.1,
+        109.0,
+        -84.0,
+        10.4,
+        122.5
+      ]
+    },
+    {
+      "name": "V8 Arm L smooth removable flipper cover",
+      "group": "flipper_covers",
+      "cad_bounds_mm": [
+        -109.04844472457157,
+        -32.955426081123534,
+        56.499966280205115,
+        -86.42731354876888,
+        22.52608380690134,
+        130.00000010000002
+      ]
+    },
+    {
+      "name": "Hardware arm L hidden M2x10 Z115",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -93.2,
+        0.9000000000000004,
+        113.2,
+        -81.19999999999999,
+        4.5,
+        116.8
+      ]
+    },
+    {
+      "name": "Hardware arm L hidden M2x10 Z119",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -93.2,
+        0.9000000000000004,
+        117.2,
+        -81.19999999999999,
+        4.5,
+        120.8
+      ]
+    },
+    {
+      "name": "07R servo supplied horn - retained spline and pilot holes",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        81.0,
+        -2.5,
+        109.0,
+        84.0,
+        13.5,
+        125.0
+      ]
+    },
+    {
+      "name": "V8 Arm R keyed hub with replaceable clips",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        84.0,
+        -5.1,
+        109.0,
+        97.39999999999999,
+        10.4,
+        122.5
+      ]
+    },
+    {
+      "name": "V8 Arm R smooth removable flipper cover",
+      "group": "flipper_covers",
+      "cad_bounds_mm": [
+        86.4261856403446,
+        -32.95542608112385,
+        56.499817624614124,
+        109.04844472457137,
+        22.52608380690101,
+        130.0000001000027
+      ]
+    },
+    {
+      "name": "Hardware arm R hidden M2x10 Z115",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        81.19999999999999,
+        0.9000000000000004,
+        113.2,
+        93.2,
+        4.5,
+        116.8
+      ]
+    },
+    {
+      "name": "Hardware arm R hidden M2x10 Z119",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        81.19999999999999,
+        0.9000000000000004,
+        117.2,
+        93.2,
+        4.5,
+        120.8
+      ]
+    },
+    {
+      "name": "Hardware servo L ear M2x5 Y-14",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -78.0,
+        -15.8,
+        115.19999999999999,
+        -71.0,
+        -12.2,
+        118.8
+      ]
+    },
+    {
+      "name": "Hardware servo L ear M2x5 Y14",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -78.0,
+        12.2,
+        115.19999999999999,
+        -71.0,
+        15.8,
+        118.8
+      ]
+    },
+    {
+      "name": "Hardware servo R ear M2x5 Y-14",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        71.0,
+        -15.8,
+        115.2,
+        78.0,
+        -12.2,
+        118.80000000000001
+      ]
+    },
+    {
+      "name": "Hardware servo R ear M2x5 Y14",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        71.0,
+        12.2,
+        115.2,
+        78.0,
+        15.8,
+        118.80000000000001
+      ]
+    },
+    {
+      "name": "V8 Torso - lower ledges Z7 to Z10 under motor plate",
+      "group": "torso_shell",
+      "cad_bounds_mm": [
+        -95.90759152769952,
+        -80.68716571209062,
+        6.999999899999979,
+        95.90761380283287,
+        93.32510642365085,
+        130.00000010000107
+      ]
+    },
+    {
+      "name": "Hardware shell underside countersunk M3x10 X-40 Y-35",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -43.0,
+        -38.0,
+        7.199999999999999,
+        -37.0,
+        -32.0,
+        17.2
+      ]
+    },
+    {
+      "name": "Hardware shell plate M3 nut X-40 Y-35",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -42.75,
+        -38.17542648054293,
+        14.0,
+        -37.25,
+        -31.82457351945707,
+        16.4
+      ]
+    },
+    {
+      "name": "Hardware shell underside countersunk M3x10 X40 Y-35",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        37.0,
+        -38.0,
+        7.199999999999999,
+        43.0,
+        -32.0,
+        17.2
+      ]
+    },
+    {
+      "name": "Hardware shell plate M3 nut X40 Y-35",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        37.25,
+        -38.17542648054293,
+        14.0,
+        42.75,
+        -31.82457351945707,
+        16.4
+      ]
+    },
+    {
+      "name": "Hardware shell underside countersunk M3x10 X-18 Y59",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -21.0,
+        56.0,
+        7.199999999999999,
+        -15.0,
+        62.0,
+        17.2
+      ]
+    },
+    {
+      "name": "Hardware shell plate M3 nut X-18 Y59",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -20.75,
+        55.824573519457076,
+        14.0,
+        -15.25,
+        62.175426480542924,
+        16.4
+      ]
+    },
+    {
+      "name": "Hardware shell underside countersunk M3x10 X18 Y59",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        14.999999999999998,
+        56.0,
+        7.199999999999999,
+        21.0,
+        62.0,
+        17.2
+      ]
+    },
+    {
+      "name": "Hardware shell plate M3 nut X18 Y59",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        15.25,
+        55.824573519457076,
+        14.0,
+        20.75,
+        62.175426480542924,
+        16.4
+      ]
+    },
+    {
+      "name": "V8 Lower front frame - braced compression supports",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -36.000000000000036,
+        -47.0,
+        19.0,
+        36.000000000000036,
+        -7.0,
+        49.000000000000014
+      ]
+    },
+    {
+      "name": "V8 Lower rear frame - braced compression supports",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -36.000000000000014,
+        45.0,
+        18.99999999999999,
+        36.000000000000014,
+        53.00000000000001,
+        49.0
+      ]
+    },
+    {
+      "name": "Hardware frame through bolt M3x80 X-30 Y-43",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -32.75,
+        -45.75,
+        7.0,
+        -27.25,
+        -40.25,
+        90.0
+      ]
+    },
+    {
+      "name": "Hardware frame washer M3 X-30 Y-43",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -33.5,
+        -46.5,
+        85.0,
+        -26.5,
+        -39.5,
+        85.5
+      ]
+    },
+    {
+      "name": "Hardware frame top nut M3 X-30 Y-43",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -32.75,
+        -46.175426480542924,
+        85.5,
+        -27.25,
+        -39.82457351945707,
+        87.89999999999999
+      ]
+    },
+    {
+      "name": "Hardware frame through bolt M3x80 X-30 Y49",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -32.75,
+        46.25,
+        7.0,
+        -27.25,
+        51.75,
+        90.0
+      ]
+    },
+    {
+      "name": "Hardware frame washer M3 X-30 Y49",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -33.5,
+        45.5,
+        85.0,
+        -26.5,
+        52.5,
+        85.5
+      ]
+    },
+    {
+      "name": "Hardware frame top nut M3 X-30 Y49",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -32.75,
+        45.824573519457076,
+        85.5,
+        -27.25,
+        52.175426480542924,
+        87.89999999999999
+      ]
+    },
+    {
+      "name": "Hardware front frame shelf M3x10 X-30",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -32.75,
+        -14.75,
+        42.0,
+        -27.25,
+        -9.25,
+        55.0
+      ]
+    },
+    {
+      "name": "Hardware frame through bolt M3x80 X30 Y-43",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        27.25,
+        -45.75,
+        7.0,
+        32.75,
+        -40.25,
+        90.0
+      ]
+    },
+    {
+      "name": "Hardware frame washer M3 X30 Y-43",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        26.5,
+        -46.5,
+        85.0,
+        33.5,
+        -39.5,
+        85.5
+      ]
+    },
+    {
+      "name": "Hardware frame top nut M3 X30 Y-43",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        27.25,
+        -46.175426480542924,
+        85.5,
+        32.75,
+        -39.82457351945707,
+        87.89999999999999
+      ]
+    },
+    {
+      "name": "Hardware frame through bolt M3x80 X30 Y49",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        27.25,
+        46.25,
+        7.0,
+        32.75,
+        51.75,
+        90.0
+      ]
+    },
+    {
+      "name": "Hardware frame washer M3 X30 Y49",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        26.5,
+        45.5,
+        85.0,
+        33.5,
+        52.5,
+        85.5
+      ]
+    },
+    {
+      "name": "Hardware frame top nut M3 X30 Y49",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        27.25,
+        45.824573519457076,
+        85.5,
+        32.75,
+        52.175426480542924,
+        87.89999999999999
+      ]
+    },
+    {
+      "name": "Hardware front frame shelf M3x10 X30",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        27.25,
+        -14.75,
+        42.0,
+        32.75,
+        -9.25,
+        55.0
+      ]
+    },
+    {
+      "name": "Hardware frame bracket L M3x12 Y-20",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -35.75,
+        -22.75,
+        79.0,
+        -30.25,
+        -17.25,
+        94.0
+      ]
+    },
+    {
+      "name": "Hardware frame bracket L M3x12 Y20",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -35.75,
+        17.25,
+        79.0,
+        -30.25,
+        22.75,
+        94.0
+      ]
+    },
+    {
+      "name": "Hardware carrier to servo tower L M3x10 Y-24",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -55.75,
+        -26.75,
+        118.0,
+        -50.25,
+        -21.25,
+        131.0
+      ]
+    },
+    {
+      "name": "Hardware carrier to servo tower L M3x10 Y24",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -55.75,
+        21.25,
+        118.0,
+        -50.25,
+        26.75,
+        131.0
+      ]
+    },
+    {
+      "name": "Hardware frame bracket R M3x12 Y-20",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        30.25,
+        -22.75,
+        79.0,
+        35.75,
+        -17.25,
+        94.0
+      ]
+    },
+    {
+      "name": "Hardware frame bracket R M3x12 Y20",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        30.25,
+        17.25,
+        79.0,
+        35.75,
+        22.75,
+        94.0
+      ]
+    },
+    {
+      "name": "Hardware carrier to servo tower R M3x10 Y-24",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        50.25,
+        -26.75,
+        118.0,
+        55.75,
+        -21.25,
+        131.0
+      ]
+    },
+    {
+      "name": "Hardware carrier to servo tower R M3x10 Y24",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        50.25,
+        21.25,
+        118.0,
+        55.75,
+        26.75,
+        131.0
+      ]
+    },
+    {
+      "name": "Hardware M3 insert nominal occupied volume deck X-33 Y-20",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -35.1,
+        -22.1,
+        79.5,
+        -30.9,
+        -17.9,
+        84.5
+      ]
+    },
+    {
+      "name": "Hardware M3 insert nominal occupied volume deck X-33 Y20",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -35.1,
+        17.9,
+        79.5,
+        -30.9,
+        22.1,
+        84.5
+      ]
+    },
+    {
+      "name": "Hardware M3 insert nominal occupied volume deck X33 Y-20",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        30.9,
+        -22.1,
+        79.5,
+        35.1,
+        -17.9,
+        84.5
+      ]
+    },
+    {
+      "name": "Hardware M3 insert nominal occupied volume deck X33 Y20",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        30.9,
+        17.9,
+        79.5,
+        35.1,
+        22.1,
+        84.5
+      ]
+    },
+    {
+      "name": "Hardware M3 insert nominal occupied volume carrier seat X-53 Y-24",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -55.1,
+        -26.1,
+        118.5,
+        -50.9,
+        -21.9,
+        123.5
+      ]
+    },
+    {
+      "name": "Hardware M3 insert nominal occupied volume carrier seat X-53 Y24",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -55.1,
+        21.9,
+        118.5,
+        -50.9,
+        26.1,
+        123.5
+      ]
+    },
+    {
+      "name": "Hardware M3 insert nominal occupied volume carrier seat X53 Y-24",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        50.9,
+        -26.1,
+        118.5,
+        55.1,
+        -21.9,
+        123.5
+      ]
+    },
+    {
+      "name": "Hardware M3 insert nominal occupied volume carrier seat X53 Y24",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        50.9,
+        21.9,
+        118.5,
+        55.1,
+        26.1,
+        123.5
+      ]
+    },
+    {
+      "name": "Hardware M3 insert nominal occupied volume front brace X-30 Y-12",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        -32.1,
+        -14.1,
+        43.5,
+        -27.9,
+        -9.9,
+        48.5
+      ]
+    },
+    {
+      "name": "Hardware M3 insert nominal occupied volume front brace X30 Y-12",
+      "group": "chassis_and_equipment",
+      "cad_bounds_mm": [
+        27.9,
+        -14.1,
+        43.5,
+        32.1,
+        -9.9,
+        48.5
+      ]
+    },
+    {
+      "name": "V9 Display pedestal and carrier saddle",
+      "group": "display_mount",
+      "cad_bounds_mm": [
+        -33.0,
+        -53.0,
+        124.39999999999999,
+        42.99000000000001,
+        -33.0,
+        189.25
+      ]
+    },
+    {
+      "name": "V9 Carrier lower clamp jaw",
+      "group": "display_mount",
+      "cad_bounds_mm": [
+        -33.0,
+        -53.0,
+        121.0,
+        33.0,
+        -33.0,
+        124.0
+      ]
+    },
+    {
+      "name": "V9 Display removable top retainer",
+      "group": "display_mount",
+      "cad_bounds_mm": [
+        -31.909999999999997,
+        -49.699999999999996,
+        187.8,
+        42.99000000000001,
+        -43.5,
+        192.25
+      ]
+    },
+    {
+      "name": "V9 Hardware clamp M3x16 X-25 Y-50",
+      "group": "display_mount",
+      "cad_bounds_mm": [
+        -27.75,
+        -52.75,
+        118.0,
+        -22.25,
+        -47.25,
+        137.0
+      ]
+    },
+    {
+      "name": "V9 Hardware clamp M3 nut X-25 Y-50",
+      "group": "display_mount",
+      "cad_bounds_mm": [
+        -28.175426480541706,
+        -52.75,
+        131.0,
+        -21.824573519448293,
+        -47.25,
+        133.4
+      ]
+    },
+    {
+      "name": "V9 Hardware clamp M3x16 X-25 Y-36",
+      "group": "display_mount",
+      "cad_bounds_mm": [
+        -27.75,
+        -38.75,
+        118.0,
+        -22.25,
+        -33.25,
+        137.0
+      ]
+    },
+    {
+      "name": "V9 Hardware clamp M3 nut X-25 Y-36",
+      "group": "display_mount",
+      "cad_bounds_mm": [
+        -28.175426480541706,
+        -38.75,
+        131.0,
+        -21.824573519448293,
+        -33.25,
+        133.4
+      ]
+    },
+    {
+      "name": "V9 Hardware clamp M3x16 X25 Y-50",
+      "group": "display_mount",
+      "cad_bounds_mm": [
+        22.25,
+        -52.75,
+        118.0,
+        27.75,
+        -47.25,
+        137.0
+      ]
+    },
+    {
+      "name": "V9 Hardware clamp M3 nut X25 Y-50",
+      "group": "display_mount",
+      "cad_bounds_mm": [
+        21.824573519456795,
+        -52.75,
+        131.0,
+        28.175426480543205,
+        -47.25,
+        133.4
+      ]
+    },
+    {
+      "name": "V9 Hardware clamp M3x16 X25 Y-36",
+      "group": "display_mount",
+      "cad_bounds_mm": [
+        22.25,
+        -38.75,
+        118.0,
+        27.75,
+        -33.25,
+        137.0
+      ]
+    },
+    {
+      "name": "V9 Hardware clamp M3 nut X25 Y-36",
+      "group": "display_mount",
+      "cad_bounds_mm": [
+        21.824573519456795,
+        -38.75,
+        131.0,
+        28.175426480543205,
+        -33.25,
+        133.4
+      ]
+    },
+    {
+      "name": "V9 Hardware retainer M3x10 X-27.71",
+      "group": "display_mount",
+      "cad_bounds_mm": [
+        -30.46,
+        -49.35,
+        182.25,
+        -24.96,
+        -43.85,
+        195.25
+      ]
+    },
+    {
+      "name": "V9 Hardware retainer M3 nut X-27.71",
+      "group": "display_mount",
+      "cad_bounds_mm": [
+        -30.88542648054171,
+        -49.349999999999994,
+        183.15,
+        -24.534573519448298,
+        -43.849999999999994,
+        185.55
+      ]
+    },
+    {
+      "name": "V9 Hardware retainer M3x10 X38.79",
+      "group": "display_mount",
+      "cad_bounds_mm": [
+        36.04,
+        -49.35,
+        182.25,
+        41.54,
+        -43.85,
+        195.25
+      ]
+    },
+    {
+      "name": "V9 Hardware retainer M3 nut X38.79",
+      "group": "display_mount",
+      "cad_bounds_mm": [
+        35.61457351945679,
+        -49.349999999999994,
+        183.15,
+        41.9654264805432,
+        -43.849999999999994,
+        185.55
+      ]
+    },
+    {
+      "name": "V9 Waveshare ESP32-S3-AMOLED-1.91-M manufacturer STEP reference",
+      "group": "display_module",
+      "cad_bounds_mm": [
+        -23.21,
+        -49.000000000000284,
+        164.45,
+        34.790000000001,
+        -35.09999999999906,
+        188.95000000000002
+      ]
+    }
+  ]
+}

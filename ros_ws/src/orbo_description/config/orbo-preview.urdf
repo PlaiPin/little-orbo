@@ -1,0 +1,188 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="orbo_v9_full">
+  <link name="base_link" />
+  <link name="cad_chassis_and_equipment">
+    <visual>
+      <geometry>
+        <mesh filename="package://orbo_description/meshes/v9/chassis_and_equipment.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+      <material name="chassis_and_equipment_material">
+        <color rgba=".30 .43 .49 1" />
+      </material>
+    </visual>
+  </link>
+  <joint name="cad_chassis_and_equipment_mount" type="fixed">
+    <parent link="base_link" />
+    <child link="cad_chassis_and_equipment" />
+  </joint>
+  <link name="cad_display_module">
+    <visual>
+      <geometry>
+        <mesh filename="package://orbo_description/meshes/v9/display_module.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+      <material name="display_module_material">
+        <color rgba=".15 .2 .2 1" />
+      </material>
+    </visual>
+  </link>
+  <joint name="cad_display_module_mount" type="fixed">
+    <parent link="base_link" />
+    <child link="cad_display_module" />
+  </joint>
+  <link name="cad_display_mount">
+    <visual>
+      <geometry>
+        <mesh filename="package://orbo_description/meshes/v9/display_mount.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+      <material name="display_mount_material">
+        <color rgba=".30 .43 .49 1" />
+      </material>
+    </visual>
+  </link>
+  <joint name="cad_display_mount_mount" type="fixed">
+    <parent link="base_link" />
+    <child link="cad_display_mount" />
+  </joint>
+  <link name="cad_eyes">
+    <visual>
+      <geometry>
+        <mesh filename="package://orbo_description/meshes/v9/eyes.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+      <material name="eyes_material">
+        <color rgba="1 .98 .8 1" />
+      </material>
+    </visual>
+  </link>
+  <joint name="cad_eyes_mount" type="fixed">
+    <parent link="base_link" />
+    <child link="cad_eyes" />
+  </joint>
+  <link name="cad_face_cover">
+    <visual>
+      <geometry>
+        <mesh filename="package://orbo_description/meshes/v9/face_cover.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+      <material name="face_cover_material">
+        <color rgba=".1 .13 .16 .45" />
+      </material>
+    </visual>
+  </link>
+  <joint name="cad_face_cover_mount" type="fixed">
+    <parent link="base_link" />
+    <child link="cad_face_cover" />
+  </joint>
+  <link name="cad_face_mask">
+    <visual>
+      <geometry>
+        <mesh filename="package://orbo_description/meshes/v9/face_mask.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+      <material name="face_mask_material">
+        <color rgba=".055 .065 .075 1" />
+      </material>
+    </visual>
+  </link>
+  <joint name="cad_face_mask_mount" type="fixed">
+    <parent link="base_link" />
+    <child link="cad_face_mask" />
+  </joint>
+  <link name="cad_flipper_covers">
+    <visual>
+      <geometry>
+        <mesh filename="package://orbo_description/meshes/v9/flipper_covers.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+      <material name="flipper_covers_material">
+        <color rgba=".95 .56 .37 1" />
+      </material>
+    </visual>
+  </link>
+  <joint name="cad_flipper_covers_mount" type="fixed">
+    <parent link="base_link" />
+    <child link="cad_flipper_covers" />
+  </joint>
+  <link name="cad_head_shell">
+    <visual>
+      <geometry>
+        <mesh filename="package://orbo_description/meshes/v9/head_shell.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+      <material name="head_shell_material">
+        <color rgba=".91 .87 .77 1" />
+      </material>
+    </visual>
+  </link>
+  <joint name="cad_head_shell_mount" type="fixed">
+    <parent link="base_link" />
+    <child link="cad_head_shell" />
+  </joint>
+  <link name="cad_left_wheel">
+    <visual>
+      <geometry>
+        <mesh filename="package://orbo_description/meshes/v9/left_wheel.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+      <material name="left_wheel_material">
+        <color rgba=".1 .1 .1 1" />
+      </material>
+    </visual>
+  </link>
+  <joint name="cad_left_wheel_mount" type="fixed">
+    <parent link="base_link" />
+    <child link="cad_left_wheel" />
+    <origin xyz="0 0.0509 0" />
+  </joint>
+  <link name="cad_neck_diffuser">
+    <visual>
+      <geometry>
+        <mesh filename="package://orbo_description/meshes/v9/neck_diffuser.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+      <material name="neck_diffuser_material">
+        <color rgba=".3 .85 .88 1" />
+      </material>
+    </visual>
+  </link>
+  <joint name="cad_neck_diffuser_mount" type="fixed">
+    <parent link="base_link" />
+    <child link="cad_neck_diffuser" />
+  </joint>
+  <link name="cad_right_wheel">
+    <visual>
+      <geometry>
+        <mesh filename="package://orbo_description/meshes/v9/right_wheel.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+      <material name="right_wheel_material">
+        <color rgba=".1 .1 .1 1" />
+      </material>
+    </visual>
+  </link>
+  <joint name="cad_right_wheel_mount" type="fixed">
+    <parent link="base_link" />
+    <child link="cad_right_wheel" />
+    <origin xyz="0 -0.0509 0" />
+  </joint>
+  <link name="cad_servos">
+    <visual>
+      <geometry>
+        <mesh filename="package://orbo_description/meshes/v9/servos.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+      <material name="servos_material">
+        <color rgba=".30 .43 .49 1" />
+      </material>
+    </visual>
+  </link>
+  <joint name="cad_servos_mount" type="fixed">
+    <parent link="base_link" />
+    <child link="cad_servos" />
+  </joint>
+  <link name="cad_torso_shell">
+    <visual>
+      <geometry>
+        <mesh filename="package://orbo_description/meshes/v9/torso_shell.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+      <material name="torso_shell_material">
+        <color rgba=".91 .87 .77 1" />
+      </material>
+    </visual>
+  </link>
+  <joint name="cad_torso_shell_mount" type="fixed">
+    <parent link="base_link" />
+    <child link="cad_torso_shell" />
+  </joint>
+</robot>
