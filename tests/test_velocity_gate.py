@@ -76,3 +76,43 @@ def test_clock_alignment_is_one_slot_bounded_and_drops_clock_rewinds():
     assert slot.offer("one", 1_010_000_000, 1_000_000_000, 2.0)
     assert slot.pop(500_000_000, 2.01) is None
     assert slot.pending is None
+
+
+def test_newly_current_command_supersedes_delayed_clock_packet_without_replay():
+    from orbo_runtime.velocity_gate import ClockAlignedSlot, accept_current_velocity
+
+    gate = VelocityGate(max_linear=0.2, max_angular=0.5)
+    gate.authorize("nav2", 1, 5.5, 5.0)
+    slot = ClockAlignedSlot()
+    old = Velocity("nav2", 1_010_000_000, 0.1, 0)
+    assert slot.offer(old, old.stamp_ns, 1_000_000_000, 5.0)
+    newer = Velocity("nav2", 1_020_000_000, 0.12, 0)
+    accept_current_velocity(gate, slot, newer, 1_020_000_000, 5.02)
+    assert slot.pop(1_030_000_000, 5.03) is None
+    assert gate.current(1_030_000_000, 5.03) == newer
+    # Receiving that older command from the wire still rejects it; only the
+    # superseded local clock buffer was discarded.
+    with pytest.raises(Rejected, match="reordered"):
+        accept_current_velocity(gate, slot, old, 1_030_000_000, 5.03)
+    # Neither accepting nor deduplicating a packet extends source freshness.
+    accept_current_velocity(gate, slot, newer, 1_100_000_000, 5.1)
+    assert gate.current(1_220_000_000, 5.22) is None
+
+
+def test_invalid_current_input_does_not_discard_pending_and_newer_slot_survives():
+    from orbo_runtime.velocity_gate import ClockAlignedSlot, accept_current_velocity
+
+    gate = VelocityGate(max_linear=0.2, max_angular=0.5)
+    gate.authorize("nav2", 1, 5.5, 5.0)
+    slot = ClockAlignedSlot()
+    pending = Velocity("nav2", 1_040_000_000, 0.1, 0)
+    assert slot.offer(pending, pending.stamp_ns, 1_000_000_000, 5.0)
+    with pytest.raises(Rejected):
+        accept_current_velocity(
+            gate, slot, Velocity("nav2", 1_050_000_000, 10, 0), 1_050_000_000, 5.01
+        )
+    assert slot.pending[0] == pending
+    current = Velocity("nav2", 1_020_000_000, 0.1, 0)
+    accept_current_velocity(gate, slot, current, 1_020_000_000, 5.02)
+    assert slot.pending[0] == pending
+    assert slot.pop(1_040_000_000, 5.04) == pending

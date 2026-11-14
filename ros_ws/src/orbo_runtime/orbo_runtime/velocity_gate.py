@@ -106,6 +106,24 @@ class ClockAlignedSlot:
         self.pending = None
         return value
 
+    def discard_through(self, stamp_ns):
+        """Drop only buffered samples superseded by an accepted current sample."""
+        if self.pending is not None and self.pending[1] <= stamp_ns:
+            self.pending = None
+
+
+def accept_current_velocity(gate, pending, sample, now_ns, now_mono):
+    """Validate before replacing locally delayed data; never relax wire ordering.
+
+    A /clock update can make a newly received command current before the timer
+    drains the prior future-clock slot. That older local copy must not be replayed
+    into the strict gate after a newer command has already been accepted.
+    """
+    if sample != gate.last:
+        gate.accept(sample, now_ns, now_mono)
+    # An exact duplicate is harmless but never renews its source stamp or lease.
+    pending.discard_through(sample.stamp_ns)
+
 
 def main():
     import time
@@ -230,15 +248,10 @@ def main():
                 ):
                     self.gate.stop()
                 return
-            if (
-                self.gate.last
-                and stamp == self.gate.last.stamp_ns
-                and msg.twist.linear.x == self.gate.last.linear
-                and msg.twist.angular.z == self.gate.last.angular
-            ):
-                return
             try:
-                self.gate.accept(
+                accept_current_velocity(
+                    self.gate,
+                    self.pending_command,
                     Velocity(
                         source,
                         msg.header.stamp.sec * 1_000_000_000 + msg.header.stamp.nanosec,
@@ -253,7 +266,10 @@ def main():
                 if source == self.gate.source:
                     if self.gate.lease_until:
                         self.get_logger().warning(
-                            "Velocity authority stopped: " + str(error)
+                            "Velocity authority stopped: "
+                            + str(error)
+                            + f"; source stamp {stamp}; local clock {now_ns}; "
+                            + f"previous stamp {self.gate.last.stamp_ns if self.gate.last else None}"
                         )
                     self.gate.stop()
 
