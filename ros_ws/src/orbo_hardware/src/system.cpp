@@ -38,6 +38,7 @@ std::vector<hardware_interface::CommandInterface> System::export_command_interfa
 CallbackReturn System::on_configure(const rclcpp_lifecycle::State &){
   stop_worker();fault_=false;boot_=0;sequence_=0;received_={};authority_received_={};
   authority_=orbo_embedded_interfaces::msg::ControlSession();have_position_origin_=false;
+  last_publication_={};last_source_ms_=0;
   node_=std::make_shared<rclcpp::Node>("orbo_hardware_transport","/orbo");
   executor_=std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
   executor_->add_node(node_);
@@ -52,13 +53,19 @@ CallbackReturn System::on_configure(const rclcpp_lifecycle::State &){
   // It preserves the originating TwistStamped age; health never creates authority.
   authority_sub_=node_->create_subscription<orbo_embedded_interfaces::msg::ControlSession>("control/authority",rclcpp::QoS(1).durability_volatile(),
     [this](orbo_embedded_interfaces::msg::ControlSession::ConstSharedPtr msg){
-      std::lock_guard<std::mutex> guard(mutex_);
-      if(msg->interface_version!=1 || !msg->enable_wheels || msg->valid_for_ms>500 || msg->valid_for_ms==0)return;
-      if(authority_.epoch>msg->epoch || (authority_.epoch==msg->epoch && authority_.sequence>=msg->sequence))return;
-      authority_=*msg;authority_received_=Steady::now();
+      {
+        std::lock_guard<std::mutex> guard(mutex_);
+        if(msg->interface_version!=1 || !msg->enable_wheels || msg->valid_for_ms>500 || msg->valid_for_ms==0)return;
+        if(authority_.epoch>msg->epoch || (authority_.epoch==msg->epoch && authority_.sequence>=msg->sequence))return;
+        authority_=*msg;authority_received_=Steady::now();
+      }
+      publish_tick();
     });
   wheel_pub_=node_->create_publisher<orbo_embedded_interfaces::msg::WheelCommand>("embedded/wheel_command",rclcpp::QoS(1).durability_volatile());
   session_pub_=node_->create_publisher<orbo_embedded_interfaces::msg::ControlSession>("embedded/control_session",rclcpp::QoS(1).durability_volatile());
+  // Receive continuously and dispatch fresh intent immediately when the 20 Hz
+  // rate limit allows. The timer releases pending intent without resending old stamps.
+  publish_timer_=node_->create_wall_timer(std::chrono::milliseconds(5), [this]{publish_tick();});
   running_=true;thread_=std::thread(&System::worker,this);
   return CallbackReturn::SUCCESS;
 }
@@ -103,9 +110,7 @@ return_type System::write(const rclcpp::Time &,const rclcpp::Duration &){
   last_write_ns_=std::chrono::duration_cast<std::chrono::nanoseconds>(Steady::now().time_since_epoch()).count();
   return return_type::OK;
 }
-void System::worker(){
-  while(running_ && rclcpp::ok()){
-    executor_->spin_some(std::chrono::milliseconds(2));
+void System::publish_tick(){
     if(request_stop_.exchange(false)){
       orbo_embedded_interfaces::msg::ControlSession stop;
       stop.interface_version=1;stop.operation=0;session_pub_->publish(stop);
@@ -121,28 +126,29 @@ void System::worker(){
           epoch_ms>=authority_.issued_epoch_ms && epoch_ms-authority_.issued_epoch_ms<authority_.valid_for_ms &&
           now-authority_received_<std::chrono::milliseconds(authority_.valid_for_ms) &&
           last_write_ns_>0 && now_ns-last_write_ns_<100000000;
-        if(valid){
+        if(valid && authority_.issued_epoch_ms!=last_source_ms_ &&
+           now-last_publication_>=std::chrono::milliseconds(50)){
           orbo_embedded_interfaces::msg::WheelCommand msg;
           msg.boot_id=boot_;msg.epoch=authority_.epoch;msg.sequence=++sequence_;msg.command_id=sequence_;
           msg.issued_epoch_ms=authority_.issued_epoch_ms; // Preserve source age, never refresh old intent.
           msg.valid_for_ms=authority_.valid_for_ms;
           for(size_t i=0;i<2;i++)msg.velocity_rad_s[i]=queued_[i].load();
+          last_source_ms_=msg.issued_epoch_ms;last_publication_=now;
           wheel_pub_->publish(msg);
         }
         // Loss of upstream authority stops refresh; the MCU expiry independently disarms.
       }
     }
-    // Firmware processes XRCE input once per ~22 ms telemetry loop. Sending
-    // faster than it consumes reliable messages builds a queue of ageing
-    // commands. Match the validated manual publisher's 20 Hz transport rate;
-    // controller read/write and odometry can continue at 50 Hz.
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-  }
+}
+void System::worker(){
+  while(running_ && rclcpp::ok())executor_->spin_once(std::chrono::milliseconds(10));
   if(session_pub_){orbo_embedded_interfaces::msg::ControlSession stop;stop.interface_version=1;stop.operation=0;session_pub_->publish(stop);}
 }
 void System::stop_worker(){
   active_=false;running_=false;
+  if(executor_)executor_->cancel();
   if(thread_.joinable())thread_.join();
+  publish_timer_.reset();
   state_sub_.reset();authority_sub_.reset();wheel_pub_.reset();session_pub_.reset();executor_.reset();node_.reset();
 }
 }

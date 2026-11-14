@@ -27,6 +27,7 @@ class System : public hardware_interface::SystemInterface {
  private:
   using Steady = std::chrono::steady_clock;
   void worker();
+  void publish_tick();
   void stop_worker();
   void stop_request();
   bool fresh_locked(Steady::time_point) const;
@@ -41,13 +42,15 @@ class System : public hardware_interface::SystemInterface {
   std::mutex mutex_;
   orbo_embedded_interfaces::msg::WheelState latest_;
   orbo_embedded_interfaces::msg::ControlSession authority_;
-  Steady::time_point received_{}, authority_received_{};
+  Steady::time_point received_{}, authority_received_{}, last_publication_{};
+  uint64_t last_source_ms_=0;
   rclcpp::Node::SharedPtr node_;
   std::shared_ptr<rclcpp::executors::SingleThreadedExecutor> executor_;
   rclcpp::Subscription<orbo_embedded_interfaces::msg::WheelState>::SharedPtr state_sub_;
   rclcpp::Subscription<orbo_embedded_interfaces::msg::ControlSession>::SharedPtr authority_sub_;
   rclcpp::Publisher<orbo_embedded_interfaces::msg::WheelCommand>::SharedPtr wheel_pub_;
   rclcpp::Publisher<orbo_embedded_interfaces::msg::ControlSession>::SharedPtr session_pub_;
+  rclcpp::TimerBase::SharedPtr publish_timer_;
   std::thread thread_;
 };
 }
