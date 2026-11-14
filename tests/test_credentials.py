@@ -1,5 +1,6 @@
 import json
 import os
+from pathlib import Path
 
 import pytest
 
@@ -148,6 +149,37 @@ def test_default_pointer_discovery_is_independent_of_cwd(tmp_path, monkeypatch):
     found = credentials.config_file()
     assert found.name == "credentials.toml" and found.parent.name == "deploy"
     assert found.is_file()
+
+
+def test_relative_external_pointer_resolves_from_config_not_cwd(
+    setup, tmp_path, monkeypatch
+):
+    _, config, secret = setup
+    config.write_text('[credentials]\nfile = "../private/credentials.env"\n')
+    put(secret, "NEARAI_API_KEY=external-fixture\n")
+    elsewhere = tmp_path / "elsewhere"
+    elsewhere.mkdir()
+    monkeypatch.chdir(elsewhere)
+    assert credentials.credential_file() == secret
+    assert credentials.credential("NEARAI_API_KEY") == "external-fixture"
+
+
+def test_initializer_copies_documented_example_and_refuses_populated_sample(setup):
+    _, config, secret = setup
+    source = Path(__file__).resolve().parents[1]
+    template = (source / "deploy/credentials.env.example").read_text()
+    sample = config.parent / "credentials.env.example"
+    sample.write_text(template)
+    assert credentials.initialize()["created"] is True
+    assert secret.read_text() == template
+    assert secret.stat().st_mode & 0o777 == 0o600
+    secret.unlink()
+    sample.write_text(
+        template.replace('NEARAI_API_KEY=""', 'NEARAI_API_KEY="not-a-template"')
+    )
+    with pytest.raises(Rejected, match="empty template"):
+        credentials.initialize()
+    assert not secret.exists()
 
 
 @pytest.mark.parametrize("value", ["secrets.env", "$HOME/secret.env", ""])

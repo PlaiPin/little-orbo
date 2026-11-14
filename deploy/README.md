@@ -16,8 +16,20 @@ credentialed service acceptance and physical robot qualification.
 ## Shared external credentials
 
 The public [credentials.toml](credentials.toml) points to
-`~/.config/orbo/credentials.env`, outside the repository. Create the private blank
-template once, then fill it with a local editor:
+`../orbo-local/credentials.env` beside the checkout, outside the repository. Both
+the folder and file are visible in a normal file browser. The committed
+[credentials.env.example](credentials.env.example) lists every supported key,
+grouped by integration, with blank values and instructions. From the repository
+root, copy it once and edit the external copy:
+
+```sh
+mkdir -p ../orbo-local
+cp -n deploy/credentials.env.example ../orbo-local/credentials.env
+chmod 700 ../orbo-local
+chmod 600 ../orbo-local/credentials.env
+```
+
+Alternatively, the initializer copies the same example and sets permissions:
 
 ```sh
 uv run --frozen orbo credentials init
@@ -33,8 +45,11 @@ Neither actual values nor private signer keys belong in the TOML or repository.
 Runtime providers, the Live E2E runner, optional accounting, remote credentials,
 and Intents automatically use this source. No shell exports of provider keys
 are needed or consulted. Select a different external path in the TOML, or set
-`ORBO_CREDENTIALS_CONFIG` to another public pointer file. Relative secret paths,
-symlinks and secret files inside the repository/deployment tree are rejected.
+`ORBO_CREDENTIALS_CONFIG` to another public pointer file. Relative paths in the
+TOML resolve against that file's directory, independently of the working
+directory. The default `../../orbo-local/credentials.env` is relative to
+`deploy/credentials.toml`. Symlinks and secret files inside the
+repository/deployment tree are rejected.
 Standalone wheel installations outside a checkout must select their pointer via
 `ORBO_CREDENTIALS_CONFIG`.
 

@@ -37,7 +37,7 @@ uv run --frozen --extra intents orbo intents \
 
 `preflight` validates the policy without contacting a service. Use the same database for every run; do not rotate or delete it to bypass the cumulative cap or an unresolved transfer. It is created with owner-only permissions. One database and one dedicated signing key/account must have a single operator; do not share that key with another wallet sender or run it against separate databases. Process locking protects concurrent invocations against the same journal.
 
-Put `NEAR_INTENTS_API_KEY` in the shared external credentials file selected by the repository’s `deploy/credentials.toml` pointer (by default `$HOME/.config/orbo/credentials.env`) for authenticated partner access. Intents automatically reads that file through the shared credential resolver; an API key is optional for unauthenticated quotes with the corresponding fee schedule. Never put secrets in the policy, repository or command-line arguments. Both the 1Click host and NEAR mainnet RPC host are fixed; redirects are rejected and response sizes/timeouts are bounded.
+Put `NEAR_INTENTS_API_KEY` in the shared external credentials file selected by the repository’s `deploy/credentials.toml` pointer (by default `../orbo-local/credentials.env` beside the checkout) for authenticated partner access. Intents automatically reads that file through the shared credential resolver; an API key is optional for unauthenticated quotes with the corresponding fee schedule. Never put secrets in the policy, repository or command-line arguments. Both the 1Click host and NEAR mainnet RPC host are fixed; redirects are rejected and response sizes/timeouts are bounded.
 
 ## Quote, review and execute
 

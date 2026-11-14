@@ -80,7 +80,10 @@ def external_path(path, config_path=None):
         raise Rejected("unsupported credential path substitution")
     result = Path(value).expanduser()
     if not result.is_absolute():
-        raise Rejected("credential file path must be absolute or start with ~/")
+        if config_path is None:
+            raise Rejected("relative credential paths require a pointer configuration")
+        result = Path(config_path).absolute().parent / result
+    result = Path(os.path.abspath(result))
     resolved = result.resolve()
     if any(resolved.is_relative_to(root) for root in _roots(config_path)):
         raise Rejected("credential file must be outside the repository/deployment tree")
@@ -173,17 +176,28 @@ def credential(name, *, required=True):
 def initialize(config_path=None):
     """Create an empty private external template; never replace existing values."""
     path = credential_file(config_path)
+    sample = config_file(config_path).parent / "credentials.env.example"
+    if sample.is_file():
+        if sample.stat().st_size > LIMIT:
+            raise Rejected("credential example exceeds limit")
+        template = sample.read_text()
+        values = parse_values(template)
+        if set(values) != set(NAMES) or any(values.values()):
+            raise Rejected(
+                "credential example must contain only the empty template fields"
+            )
+    else:
+        template = (
+            "# Private Orbo credentials. Literal values only; never source this file.\n"
+        )
+        template += "".join(name + '=""\n' for name in NAMES)
     path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
     try:
         fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
     except FileExistsError:
         return {"file": str(path), "created": False}
     with os.fdopen(fd, "w") as target:
-        target.write(
-            "# Private Orbo credentials. Literal values only; never source this file.\n"
-        )
-        for name in NAMES:
-            target.write(name + '=""\n')
+        target.write(template)
     return {"file": str(path), "created": True}
 
 
