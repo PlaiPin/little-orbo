@@ -542,8 +542,11 @@ environments:
       - conda: https://prefix.dev/conda-forge/osx-arm64/zstd-1.5.7-hf451053_7.conda
       - conda: https://prefix.dev/conda-forge/osx-arm64/zziplib-0.13.69-h57f5043_2.conda
       - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros-jazzy-desktop-0.11.0-h60d57d3_25.conda
+      - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros-jazzy-gz-ros2-control-1.2.20-h60d57d3_25.conda
       - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros-jazzy-joy-3.3.0-h60d57d3_25.conda
       - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros-jazzy-nav2-bringup-1.3.13-h60d57d3_25.conda
+      - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros-jazzy-ros-gz-bridge-1.0.24-h60d57d3_25.conda
+      - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros-jazzy-ros-gz-sim-1.0.24-h60d57d3_25.conda
       - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros-jazzy-ros2-control-4.49.0-h60d57d3_25.conda
       - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros-jazzy-ros2-controllers-4.43.0-h60d57d3_25.conda
       - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros-jazzy-xacro-2.1.1-h60d57d3_25.conda
@@ -686,6 +689,7 @@ environments:
       - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros2-gz-physics-vendor-0.0.9-np2py312h5d78f99_25.conda
       - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros2-gz-plugin-vendor-0.0.5-np2py312h3d3361c_25.conda
       - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros2-gz-rendering-vendor-0.0.7-np2py312h7cc7e85_25.conda
+      - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros2-gz-ros2-control-1.2.20-np2py312h3d3361c_25.conda
       - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros2-gz-sensors-vendor-0.0.6-np2py312h3d3361c_25.conda
       - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros2-gz-sim-vendor-0.0.13-np2py312hf8319df_25.conda
       - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros2-gz-tools-vendor-0.0.8-np2py312h3d3361c_25.conda
@@ -835,6 +839,7 @@ environments:
       - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros2-ros-gz-sim-1.0.24-np2py312hb05e6b1_25.conda
       - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros2-ros-workspace-1.0.3-np2py312h3d3361c_25.conda
       - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros2-ros2-control-4.49.0-np2py312h3d3361c_25.conda
+      - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros2-ros2-control-cmake-0.4.0-np2py312h3d3361c_25.conda
       - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros2-ros2-control-test-assets-4.49.0-np2py312h3d3361c_25.conda
       - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros2-ros2-controllers-4.43.0-np2py312h3d3361c_25.conda
       - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros2-ros2action-0.32.13-np2py312h3d3361c_25.conda
@@ -9472,6 +9477,14 @@ packages:
   run_exports: {}
   size: 1999
   timestamp: 1791453519246
+- conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros-jazzy-gz-ros2-control-1.2.20-h60d57d3_25.conda
+  sha256: 2342a683c6b0b9741f101386063f3f4d88567889dd556fc7232e11a0a5fc77d8
+  md5: a34ff874765cca9f6f5b0bfbd8f1193f
+  depends:
+  - ros2-gz-ros2-control ==1.2.20
+  run_exports: {}
+  size: 2033
+  timestamp: 1791447599849
 - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros-jazzy-joy-3.3.0-h60d57d3_25.conda
   sha256: dbb07023701560446313a30552c23460a3e7adc7837e44c91d1cc3363f101958
   md5: a88b2b11cb9f880f4970a4d49758e0ee
@@ -9488,6 +9501,22 @@ packages:
   run_exports: {}
   size: 2020
   timestamp: 1791452723608
+- conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros-jazzy-ros-gz-bridge-1.0.24-h60d57d3_25.conda
+  sha256: 4e3325520f499e0b9bb32ffd2c0d971153aaaec2fe985be48ff1c490f7b48774
+  md5: 2ab6a99f6a7dfc0f644b09ebc8a28fb8
+  depends:
+  - ros2-ros-gz-bridge ==1.0.24
+  run_exports: {}
+  size: 2023
+  timestamp: 1791439400525
+- conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros-jazzy-ros-gz-sim-1.0.24-h60d57d3_25.conda
+  sha256: ce620d02edc5dd6827baae3bf1b2cab9bded93ab81d7b4361f849a8e36f3f307
+  md5: c3433be479441dfc65a89b70f2ac7ac4
+  depends:
+  - ros2-ros-gz-sim ==1.0.24
+  run_exports: {}
+  size: 2004
+  timestamp: 1791441293480
 - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros-jazzy-ros2-control-4.49.0-h60d57d3_25.conda
   sha256: 2c7b6543bb01522ee8b39b9ad6391455b2a8f2eacc6ea4b1ad883beb70b11f7c
   md5: 042a9fbe9b5537abe12fd9f0f354ec8d
@@ -12464,6 +12493,31 @@ packages:
   run_exports: {}
   size: 52268
   timestamp: 1791432155743
+- conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros2-gz-ros2-control-1.2.20-np2py312h3d3361c_25.conda
+  sha256: 0747fe608c534d87d3f2dbb370808055978b5b47eee40cfc568fecbdc51f20e5
+  md5: d3a838a3eb1ddc5c6b6cebb2c6fa0dce
+  depends:
+  - python
+  - ros2-controller-manager
+  - ros2-distro-mutex 0.19.* jazzy_*
+  - ros2-gz-plugin-vendor
+  - ros2-gz-sim-vendor
+  - ros2-hardware-interface
+  - ros2-pluginlib
+  - ros2-rclcpp
+  - ros2-rclcpp-lifecycle
+  - ros2-ros-workspace
+  - ros2-ros2-control-cmake
+  - ros2-yaml-cpp-vendor
+  - libcxx >=21
+  - __osx >=14.0
+  - numpy >=1.25,<3
+  - ros2-distro-mutex >=0.19.0,<0.20.0a0
+  - python_abi 3.12.* *_cp312
+  license: Apache-2.0
+  run_exports: {}
+  size: 292776
+  timestamp: 1791446457617
 - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros2-gz-sensors-vendor-0.0.6-np2py312h3d3361c_25.conda
   sha256: 2a5516bf5434f0f67c5a72a09c288749c60c87cd75c54b13d67dc5dd697bceb4
   md5: 314e52e45c918b47ae46543aa58ed0dd
@@ -16079,6 +16133,22 @@ packages:
   run_exports: {}
   size: 24763
   timestamp: 1791447513828
+- conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros2-ros2-control-cmake-0.4.0-np2py312h3d3361c_25.conda
+  sha256: b3764c1d871013916c1f005f939b39df3c8caaaff60a2cae075285462f9e0450
+  md5: f52a49f901b5e972f5371096d254e9c5
+  depends:
+  - python
+  - ros2-distro-mutex 0.19.* jazzy_*
+  - ros2-ros-workspace
+  - libcxx >=21
+  - __osx >=14.0
+  - python_abi 3.12.* *_cp312
+  - numpy >=1.25,<3
+  - ros2-distro-mutex >=0.19.0,<0.20.0a0
+  license: Apache-2.0
+  run_exports: {}
+  size: 31407
+  timestamp: 1791431190500
 - conda: https://prefix.dev/robostack-jazzy/osx-arm64/ros2-ros2-control-test-assets-4.49.0-np2py312h3d3361c_25.conda
   sha256: cb6f4f0730a1fe7e7322f611a61bd12d797e00fe757c11ab9a088115c92fed90
   md5: defbd77aa87a4134ce88d7c001c50623

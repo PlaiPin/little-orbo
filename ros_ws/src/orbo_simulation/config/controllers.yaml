@@ -1,0 +1,37 @@
+/orbo_sim/controller_manager:
+  ros__parameters:
+    update_rate: 100
+    use_sim_time: true
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+    drive_controller:
+      type: diff_drive_controller/DiffDriveController
+
+/orbo_sim/drive_controller:
+  ros__parameters:
+    use_sim_time: true
+    left_wheel_names: [left_wheel_joint]
+    right_wheel_names: [right_wheel_joint]
+    wheel_separation: 0.1018
+    wheel_radius: 0.033
+    open_loop: false
+    position_feedback: true
+    publish_rate: 50.0
+    odom_frame_id: odom
+    base_frame_id: base_link
+    enable_odom_tf: true
+    tf_frame_prefix_enable: false
+    cmd_vel_timeout: 0.3
+    # Simulation-only speeds; these do not change the commissioned hardware limits.
+    linear.x.max_velocity: 0.15
+    linear.x.min_velocity: -0.15
+    linear.x.max_acceleration: 0.25
+    linear.x.max_deceleration: -0.25
+    angular.z.max_velocity: 1.0
+    angular.z.min_velocity: -1.0
+    angular.z.max_acceleration: 2.0
+    angular.z.max_deceleration: -2.0
+
+/orbo_sim/joint_state_broadcaster:
+  ros__parameters:
+    use_sim_time: true

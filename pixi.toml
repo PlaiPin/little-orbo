@@ -15,6 +15,12 @@ ros-jazzy-ros2-controllers = ">=4.43.0,<5"
 ros-jazzy-xacro = ">=2.1.1,<3"
 ros-jazzy-nav2-bringup = ">=1.3,<2"
 ros-jazzy-joy = ">=3.3,<4"
+ros-jazzy-gz-ros2-control = ">=1.2.20,<2"
+ros-jazzy-ros-gz-sim = ">=1.0,<2"
+ros-jazzy-ros-gz-bridge = ">=1.0,<2"
+gz-sim8 = ">=8.10,<9"
+gz-transport13-python = ">=13.5,<14"
+gz-msgs10-python = ">=10.3,<11"
 
 [pypi-dependencies]
 orbo-runtime = { path = ".", editable = true }
@@ -28,6 +34,10 @@ FASTDDS_BUILTIN_TRANSPORTS = "UDPv4"
 ROS_AUTOMATIC_DISCOVERY_RANGE = "SUBNET"
 
 [tasks]
+ros-build-simulation = "colcon --log-base ros_ws/log/macos build --base-paths ros_ws/src --build-base ros_ws/build/macos --install-base ros_ws/install/macos --packages-select orbo_description orbo_simulation"
+orbo-sim = { cmd = "bash tools/run-orbo-sim.sh", depends-on = ["ros-build-simulation"] }
+orbo-sim-drive = "bash tools/run-orbo-sim.sh drive"
+ros-test-simulation = { cmd = "bash tools/run-orbo-sim.sh test", depends-on = ["ros-build-simulation"] }
 ros-check = "python tools/check-ros-macos.py"
 ros-talker = "ros2 run demo_nodes_cpp talker"
 ros-listener = "ros2 run demo_nodes_py listener"

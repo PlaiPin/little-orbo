@@ -18,6 +18,28 @@ motion handlers.
 
 ## Development commands
 
+### Gazebo room simulation on the Mac
+
+The native Apple Silicon Pixi environment now runs Gazebo Harmonic with Orbo's
+v9 model, wheel/caster contacts and the ROS differential-drive controller in a
+simple room. From this repository, start the room, then use a second terminal
+for keyboard control:
+
+```bash
+pixi run --locked orbo-sim
+# Second terminal:
+pixi run --locked orbo-sim-drive keyboard
+```
+
+W/S drive, A/D turn, Space stops and Q exits. On a fresh room,
+`pixi run --locked orbo-sim-drive demo` drives a bounded square.
+`pixi run --locked ros-test-simulation` checks physical displacement, turns,
+command expiry and wall contact in an isolated headless instance.
+See the [simulation guide](ros_ws/src/orbo_simulation/README.md) for Mac rendering,
+assumed physics parameters and current scope. Sensors and Nav2 are the next
+extension; this first version provides manual/scripted driving. It does not
+communicate with the real robot.
+
 ### MacBook ROS 2 / Pixi setup
 
 The locked environment supports **Apple silicon, macOS 14 or newer**, and Pixi

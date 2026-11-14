@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="orbo">
+  <xacro:arg name="physics" default="$(find orbo_simulation)/config/physics.yaml"/>
+  <xacro:arg name="controllers" default="$(find orbo_simulation)/config/controllers.yaml"/>
+  <xacro:property name="p" value="${xacro.load_yaml('$(arg physics)')}"/>
+  <xacro:include filename="$(find orbo_description)/config/cad-v9.xacro"/>
+  <!-- Axle origin, detailed v9 visuals, deliberately simple collision proxies. -->
+  <link name="base_link">
+    <inertial>
+      <origin xyz="${p['body_com']}"/>
+      <mass value="${p['body_mass']}"/>
+      <inertia ixx="${p['body_inertia'][0]}" iyy="${p['body_inertia'][1]}"
+               izz="${p['body_inertia'][2]}" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <collision name="torso">
+      <origin xyz="0.002 0 0.0355"/>
+      <geometry><box size="0.1741 0.1919 0.123"/></geometry>
+    </collision>
+    <collision name="head">
+      <origin xyz="0.008 0 0.157"/>
+      <geometry><box size="0.148 0.176 0.112"/></geometry>
+    </collision>
+    <collision name="flippers">
+      <origin xyz="0.013 0 0.060"/>
+      <geometry><box size="0.058 0.2181 0.0735"/></geometry>
+    </collision>
+  </link>
+  <xacro:orbo_cad/>
+  <xacro:macro name="wheel" params="side sign">
+    <link name="${side}_wheel">
+      <inertial>
+        <mass value="${p['wheel_mass']}"/>
+        <inertia ixx="${p['wheel_mass']*(3*p['wheel_radius']**2+p['wheel_width']**2)/12}"
+                 iyy="${p['wheel_mass']*p['wheel_radius']**2/2}"
+                 izz="${p['wheel_mass']*(3*p['wheel_radius']**2+p['wheel_width']**2)/12}"
+                 ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+      <xacro:if value="${side == 'left'}"><xacro:cad_left_wheel/></xacro:if>
+      <xacro:if value="${side == 'right'}"><xacro:cad_right_wheel/></xacro:if>
+      <collision>
+        <origin rpy="${pi/2} 0 0"/>
+        <geometry><cylinder radius="${p['wheel_radius']}" length="${p['wheel_width']}"/></geometry>
+      </collision>
+    </link>
+    <joint name="${side}_wheel_joint" type="continuous">
+      <parent link="base_link"/><child link="${side}_wheel"/>
+      <origin xyz="0 ${sign*p['wheel_separation']/2} 0"/>
+      <axis xyz="0 1 0"/>
+      <limit effort="0.4" velocity="8"/>
+      <dynamics damping="0.001" friction="0"/>
+    </joint>
+    <gazebo reference="${side}_wheel">
+      <mu1>${p['wheel_friction']}</mu1><mu2>${p['wheel_friction']}</mu2>
+    </gazebo>
+  </xacro:macro>
+  <xacro:wheel side="left" sign="1"/>
+  <xacro:wheel side="right" sign="-1"/>
+  <link name="front_caster">
+    <inertial>
+      <mass value="0.02"/>
+      <inertia ixx="0.000000726" iyy="0.000000726" izz="0.000000726" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <collision><geometry><sphere radius="${p['caster_radius']}"/></geometry></collision>
+  </link>
+  <joint name="front_caster_mount" type="fixed">
+    <parent link="base_link"/><child link="front_caster"/>
+    <origin xyz="${p['caster_xyz']}"/>
+  </joint>
+  <gazebo reference="front_caster">
+    <mu1>${p['caster_friction']}</mu1><mu2>${p['caster_friction']}</mu2>
+  </gazebo>
+  <ros2_control name="OrboSimWheels" type="system">
+    <hardware><plugin>gz_ros2_control/GazeboSimSystem</plugin></hardware>
+    <joint name="left_wheel_joint">
+      <command_interface name="velocity"/>
+      <state_interface name="position"/><state_interface name="velocity"/>
+    </joint>
+    <joint name="right_wheel_joint">
+      <command_interface name="velocity"/>
+      <state_interface name="position"/><state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+  <gazebo>
+    <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+      <parameters>$(arg controllers)</parameters>
+      <ros><namespace>/orbo_sim</namespace></ros>
+    </plugin>
+  </gazebo>
+</robot>

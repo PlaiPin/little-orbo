@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.16)
+project(orbo_simulation)
+find_package(ament_cmake REQUIRED)
+install(DIRECTORY config launch urdf worlds DESTINATION share/${PROJECT_NAME})
+install(FILES README.md DESTINATION share/${PROJECT_NAME})
+install(PROGRAMS scripts/drive.py DESTINATION lib/${PROJECT_NAME} RENAME drive)
+ament_package()
