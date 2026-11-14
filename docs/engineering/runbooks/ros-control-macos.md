@@ -44,6 +44,10 @@ pixi run --locked ros-build-control
 
 Pixi includes `ros-jazzy-ros2-control`, `ros-jazzy-ros2-controllers`, and xacro.
 The build installs interfaces, hardware plugin, robot description and bringup.
+Pixi also installs the local Python runtime and its console commands; no manual
+`PYTHONPATH` export is needed. To include navigation and run the separate
+peripheral/launch checks, use `ros-build-workspace` and `ros-test-integrations`;
+see the [workspace guide](../../../ros_ws/README.md).
 
 ## Run
 
@@ -143,9 +147,15 @@ Orbo hardware plugin with synthetic firmware messages. It covers:
   does not resume merely because messages return.
 - Real plugin deactivation on stale feedback, plus 13 helper/model checks.
 
-The latest Mac run passed all 7 ROS integration cases and all 13 helper/model
-tests. The integration lane completed in about 61 seconds, including the full
-30-second synthetic drive. These are software-only results.
+An earlier Mac run passed all 7 ROS integration cases and all 13 helper/model
+tests, including the full 30-second synthetic drive. During the runtime packaging
+update, a repeated run stopped on the hardware feedback-freshness guard while
+the other 6 ROS cases and 13 helper/model checks passed. The clean-source build also
+stopped before completing 30 seconds; its 3 installed-launch checks and remaining
+6 ROS control cases passed. The cause of the sustained-control timing failure is
+unresolved. A previous pass is not a guarantee of sustained physical operation.
+Watchdog limits have not been relaxed. The separate launch/peripheral integration
+suite passed all 8 checks.
 
 A startup race found by these tests was fixed: the bench launch loads both
 controllers inactive, and the bench owner activates them together. It waits for

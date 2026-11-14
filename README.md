@@ -1,10 +1,16 @@
 # Little Orbo target system
 
-**Software handoff complete (13 November 2026):** [handoff and reproducible checks](docs/engineering/software-handoff.md). The earlier full distribution is `artifacts/release/orbo-software-handoff.tar.gz`; the latest [Commons patch separation](integrations/trace_commons/README.md) is delivered in the repository as a **source-only handoff**, with **binary packaging and release-archive refresh pending separately**; [hardware commissioning and live-service validation](docs/engineering/pending-validation.md) remain separate pending steps.
+The target is Raspberry Pi 5 (8 GB), Ubuntu 24.04 ARM64 / ROS 2 Jazzy, and
+ESP32-S3. Native Mac development uses the locked Pixi environment. The host Python
+runtime and all five ROS package sources are versioned; deployment archives,
+generated evidence and external service installations are separate.
 
-The target is Raspberry Pi 5 (8 GB), Ubuntu 24.04 ARM64 / ROS 2 Jazzy, and ESP32-S3. Uncommissioned target firmware, ARM64 ROS/Agent builds, a Python wheel and a complete deployment source bundle are available. The ARM64 staging installation and owner-IPC smoke test pass; device/live acceptance remains pending. Host tests and synthetic scenarios do **not** establish hardware, live-provider, Commons delivery or navigation acceptance.
-
-The [master execution plan](master-implementation-phases.md) and [implementation record](docs/engineering/implementation-status.md) distinguish implemented, deployed, verified and externally pending work. Existing CAD and `Software/Teleoperate` remain intact; production firmware does not link legacy UDP/text motion handlers.
+Start with the [runtime guide](packages/orbo_runtime/README.md),
+[ROS workspace guide](ros_ws/README.md), and [firmware README](firmware/orbo/README.md).
+Software-only checks do not establish physical driving, Pi peripheral operation,
+live-provider behavior or navigation acceptance. Existing CAD and
+`Software/Teleoperate` remain intact; the ROS firmware does not use legacy UDP/text
+motion handlers.
 
 ## Development commands
 
@@ -202,13 +208,31 @@ Next: finish the sustained encoder-odometry and fault/recovery tests on the Mac,
 measure the physical geometry and ground odometry, then deploy the same controller
 stack on the Pi. Sensor integration, localization and Nav2 follow that validation.
 
+### Runtime and ROS source
+
+The [host runtime guide](packages/orbo_runtime/README.md) explains application
+coordination, robot adapters, optional services, and the different keyboard paths.
+The [ROS workspace guide](ros_ws/README.md) documents all five packages, global
+TF topics, camera/Nav2 launch boundaries, and fresh-checkout setup:
+
+```bash
+pixi install --locked
+pixi run --locked ros-build-workspace
+pixi run --locked ros-test-integrations
+```
+
+Pixi installs `orbo-runtime` directly; no `PYTHONPATH` workaround is needed.
+The integration tests use synthetic inputs in domain 96. Physical driving and
+Pi peripheral/navigation acceptance remain separate. Old v05 meshes and generated
+evidence are excluded from source commits.
+
 ### Python application development
 
 The Orbo Python application workflow requires Python 3.12 and `uv`. Run from this repository:
 
 ```sh
-uv sync --frozen --all-extras --group dev
-uv run --all-extras pytest -q
+uv sync --locked --all-extras --group dev
+uv run --locked --all-extras pytest -q
 uv run ruff check packages tests
 uv run --all-extras orbo diagnostics
 uv run --all-extras orbo demo --database /tmp/orbo-synthetic.db
@@ -227,23 +251,32 @@ The demo makes no network or hardware calls. It labels simulated action/playback
 | `packages/orbo_runtime` | SQLite journal, reminders/preferences, broker, conversation/tools, NEAR/Fish/audio, ROS adapter, exports and owner CLI |
 | `firmware/orbo` | Production micro-ROS application, local command expiry, XL430 feedback/watchdogs and calibrated PWM |
 | `ros_ws/src` | Bounded shared embedded interfaces and Pi ROS packages |
-| `integrations/booster_k1` | On-K1 official SDK worker, dependency lock, lease/stop/recovery and commissioning |
-| `integrations/trace_commons` | Two generic fixes plus three Orbo client/server patches, durable revocation/recovery, minimized exports and targeted evidence retrieval |
-| `artifacts/test-evidence` | Recorded local checks, explicitly distinct from device/live results |
+| `artifacts/test-evidence` | Ignored local captures; not part of the source distribution |
 | `docs/engineering` | Architecture contracts, status and operator instructions |
 
 Credentials load from systemd's credential directory or injected `NEARAI_API_KEY` / `FISH_API_KEY` environment variables. Never commit keys. Fish is owner-prepaid; the runtime contains no purchase operation. Cloud processing, local execution, speech and contribution permissions are distinct and default to absent.
 
-Firmware boots disarmed. Generic Kconfig defaults disable wheel and flipper commissioning; the checked-in `sdkconfig` selects the wheel-enabled lifted-base bench profile described above. Flipper pins and pulse limits remain unset and flippers stay disabled. Ground driving and navigation still require physical qualification. The owner identified the humanoid as Booster K1; its [official SDK bridge](integrations/booster_k1/README.md) is implemented with motion disabled pending physical commissioning. The [hardware inventory](docs/engineering/hardware-inventory.md) records the repository specifications.
+Firmware boots disarmed. Generic Kconfig defaults disable wheel and flipper commissioning; the checked-in `sdkconfig` selects the wheel-enabled lifted-base bench profile described above. Flipper pins and pulse limits remain unset and flippers stay disabled. Ground driving and navigation still require physical qualification. The runtime includes clients for a separate Booster K1 worker and Commons service;
+those services and their deployment assets are not installed by the Python or
+Pixi setup above.
 
-Build and operate using the [operator runbook](docs/engineering/runbooks/operator.md). Flashable uncommissioned ESP32-S3 artifacts and ARM64 development packages are under `artifacts/`, with hashes and explicit deployment limitations.
-
-Rebuild the artifact index with `python3 tools/package-release.py` after building the runtime (`uv build --wheel --sdist --out-dir artifacts/runtime`). The explicit deployment archive excludes dependency checkouts, build directories, databases, secrets and unrelated CAD. Current patch-separation results and exact validation limits are recorded in [the Commons review packet](integrations/trace_commons/upstream/validation.md). Earlier target-device software checks remain in the implementation record; no new hardware or live-service acceptance is claimed.
-
-ROS keyboard/gamepad teleop, the ArduCam B0033+B0087 **OV5647** camera, and WaveShare **USB TO AUDIO** microphone/speaker are covered by the [Pi peripherals runbook](docs/engineering/runbooks/pi-peripherals.md) and [architecture diagram](docs/engineering/diagrams/pi-peripherals.svg). Camera capture and motion remain opt-in; physical qualification is pending.
+Build the Python distribution with `uv build`; local outputs go to ignored
+`dist/`. Use the [workspace guide](ros_ws/README.md) for camera/teleop/navigation
+launch integration and its Pi validation boundary. The current Mac bench setup
+is documented in the [control runbook](docs/engineering/runbooks/ros-control-macos.md).
 
 ## Private cloud validation
 
-Use the [NEAR/Fish live-validation runner](docs/engineering/runbooks/live-validation.md) to initialize owner-only credential templates in the gitignored `.live-validation/` directory and run network-free preflight. Live execution requires an explicit `--execute` batch. Commons remains separate until its compatible server is available.
+The installed runtime can create private local templates and perform network-free
+preflight without any deployment wrapper:
 
-Credential sample: [`deploy/live-validation/credentials.env.example`](deploy/live-validation/credentials.env.example). Edit the ignored `.live-validation/credentials.env` with the NEAR key, Fish key and Fish voice ID.
+```bash
+uv run --locked --all-extras python -m orbo_runtime.live_validation init
+# Fill the ignored .live-validation/credentials.env privately, then:
+uv run --locked --all-extras python -m orbo_runtime.live_validation check
+```
+
+The default directory is gitignored `.live-validation/`. Preflight reports missing
+configuration without making provider calls. Live execution is a separate
+explicit `run --execute` operation and may consume credit; it is not part of the
+runtime or ROS test commands. Keep credentials and generated reports local.

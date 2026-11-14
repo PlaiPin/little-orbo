@@ -83,6 +83,19 @@ Use `local_setup.bash` instead if your shell is Bash. This task builds only
 `ros_ws/install/macos`, and `ros_ws/log/macos`. It does not build or start the Pi
 hardware, camera, audio, navigation, or control stack.
 
+## Build the complete workspace
+
+```bash
+pixi install --locked
+pixi run --locked ros-build-workspace
+pixi run --locked ros-test-integrations
+```
+
+This includes the navigation package and checks installed launch configuration
+and synthetic peripheral/navigation traffic in domain 96. It does not start
+physical drivers or motion. See the [workspace guide](../../../ros_ws/README.md)
+for TF conventions, package roles and the Pi validation boundary.
+
 ## Test an ESP32-S3-Nano
 
 For the physical ESP32-S3-Nano, use the [firmware README](../../../firmware/orbo/README.md).
@@ -141,9 +154,10 @@ The ROS environment pins Python 3.12 and includes the ROS desktop metapackage an
 `ros-dev-tools`. Use its Python through `pixi run python`, not the repository's
 `.venv/bin/python`, when importing `rclpy` or generated ROS messages.
 
-The existing `uv` workflow in the main README manages the Orbo application and
-its tests separately. The Pixi environment does not automatically install the
-Orbo Python application or its optional provider/audio dependencies. Avoid
+Pixi installs the local `orbo-runtime` package editable, including its console
+commands and core Python dependencies. No manual `PYTHONPATH` is needed. The
+optional cloud/audio extras remain outside the default ROS environment. The
+`uv` workflow manages application development with those extras separately. Avoid
 activating the two environments together. Do not source `/opt/ros/...` or another
 ROS installation into the Pixi environment.
 
