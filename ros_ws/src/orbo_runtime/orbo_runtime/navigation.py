@@ -12,16 +12,24 @@ from .contracts import ActionResult, Capability, Rejected
 
 
 class Navigation:
-    def __init__(self, adapter, calibration_path):
+    def __init__(self, adapter, calibration_path=None, *, simulation_waypoints=None):
         import yaml
         from geometry_msgs.msg import TwistStamped
         from nav2_msgs.action import NavigateToPose
         from rclpy.action import ActionClient
 
-        calibration = validate_calibration(
-            yaml.safe_load(Path(calibration_path).read_text()), navigation=True
+        if simulation_waypoints is not None:
+            if not getattr(adapter, "simulated", False):
+                raise Rejected("simulation waypoints cannot commission hardware")
+            self.waypoints = simulation_waypoints
+        else:
+            calibration = validate_calibration(
+                yaml.safe_load(Path(calibration_path).read_text()), navigation=True
+            )
+            self.waypoints = calibration["navigation"].get("waypoints", {})
+        self.result_evidence = (
+            "simulation" if getattr(adapter, "simulated", False) else "controller_ack"
         )
-        self.waypoints = calibration["navigation"].get("waypoints", {})
         if not self.waypoints or len(self.waypoints) > 32:
             raise Rejected("one to 32 surveyed named waypoints required")
         for name, pose in self.waypoints.items():
@@ -55,8 +63,8 @@ class Navigation:
             "navigation.named_goal",
             ("wheels",),
             600,
-            ("controller_ack",),
-            True,
+            (self.result_evidence,),
+            not getattr(adapter, "simulated", False),
         )
 
     def _command(self, message):
@@ -164,9 +172,10 @@ class Navigation:
                 health = self.adapter._snapshot()
                 with self.observation_lock:
                     feedback_age = time.monotonic() - self.last_feedback_mono
+                if feedback_age > 2:
+                    raise Rejected("navigation localization feedback stale")
                 if (
-                    feedback_age > 2
-                    or self.stopping
+                    self.stopping
                     or time.monotonic() >= deadline
                     or health.boot_id != boot_id
                     or not health.armed
@@ -185,7 +194,9 @@ class Navigation:
                     action.epoch,
                     self.adapter.sequence,
                 )
-                lease.issued_epoch_ms = time.time_ns() // 1_000_000
+                lease.issued_epoch_ms = (
+                    self.adapter.node.get_clock().now().nanoseconds // 1_000_000
+                )
                 lease.valid_for_ms = min(
                     250, max(1, int((deadline - time.monotonic()) * 1000))
                 )
@@ -201,7 +212,7 @@ class Navigation:
             result = ActionResult(
                 action.command_id,
                 state,
-                "controller_ack" if state != "unknown" else "none",
+                self.result_evidence if state != "unknown" else "none",
                 {
                     "nav2_status": response.status,
                     "error_code": getattr(response.result, "error_code", None),
@@ -270,7 +281,7 @@ class Navigation:
         result = ActionResult(
             command_id,
             state,
-            "controller_ack" if state != "unknown" else "none",
+            self.result_evidence if state != "unknown" else "none",
             {"nav2_status": response.status, "physical_observation": False},
         )
         self.results[command_id] = result

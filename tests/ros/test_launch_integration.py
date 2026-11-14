@@ -154,6 +154,13 @@ def test_nav2_uses_global_tf_and_namespaced_velocity(tmp_path, monkeypatch):
             params["controller_server"]["ros__parameters"]["odom_topic"]
             == "/orbo/drive_controller/odom"
         )
+        assert (
+            params["velocity_smoother"]["ros__parameters"][
+                "stamp_smoothed_velocity_with_smoothing_time"
+            ]
+            is True
+        )
+        assert params["velocity_smoother"]["ros__parameters"]["velocity_timeout"] == 0.2
         description = load_launch(
             "nav2_bringup", "navigation_launch.py"
         ).generate_launch_description()

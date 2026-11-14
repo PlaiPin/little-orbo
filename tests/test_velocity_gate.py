@@ -49,3 +49,30 @@ def test_stopped_epoch_cannot_be_renewed():
     with pytest.raises(Rejected):
         gate.authorize("teleop", 1, 0.3, 0.1)
     gate.authorize("teleop", 2, 0.3, 0.1)
+
+
+def test_clock_alignment_never_releases_future_or_refreshes_stamp():
+    from orbo_runtime.velocity_gate import ClockAlignedSlot
+
+    slot = ClockAlignedSlot()
+    packet = {"issued": 1_010_000_000, "valid_for_ms": 250}
+    assert slot.offer(packet, packet["issued"], 1_000_000_000, 5.0)
+    assert slot.pop(1_005_000_000, 5.005) is None
+    assert slot.pop(1_020_000_000, 5.02) is packet
+    assert packet["issued"] == 1_010_000_000
+    assert slot.pop(1_020_000_000, 5.02) is None
+
+
+def test_clock_alignment_is_one_slot_bounded_and_drops_clock_rewinds():
+    from orbo_runtime.velocity_gate import ClockAlignedSlot
+
+    slot = ClockAlignedSlot()
+    assert not slot.offer("far future", 2_000_000_000, 1_000_000_000, 1.0)
+    assert slot.offer("one", 1_010_000_000, 1_000_000_000, 1.0)
+    assert slot.offer("two", 1_020_000_000, 1_000_000_000, 1.01)
+    assert not slot.offer("old", 1_010_000_000, 1_000_000_000, 1.02)
+    assert slot.pop(1_020_000_000, 1.07) is None
+    assert slot.pending is None
+    assert slot.offer("one", 1_010_000_000, 1_000_000_000, 2.0)
+    assert slot.pop(500_000_000, 2.01) is None
+    assert slot.pending is None

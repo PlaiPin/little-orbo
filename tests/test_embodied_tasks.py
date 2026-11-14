@@ -349,3 +349,19 @@ async def test_recall_cancellation_does_not_stop_another_task(core):
     await TaskNavigator(tasks, broker).cancel("owner", recall["id"], 1)
     assert not stops
     assert tasks.get("owner", physical["id"])["state"] == "accepted"
+
+
+def test_gazebo_adapter_refuses_non_simulation_domain(monkeypatch):
+    from orbo_runtime.gazebo_adapter import require_simulation_domain
+
+    monkeypatch.setenv("ROS_DOMAIN_ID", "0")
+    monkeypatch.setenv("GZ_PARTITION", "little-orbo-sim")
+    with pytest.raises(Rejected, match="isolated"):
+        require_simulation_domain()
+    monkeypatch.setenv("ROS_DOMAIN_ID", "100")
+    monkeypatch.setenv("GZ_PARTITION", "little-orbo-embodied-test")
+    monkeypatch.delenv("ORBO_GAZEBO_TESTS", raising=False)
+    with pytest.raises(Rejected):
+        require_simulation_domain()
+    monkeypatch.setenv("ORBO_GAZEBO_TESTS", "1")
+    require_simulation_domain()

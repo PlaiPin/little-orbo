@@ -94,6 +94,9 @@ def setup(context):
             "max_accel": [nav["max_linear_accel"], 0.0, nav["max_angular_accel"]],
             "max_decel": [-nav["max_linear_accel"], 0.0, -nav["max_angular_accel"]],
             "velocity_timeout": 0.2,
+            # Changing smoothed values need progressing source timestamps for
+            # the strict command-order gate (Nav2 Jazzy smoother semantics).
+            "stamp_smoothed_velocity_with_smoothing_time": True,
         }
     )
     params["amcl"]["ros__parameters"].update(
@@ -168,9 +171,16 @@ def setup(context):
             ]
         ),
         Node(
-            package="orbo_runtime", executable="velocity_gate", output="screen",
-            parameters=[{"source": "nav2", "max_linear": calibration["max_linear_m_s"],
-                         "max_angular": calibration["max_angular_rad_s"]}],
+            package="orbo_runtime",
+            executable="velocity_gate",
+            output="screen",
+            parameters=[
+                {
+                    "source": "nav2",
+                    "max_linear": calibration["max_linear_m_s"],
+                    "max_angular": calibration["max_angular_rad_s"],
+                }
+            ],
         ),
     ]
 

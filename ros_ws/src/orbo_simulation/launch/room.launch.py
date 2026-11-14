@@ -27,6 +27,7 @@ def setup(context):
     allowed = {("95", "little-orbo-sim")}
     if os.environ.get("ORBO_GAZEBO_TESTS") == "1":
         allowed.add(("99", "little-orbo-sim-test"))
+        allowed.add(("100", "little-orbo-embodied-test"))
     if pair not in allowed:
         raise RuntimeError(
             "Use pixi run orbo-sim (isolated ROS domain 95 / Gazebo partition little-orbo-sim)"
@@ -35,6 +36,9 @@ def setup(context):
     description = Path(get_package_share_directory("orbo_description"))
     sensors = LaunchConfiguration("sensors").perform(context).lower() == "true"
     navigation = LaunchConfiguration("navigation").perform(context).lower() == "true"
+    embodied = LaunchConfiguration("embodied").perform(context).lower() == "true"
+    if embodied and not navigation:
+        raise RuntimeError("Embodied simulation requires navigation")
     world = LaunchConfiguration("world").perform(context)
     if world not in ("room", "living_room"):
         raise RuntimeError("world must be room or living_room")
@@ -153,7 +157,8 @@ def setup(context):
                 IncludeLaunchDescription(
                     PythonLaunchDescriptionSource(
                         str(share / "launch/navigation.launch.py")
-                    )
+                    ),
+                    launch_arguments={"embodied": str(embodied).lower()}.items(),
                 )
             ]
             if navigation
@@ -209,6 +214,7 @@ def generate_launch_description():
             DeclareLaunchArgument("world", default_value="living_room"),
             DeclareLaunchArgument("sensors", default_value="true"),
             DeclareLaunchArgument("navigation", default_value="true"),
+            DeclareLaunchArgument("embodied", default_value="false"),
             OpaqueFunction(function=setup),
         ]
     )

@@ -75,6 +75,38 @@ class VelocityGate:
         self.last = None
 
 
+class ClockAlignedSlot:
+    """One packet awaiting a slightly lagging ROS clock, without timestamp renewal.
+
+    Distributed /clock and data topics can arrive in either order. This buffer
+    never authorizes a future packet: it waits <=50 ms for local clock alignment.
+    Both its wall wait and its source-clock offset are bounded.
+    """
+
+    def __init__(self):
+        self.pending = None
+
+    def offer(self, value, stamp_ns, now_ns, now_mono):
+        if not 0 < stamp_ns - now_ns <= 50_000_000:
+            return False
+        if self.pending and stamp_ns <= self.pending[1]:
+            return False
+        self.pending = (value, stamp_ns, now_mono)
+        return True
+
+    def pop(self, now_ns, now_mono):
+        if self.pending is None:
+            return None
+        value, stamp_ns, received = self.pending
+        if not 0 <= now_mono - received <= 0.05 or abs(stamp_ns - now_ns) > 50_000_000:
+            self.pending = None
+            return None
+        if stamp_ns > now_ns:
+            return None
+        self.pending = None
+        return value
+
+
 def main():
     import time
     import rclpy
@@ -94,6 +126,9 @@ def main():
                 max_angular=self.get_parameter("max_angular").value,
             )
             self.authority = None
+            self.lease_debug = {"received": 0, "accepted": 0, "last_rejection": None}
+            self.pending_lease = ClockAlignedSlot()
+            self.pending_command = ClockAlignedSlot()
             self.sequence = 0
             self.had_command = False
             self.output = self.create_publisher(
@@ -126,15 +161,34 @@ def main():
             if msg.interface_version == 1 and msg.operation == 0:
                 self.gate.stop()
 
-        def lease(self, msg):
+        def lease(self, msg, received_mono=None):
+            self.lease_debug["received"] += 1
+            now_mono = time.monotonic()
+            if received_mono is None:
+                received_mono = now_mono
             now_ms = self.get_clock().now().nanoseconds // 1_000_000
-            remaining = msg.valid_for_ms - (now_ms - msg.issued_epoch_ms)
+            remaining = min(
+                msg.valid_for_ms - (now_ms - msg.issued_epoch_ms),
+                msg.valid_for_ms - (now_mono - received_mono) * 1000,
+            )
+            if msg.issued_epoch_ms > now_ms:
+                self.lease_debug["last_rejection"] = (
+                    f"future {msg.issued_epoch_ms - now_ms} ms"
+                )
+                self.pending_lease.offer(
+                    (msg, received_mono),
+                    msg.issued_epoch_ms * 1_000_000,
+                    now_ms * 1_000_000,
+                    time.monotonic(),
+                )
+                return
             if (
                 msg.interface_version != 1
                 or not msg.enable_wheels
                 or msg.issued_epoch_ms > now_ms
                 or not 0 < remaining <= 500
             ):
+                self.lease_debug["last_rejection"] = f"invalid remaining {remaining}"
                 return
             if (
                 self.authority
@@ -152,6 +206,7 @@ def main():
             except Rejected:
                 return
             self.authority = msg
+            self.lease_debug["accepted"] += 1
 
         def command(self, source, msg):
             if source != self.source:
@@ -168,6 +223,13 @@ def main():
                 self.gate.stop()
                 return
             stamp = msg.header.stamp.sec * 1_000_000_000 + msg.header.stamp.nanosec
+            now_ns = self.get_clock().now().nanoseconds
+            if stamp > now_ns:
+                if not self.pending_command.offer(
+                    (source, msg), stamp, now_ns, time.monotonic()
+                ):
+                    self.gate.stop()
+                return
             if (
                 self.gate.last
                 and stamp == self.gate.last.stamp_ns
@@ -186,16 +248,36 @@ def main():
                     self.get_clock().now().nanoseconds,
                     time.monotonic(),
                 )
-            except Rejected:
+            except Rejected as error:
                 # Invalid selected-source input removes authority, never refreshes a stale command.
                 if source == self.gate.source:
+                    if self.gate.lease_until:
+                        self.get_logger().warning(
+                            "Velocity authority stopped: " + str(error)
+                        )
                     self.gate.stop()
 
         def tick(self):
             now = self.get_clock().now()
-            current = self.gate.current(now.nanoseconds, time.monotonic())
+            now_mono = time.monotonic()
+            pending_lease = self.pending_lease.pop(now.nanoseconds, now_mono)
+            if pending_lease is not None:
+                self.lease(*pending_lease)
+            pending_command = self.pending_command.pop(now.nanoseconds, now_mono)
+            if pending_command is not None:
+                self.command(*pending_command)
+            previous = self.gate.last
+            source_age_ms = (
+                (now.nanoseconds - previous.stamp_ns) / 1_000_000 if previous else None
+            )
+            lease_remaining_ms = (self.gate.lease_until - now_mono) * 1000
+            current = self.gate.current(now.nanoseconds, now_mono)
             if current is None:
                 if self.had_command:
+                    self.get_logger().warning(
+                        f"Velocity authority stopped: source age {source_age_ms} ms; "
+                        f"lease remaining {lease_remaining_ms:.1f} ms; {self.lease_debug}"
+                    )
                     self.gate.stop()
                     zero = TwistStamped()
                     zero.header.stamp = now.to_msg()

@@ -578,7 +578,7 @@ class TaskNavigator:
                 self.tasks.transition(
                     owner, task_id, revision, "unknown", {"operation_id": op["id"]}
                 )
-        except BaseException:
+        except BaseException as error:
             admitted = self.tasks.store.db.execute(
                 "SELECT 1 FROM operations WHERE owner=? AND key=?",
                 (owner, "command:task:" + op["id"]),
@@ -588,7 +588,12 @@ class TaskNavigator:
                 op["id"],
                 revision,
                 "unknown" if admitted else "failed",
-                {"reason": "navigation interrupted or rejected"},
+                {
+                    "reason": str(error)
+                    if isinstance(error, Rejected)
+                    else "navigation interrupted or rejected",
+                    "error_type": type(error).__name__,
+                },
             )
             raise
         finally:

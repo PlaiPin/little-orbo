@@ -15,6 +15,7 @@ def main():
     allowed = {("95", "little-orbo-sim")}
     if os.environ.get("ORBO_GAZEBO_TESTS") == "1":
         allowed.add(("99", "little-orbo-sim-test"))
+        allowed.add(("100", "little-orbo-embodied-test"))
     if (os.environ.get("ROS_DOMAIN_ID"), os.environ.get("GZ_PARTITION")) not in allowed:
         raise RuntimeError("Simulation domain/partition required")
     rclpy.init()
