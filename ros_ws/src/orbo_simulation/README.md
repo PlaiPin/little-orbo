@@ -118,11 +118,10 @@ pose; only the acceptance test uses ground truth to verify physical arrival.
 
 ## Mac compatibility
 
-Verified on macOS 15.8, ARM64, on 14 November 2026 with the repository's locked
-Pixi environment: Gazebo Sim **8.10.0**, `gz_ros2_control` **1.2.20**, ROS 2 Jazzy,
-and DART physics. No Docker, Homebrew Gazebo installation, or Rosetta is needed.
-The existing environment already included most Gazebo libraries; the lockfile
-now explicitly includes the simulator, ROS bridge, Python transport and control plugin.
+The locked Pixi environment targets macOS ARM64 with Gazebo Sim **8.10.0**,
+`gz_ros2_control` **1.2.20**, ROS 2 Jazzy and DART physics. No Docker, Homebrew
+Gazebo installation or Rosetta is needed. The lockfile includes the simulator,
+ROS bridge, Python transport and control plugin.
 
 The wrapper creates an ignored `.pixi/Orbo Gazebo.app` around Pixi's Ruby runtime
 so the Qt window has a macOS application identity. It uses **Ogre2/OpenGL**:
@@ -188,33 +187,24 @@ Python test runs skip this lane. They verify:
 - All four named Nav2 goals, with independent physical position/yaw checks.
 - Nav2 goal cancellation followed by a stationary physical body.
 
-The first native run passed in 22.37 seconds. Forward body travel was 0.30157 m
-versus 0.30157 m encoder travel; reverse travel was 0.15210 m; turning was 0.90237
-rad; post-timeout body drift was zero in the observation window. The body stopped
-at x=1.91095 m against the wall whose interior face is x=2 m. Generated evidence
-is kept locally in ignored `artifacts/test-evidence/gazebo-macos/physics-report.json`.
-The square demo also completed all four sides. These results establish the
-implemented idealized scene, not real-robot calibration or stopping performance.
+Generated physics reports are saved locally in ignored
+`artifacts/test-evidence/gazebo-macos/physics-report.json`. Simulation checks
+do not establish real-robot calibration or stopping performance.
 
 Navigation evidence, the camera capture and trajectory are saved under the same
 directory as `navigation-report.json`, `camera.png`, `trajectory.json` and
 `navigation.log`. The navigation report is reset to `passed: false` at the start
 of each run, and retains completed stages if a later check fails.
 
-The native navigation acceptance run on 14 November 2026 completed all four
-goals in 196 seconds including startup, sensor and stopping checks. Physical
-position errors were 3.8 cm (TV), 4.6 cm (sofa), 4.1 cm (reading) and 14.0 cm
-(entry); the largest heading error was 0.271 rad. Acceptance bounds are 15 cm
-and 0.3 rad against Gazebo ground truth, including localization error. All sensor
-streams measured 10 Hz after startup; both action cancellation and CLI Ctrl-C
-had zero observed body drift in the subsequent one-second measurement window.
+Navigation acceptance bounds are 15 cm and 0.3 rad against Gazebo ground truth,
+including localization error.
 
-## Remaining scope
+## Limitations
 
-This milestone includes room physics, lidar/RGB sensors and AMCL/Nav2 goal
-execution. IMU simulation, SLAM, measured sensor noise, moving people, the broker
-and velocity-gate session protocol, and an ESP32 emulator remain future work.
-The existing hardware description and control launch remain separate.
+The simulation includes room physics, lidar/RGB sensors and AMCL/Nav2 goal
+execution. It does not model an IMU, SLAM, measured sensor noise, moving people,
+the broker and velocity-gate session protocol, or an ESP32. The hardware
+description and control launch are separate.
 
 References: [Gazebo Harmonic](https://gazebosim.org/docs/harmonic/),
 [Jazzy gz_ros2_control](https://control.ros.org/jazzy/doc/gz_ros2_control/doc/index.html),

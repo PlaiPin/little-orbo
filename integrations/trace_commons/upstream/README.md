@@ -1,8 +1,8 @@
 # Generic Commons review packet
 
-**Upstream review packet; PRs not opened.** The descriptions below are local drafts ready for review, subject to the stated upstream test limitations. Reproducible patched binary packaging is now available through the [deployment README](../../../deploy/trace-commons/README.md); it is separate from reviewing these patches.
-
-Two independent, product-neutral source patches are prepared for upstream review. They stay in the patch-based Orbo build. This directory contains descriptions and evidence, not published PRs. No upstream branch, fork, push, PR or issue was created.
+This directory contains review descriptions for two independent, product-neutral
+source patches used by the Orbo build. For binary packaging, see the
+[deployment guide](../../../deploy/trace-commons/README.md).
 
 | Proposed PR | Patch | Description |
 |---|---|---|
@@ -13,7 +13,7 @@ Each includes production code, standalone regressions and upstream documentation
 
 ## Review bases and reproduction
 
-The recorded upstream review base is `279f1049160bcd14e1fdae851b070d0c5c3c58cc` (release 1.0.8), resolved from upstream `main` on 2026-11-13. The Orbo production dependency stays at `8fcb9e6fbfe1ccac5b781fc80399b7662a61f175` (1.0.7). Both defects are still present in the reviewed 1.0.8 source. See the [integration README](../README.md#end-to-end-behavior-and-acceptance) for checked scope; this is not a claim about future upstream revisions or unrun platform/CI jobs.
+The recorded upstream review base is `279f1049160bcd14e1fdae851b070d0c5c3c58cc` (release 1.0.8). The Orbo production dependency stays at `8fcb9e6fbfe1ccac5b781fc80399b7662a61f175` (1.0.7). Both defects are still present in the reviewed 1.0.8 source. See the [integration README](../README.md#end-to-end-behavior-and-acceptance) for checked scope; this is not a claim about future upstream revisions or unrun platform/CI jobs.
 
 For an independent review, use a fresh Trace Commons checkout at `PR_BASE_REVISION` and apply **one** patch, not the full Orbo series. Example from the little-orbo root, with an existing clean checkout at `.sdk/commons-review-one`:
 
@@ -30,11 +30,11 @@ CARGO_INCREMENTAL=0 RUSTFLAGS="-D warnings" cargo +1.96.0 test \
 
 Use a separate clean checkout for patch 0002 and the `reviewed_approval` test filter (five tests must execute). Keep the default per-checkout Cargo target directory. If sharing a target directory between same-version checkouts, clean the workspace packages before switching: Cargo can otherwise reuse another checkout's test binary. A zero-test result is not validation. The complete generic profile can also be prepared with the bootstrap command in the integration README. The source and IPC suites, formatting, clippy and license-boundary checks are documented in the validation record.
 
-## Future submission procedure
+## Submission procedure
 
 1. Refresh upstream and check whether the defect is already fixed. Rebase/retest the patch if required; do not silently change the pinned Orbo dependency.
 2. On a fresh branch, apply the single generic patch, inspect the diff and reproduce its regression tests. Use the accompanying description, updated to the final validation results.
-3. Follow upstream `CONTRIBUTING.md`: short imperative commit title, DCO sign-off and inbound MIT OR Apache-2.0 terms. No author sign-off or licensing acceptance has been manufactured here; the submitting author performs those steps when committing/submitting.
+3. Follow upstream `CONTRIBUTING.md`: short imperative commit title, DCO sign-off and inbound MIT OR Apache-2.0 terms. The submitting author provides the sign-off when committing.
 4. Run the applicable upstream CI checks. Local evidence lists exactly what ran; it does not stand in for platform, feature, database or merge-queue CI.
 5. Only when submission is authorized, push the branch and open the PR. Keep the local patch until the pinned release includes the accepted fix.
 

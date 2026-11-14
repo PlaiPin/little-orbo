@@ -67,16 +67,13 @@ keyboard expiry, application teleop, the Nav2 action adapter and runtime packagi
 a 30-second synthetic drive. Both use domain 96 and require no battery or agent.
 Neither establishes physical navigation or peripheral acceptance.
 `pixi run --locked ros-test-control-repeat` runs five fresh 30-second stacks in
-domain 97. The final repeat batch passed all five after the callback/dispatch
-fixes, UDP transport configuration, and removal of a leftover Docker qualification
-workload. Watchdog limits remain unchanged; battery-powered verification is still
-pending. See the [control runbook](../docs/engineering/runbooks/ros-control-macos.md#work-without-the-battery)
-for results and limitations.
+domain 97. See the [control runbook](../docs/engineering/runbooks/ros-control-macos.md#work-without-the-battery)
+for operating requirements and limitations.
 
 Pixi runs natively on the Mac and does not require Docker. Its activation selects
 UDPv4 and `SUBNET` discovery; restart existing Pixi shells/ROS processes after
 updating. Jazzy `LOCALHOST` discovery re-enables shared memory and bypasses that
-UDP-only choice. Test cleanup now also kills orphaned controller children when a
+UDP-only choice. Test cleanup kills orphaned controller children when a
 launcher has already exited.
 
 For manual ROS inspection:
@@ -312,7 +309,7 @@ orbo_ros launch orbo_bringup teleop.launch.py input:=joystick \
 
 The local-controller launch starts the input driver alongside one gate; retain
 the same runtime mapping, controller activation and owner-session steps.
-The Pi installer already installs `ros-jazzy-joy`; the Mac Pixi lock now includes it.
+The Pi installer already installs `ros-jazzy-joy`; the Mac Pixi lock includes it.
 
 Software integration tests use synthetic Xbox-layout Joy messages to check
 deadman release, speed bounds and input loss. They do not establish USB/Bluetooth

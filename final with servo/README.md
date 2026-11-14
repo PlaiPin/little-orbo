@@ -1,9 +1,9 @@
 # Little Orbo — Wi-Fi keyboard drive + little hands
 
-This standalone ESP-IDF project copies the running `Software/Teleoperate` project from
-`C:\Users\sahlu\Documents\Plaipin\Fall 2026\Rpi shell drive\Software`, then adds the
-two PWM arms using the driver approach in `firmware/orbo/main/flippers.c`.
-The original projects are unchanged. No ROS or Raspberry Pi runtime is needed.
+This standalone ESP-IDF project provides Wi-Fi keyboard driving and two PWM
+arms. It shares the teleoperation approach in `Software/Teleoperate` and the
+flipper driver approach in `firmware/orbo/main/flippers.c`. No ROS or Raspberry
+Pi runtime is needed.
 
 ## Run
 
@@ -111,7 +111,7 @@ establish mechanical safety. ARM modes: 0 off, 1 rest, 2 sway, 3 paddle, 4 wave,
 The app sends ARM and DRIVE at 20 Hz; ARMS telemetry is sent at 10 Hz. An ARM
 heartbeat does not keep wheels alive, and DRIVE does not keep arms alive.
 
-The inherited SCAN diagnostic now stops wheels and disables wheel torque before
+The SCAN diagnostic stops wheels and disables wheel torque before
 its blocking bus scan. Non-finite wheel commands and malformed arm commands are rejected.
 
 ## Checks
@@ -124,5 +124,4 @@ focus loss, telemetry timeout, disconnect, and rendering. Render output is in
 `tests/test_motion.c` exercises the actual firmware motion engine: bounds for every
 pattern, slew limits, atomic calibration validation, direction, timeout, and off.
 For a host with a C compiler: `cc -Ifirmware/main tests/test_motion.c firmware/main/arm_motion.c -lm -o test_motion`.
-On this Windows PC it compiled, but Smart App Control blocked execution of the new
-test executable. No security settings were changed. See `VALIDATION.md` for hardware checks.
+See `VALIDATION.md` for hardware checks.

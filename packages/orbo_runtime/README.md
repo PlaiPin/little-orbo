@@ -1,6 +1,6 @@
 # Orbo host runtime
 
-The implementation now lives in the [ROS workspace package](../../ros_ws/src/orbo_runtime/README.md).
+The implementation lives in the [ROS workspace package](../../ros_ws/src/orbo_runtime/README.md).
 The root Python wheel and ROS executables share those modules. For Pi operation,
 follow the [native ROS quickstart](../../PI5_QUICKSTART.md); systemd is optional.
 
@@ -86,6 +86,5 @@ adapter as `orbo-teleop-keyboard`; run only one of these input sources at a time
 Runtime tests use synthetic devices and mocked providers. ROS integration tests
 use isolated domain 96, synthetic messages, and installed launch configuration;
 they do not open USB, start camera capture, or command physical motors. Build/test
-success does not qualify Pi peripherals, live services, floor navigation, or the
-pending battery-powered 30-second drive. Generated logs, databases, credentials,
+success does not qualify Pi peripherals, live services, or physical driving and navigation. Generated logs, databases, credentials,
 and test evidence stay outside source commits.

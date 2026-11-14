@@ -1,6 +1,9 @@
 # Booster K1 vendor adapter (H-01–03)
 
-The owner identified the humanoid as **Booster K1** on 2026-11-13. This integration uses the official `boosteros==1.2.5` package and `booster-robotics-sdk-python==1.6.3`; the ARM64 dependency lock includes distribution SHA-256 hashes. SDK source and examples were inspected from the official PyPI distributions linked by Booster's documentation. Both packages import in Ubuntu 24.04 ARM64 with Jazzy. The real vendor task implementation is exercised against a synthetic controller boundary in `tests/k1/test_vendor_sdk.py`. No physical K1 has been connected.
+This integration targets **Booster K1** using `boosteros==1.2.5` and
+`booster-robotics-sdk-python==1.6.3`. The ARM64 dependency lock includes
+distribution SHA-256 hashes. Vendor SDK tests use a synthetic controller
+boundary; hardware commissioning is required before operation.
 
 References: [official SDK overview](https://docs.booster.tech/docs/developer-guide/booster-os-python-sdk/sdk-overview/), [quick start](https://docs.booster.tech/docs/developer-guide/booster-os-python-sdk/quick-start/), [task API](https://docs.booster.tech/docs/developer-guide/booster-os-python-sdk/booster-robot-client-reference/advanced-task-apis/overview/), [native SDK](https://github.com/BoosterRobotics/booster_robotics_sdk). The documented BoosterOS environment is on a Booster robot or Booster Studio virtual robot, with firmware at least v1.7. Exact installed firmware/API compatibility still requires qualification; no firmware upgrade is performed here.
 
@@ -8,7 +11,7 @@ References: [official SDK overview](https://docs.booster.tech/docs/developer-gui
 
 The Pi runtime keeps the durable coordinator, permissions, broker and task journal. `ros_ws/src/orbo_runtime/orbo_runtime/k1_adapter.py` talks to an owner-private Unix socket, forwarded over authenticated SSH to `worker.py` running on the K1. The worker uses the K1's existing ROS/Python environment (Python 3.10+); it does not require upgrading the vendor OS to the Pi's Python version. It calls `BoosterRobot.do_action`, reads joint/fall/mode feedback, and uses the returned task handle's cancellation/status. Vendor gait, balance, motor gains, joint trajectories and recovery remain untouched.
 
-Only explicitly commissioned actions that `list_actions()` identifies as interruptible `upper_body` actions are admitted. The bundled `hand_wave` runtime profile is a candidate, disabled by default. It supports a first bounded action/attention contract; it does not establish the planned object-manipulation task or imply a gripper is installed. Task selection, independent outcomes and any end-effector-specific integration remain physical acceptance work.
+Only explicitly commissioned actions that `list_actions()` identifies as interruptible `upper_body` actions are admitted. The bundled `hand_wave` runtime profile is a candidate, disabled by default. It supports bounded upper-body actions; object manipulation and gripper control are not included.
 
 The Pi renews a 500 ms software lease. The on-K1 worker independently requests stop on lease loss, stale joint/fall feedback, owner stop or action deadline. A normal bounded hold ends through the vendor's stop operation. The SDK may refuse cancellation before observing action start; the worker retries **stop only**, never start. SQL intent precedes the SDK call, identities are idempotent, late starts are stopped, and unknown outcomes survive process restart. Feedback requires the complete vendor joint-name inventory and is bounded to 60 samples. SDK header timestamps are checked as UTC seconds; their physical capture-versus-receipt semantics remain to be qualified on the robot. Controller completion remains separate from independently observed success.
 
@@ -59,4 +62,4 @@ uv run pytest -q tests/test_k1.py
 ORBO_K1_SDK_TESTS=1 python -m pytest -q tests/k1
 ```
 
-Worker fixtures cover cancellation before dispatch, delayed start with lost lease, stop during admission, stale feedback, vendor stop retries, restart uncertainty, owner recovery, action/model qualification and real private Unix IPC. The vendor lane uses the actual task class and native enums with a synthetic controller; it is not a hardware test. Exact robot firmware, network access, SDK task tracking, real motion/stop observations and the primary humanoid task remain pending.
+Worker fixtures cover cancellation before dispatch, delayed start with lost lease, stop during admission, stale feedback, vendor stop retries, restart uncertainty, owner recovery, action/model qualification and real private Unix IPC. The vendor lane uses the actual task class and native enums with a synthetic controller; it is not a hardware test. Verify firmware, network access, SDK task tracking and physical motion/stop behavior on the actual robot before enabling actions.

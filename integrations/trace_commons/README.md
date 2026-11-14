@@ -1,8 +1,6 @@
 # Trace Commons patch integration
 
-**Patched runtime packaging available (2026-11-14).** The [generic patches](patches/generic/), [Orbo patches](patches/orbo/), ordered [series manifest](patches/series.json), tests and [upstream review packet](upstream/README.md) remain the source baseline. The [deployment README](../../deploy/trace-commons/README.md) now covers packaging both binaries, verified executable identities, corresponding source publication, Linux services, enrollment and deployment checks. A fresh macOS ARM64 debug package was built and verified locally; it is not a Linux/Pi release or a deployed service. Earlier archives retain their own provenance.
-
-The patch-based build is retained. `patches/series.json` is the authoritative application order: **two generic contributor fixes, followed by three Orbo extensions**. The generic patches are independent upstream review candidates; the Orbo patches are not part of those proposed PRs. No PR has been opened, no source pushed, no account enrolled and no service deployed.
+The build applies patches to a pinned upstream source revision. `patches/series.json` is the authoritative application order: **two generic contributor fixes, followed by three Orbo extensions**. The generic patches are independent upstream review candidates; the Orbo patches are not part of those proposed PRs.
 
 The production integration remains pinned to `UPSTREAM_REVISION` (`8fcb9e6`, contributor 1.0.7). `PR_BASE_REVISION` records the separately inspected upstream review base (`279f104`, contributor 1.0.8). Reviewing against current upstream does not silently upgrade the Orbo deployment.
 
@@ -16,17 +14,9 @@ The production integration remains pinned to `UPSTREAM_REVISION` (`8fcb9e6`, con
 | `orbo/0002-authorized-task-event-delivery.patch` | Add `/v1/datasets/task-evidence` and `orbo.task-evidence.v1` through existing authorization, consent, risk, retention and auditing gates. | Custom server contract, not offered as a generic fix. |
 | `orbo/0003-recovery-and-targeted-evidence.patch` | Permanent `orbo_revoked` fences, exact-entry status/recovery, minimized fixture and selection-before-limit with `X-Orbo-Task-Selection`. | Product extension. General revocation/export APIs need a separate design proposal; renaming them alone would not make them upstream-ready. |
 
-The original six-file bundle maps to the new layout as follows:
-
-| Previous files | New location |
-|---|---|
-| `0001` regression + `0002` observation fix | `generic/0001` (test and fix together, product-neutral) |
-| `0003` exact approval | `generic/0002` (with expanded regressions and API documentation) |
-| `0004` task fixture | `orbo/0001` |
-| `0005` event delivery | `orbo/0002` |
-| `0006` recovery/selection | `orbo/0003` |
-
-Both generic patches apply independently to the recorded pinned and review bases. The full Orbo series requires both generic patches first, followed by the three extension patches in manifest order. New tests/documentation and Rust formatting replace the old six-file packaging; existing Orbo IPC names, schemas, policy checks and recovery behavior are preserved.
+Both generic patches apply independently to the pinned and review bases. The full
+Orbo series requires both generic patches first, followed by the three extension
+patches in manifest order.
 
 ```mermaid
 flowchart TD
@@ -35,7 +25,7 @@ flowchart TD
     O --> B[Build Orbo contributor and compatible server]
     U[Recorded upstream review source] --> I[Apply each generic patch independently]
     I --> T[Regression tests and prepared PR descriptions]
-    T --> R[Future upstream review - not submitted]
+    T --> R[Upstream review]
 ```
 
 ## Build and package the full series
@@ -81,6 +71,4 @@ The custom server endpoint returns redacted full events for 1–10 explicit subm
 
 The local synthetic parser → preparation → in-process server → consumer round trip establishes software compatibility for these fixtures. It does not establish live admission, deployed interpretation of Feedback, physical outcomes, awards, received credit or applied usage. A deployed consumer that treats every Feedback as an owner evaluation remains incompatible. A typed protocol extension would require separate agreement. Payment execution and automatic provider funding are not implied by successful trace admission or delivery.
 
-The current local package at `artifacts/commons-current-macos-arm64` reports build identity `8fcb9e6fbfe1-orbo-8ebe22e08c3b4b15`. Both executables were freshly compiled with `--locked` and warnings denied, their versions and package hashes verified, and the ingest TLS self-check passed. The [local process smoke](../../deploy/trace-commons/README.md#local-process-smoke-without-provider-keys) started both real binaries against temporary state and passed health identity, unauthenticated export refusal, authenticated exact-selection acknowledgement for an empty dataset, and patched owner-private daemon IPC. The deployment and patch-series Python checks passed 33 tests.
-
-These checks do not establish enrollment, uploads, accepted evidence delivery or rewards. The pinned open server excludes proprietary production scoring/settlement/payout adapters; the intended operator must provide those when required. Use the [deployment delivery check](../../deploy/trace-commons/README.md#check-readiness-and-delivery) after a deliberately approved trace has actually been accepted. Historical logs under `artifacts/test-evidence/commons-*` retain their earlier provenance and should not be interpreted as this run.
+These checks do not establish enrollment, uploads, accepted evidence delivery or rewards. The pinned open server excludes proprietary production scoring/settlement/payout adapters; the intended operator must provide those when required. Use the [deployment delivery check](../../deploy/trace-commons/README.md#check-readiness-and-delivery) after a deliberately approved trace has actually been accepted.

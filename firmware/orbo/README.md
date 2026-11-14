@@ -2,7 +2,7 @@
 
 This firmware publishes ROS 2 telemetry over native USB CDC0 and accepts bounded
 control messages. CDC1 carries text logs. It boots disarmed. The checked-in
-`sdkconfig` now enables wheel arming for the lifted-base XL430 bench, with a
+`sdkconfig` enables wheel arming for the lifted-base XL430 bench, with a
 1.2 rad/s maximum, left ID 1/right ID 2, 115200 baud, and signs +1/-1. Flippers remain
 disabled. The generic Kconfig defaults still disable both commissioning flags.
 Enabling wheel arming does not arm at boot or on reconnection and does not qualify
@@ -20,7 +20,7 @@ The confirmed little-orbo wiring is **left D7 = GPIO10**, **right D10 = GPIO21**
 on the Waveshare ESP32-S3-Nano. ESP-IDF uses the native GPIO numbers, not the
 printed D numbers. See the [Nano pin mapping](https://support.arduino.cc/hc/en-us/articles/10483225565980-Select-pin-numbering-for-Nano-ESP32-in-Arduino-IDE)
 and [Waveshare board documentation](https://docs.waveshare.com/ESP32-S3-Nano).
-Both pins are now configured in `sdkconfig` and Kconfig defaults.
+Both pins are configured in `sdkconfig` and Kconfig defaults.
 
 The two 9g servos use 50 Hz LEDC PWM. Connect their signal wires to the pins
 above and connect servo-supply ground to ESP32 ground. Use a supply rated for the
@@ -122,30 +122,12 @@ result path; an explicit output path can optionally be passed as the first argum
 It refuses to overwrite existing output.
 Physical chassis direction and independent stopping latency still need measurement.
 
-Physical encoder tests on 13 November 2026 passed individual positive/negative
-wheel commands and simultaneous positive commands, explicit stop, and command
-expiry. At 0.3 rad/s, settled measured speeds in the final run were approximately
-0.299 rad/s; each 8-second forward phase moved about 140 degrees. The timestamp
-fix stamps the completed feedback snapshot after any agent ping, eliminating the
-previous enclosing/motor timestamp inversion in the captured tests.
-
-The earlier 0.3 rad/s test's first long run aborted during simultaneous motion after one right
-motor feedback error (`ORBO_FEEDBACK`); the following full run passed. A separate
-read-only interval retained a health delivery age of 185 ms, so the existing
-100 ms delivery qualification remains unresolved. These failures are retained,
-not overwritten. See the [wheel-control evidence](../../artifacts/test-evidence/esp32s3-wheel-control-2026-11-13/README.md).
-
-The subsequent 1.2 rad/s test (four times the previous command speed) passed all
-five motion phases on its second run, with settled speeds of 1.184–1.187 rad/s.
-Explicit stop and command expiry both stopped and disarmed the wheels. Its first
-run stopped on one left motor-feedback error during reverse; the repeat added no
-read errors. These runs used the former 1 Mbps motor profile. They also recorded
-a 329 ms health-delivery age; broader delivery qualification remains unresolved.
-The reproduced motor CRC issue is addressed by the 115200-baud validation below. See the
-[1.2 rad/s evidence](../../artifacts/test-evidence/esp32s3-wheel-speed-1p2-2026-11-13/README.md).
+Feedback snapshots are timestamped after agent synchronization.
+Health delivery can exceed the 100 ms budget; passing a lifted-wheel check does
+not qualify telemetry timing, ground driving or navigation.
 
 Do not run the old bare-board `check-rejections.py` against this wheel-enabled
-image: its wheel-arm rejection case can now enable torque. That script belongs
+image: its wheel-arm rejection case can enable torque. That script belongs
 to the wheel-disabled profile described in section 5.
 
 ## Motor bus configuration and diagnostics
@@ -161,30 +143,16 @@ raw diagnostic tools must be configured accordingly before they can communicate.
 The GPIOs, IDs, direction signs, 1.2 rad/s speed bound and feedback fault policy
 are unchanged. This baud is independent of the USB logging port's line coding.
 
-Warning logs on CDC1 now identify the motor ID and read register for bus errors,
+Warning logs on CDC1 identify the motor ID and read register for bus errors,
 and distinguish hardware/watchdog/torque checks from encoder discontinuities.
-DYNAMIXEL status errors include their actual protocol error byte. During diagnosis
-we captured `ff ff fd 00 01 04 00 55 03 ab 0c`: a valid motor reply reporting
-incoming-request CRC error 0x03. This is distinct from a corrupted reply detected
-by the host's CRC checker. A 100 us inter-transaction gap did not eliminate the
-failure and was removed; it is not part of the final configuration.
+DYNAMIXEL status errors include their actual protocol error byte. Error 0x03
+in a valid motor reply indicates an incoming-request CRC error, distinct from
+a corrupted reply detected by the host CRC checker.
 
 Protocol and baud definitions: [ROBOTIS Protocol 2.0](https://emanual.robotis.com/docs/en/dxl/protocol2/#error)
 and [XL430 baud register](https://emanual.robotis.com/docs/en/dxl/x/xl430-w250/#baud-rate8).
 A CRC error identifies a communication failure; it does not establish ESP32 CPU
 exhaustion or identify a specific electrical component without waveform capture.
-
-After rebuilding and automatic USB flashing on 13 November 2026, the 115200-baud
-profile completed the requested **30.02-second drive at [1.2, 1.2] rad/s**:
-585 commands, 1,912 captured wheel samples, no unexpected disarms, both read-error
-counters zero, and all feedback valid with zero hardware errors. Settled measured
-speeds averaged 1.1864/1.1861 rad/s. A separate terminal/PTY keyboard test supplied
-W/S/A/D, zero, and key-release timeout for 30 seconds; the session stayed armed
-for 31.29 seconds until intentional quit, with 1,825 wheel samples and zero read
-errors. Both runs ended with encoder-confirmed zero speed and disarm. Host
-sanitizer, baud-migration, and nine manual-publisher regression tests passed.
-The motors were raised off the ground; this does not qualify ground driving.
-Generated captures remain local and ignored by Git.
 
 For the full `ros2_control` path with measured wheel odometry and v9 RViz meshes,
 see the [Mac control-stack runbook](../../docs/engineering/runbooks/ros-control-macos.md).
@@ -274,20 +242,16 @@ ros2 topic pub --once --max-wait-time-secs 10 \
 
 The manual helper's message sequencing, guards, key timeout, escape-sequence
 handling and terminal restoration are covered by host mocks using real ROS
-message classes. The earlier 1 Mbps timed drive reproduced a firmware `FEEDBACK (5)` stop after
-the left-wheel read-error counter rose from 0 to 1. The publisher's maximum send
-gap was 52.6 ms and the boot/session stayed unchanged. The subsequent diagnostic
-build identified incoming-request CRC errors. Both timed drive and live keyboard
-input passed after the 115200-baud change; see the motor-bus results above.
+message classes.
 
-On failure, the helper now captures `/orbo/embedded/actuator_status` and prints
+On failure, the helper captures `/orbo/embedded/actuator_status` and prints
 the original firmware fault, feedback counters/voltage, last accepted sequence,
 and maximum publication gap. The cleanup stop can change `health.fault` to
 `DISARMED (1)`; that later value does not identify the original cause. A transient
 invalid motor sample may have recovered by the next published WheelState while
 the controller remains disarmed. `EXPIRED (2)` means command validity elapsed,
 `FEEDBACK (5)` means feedback failed validation or freshness, and `BUS (6)` covers
-bus/transport faults. For the exact low-level cause, inspect CDC1 warning logs: the firmware now
+bus/transport faults. For the exact low-level cause, inspect CDC1 warning logs: the firmware
 reports read register/error code, motor protocol errors, hardware/watchdog/torque
 validation failures and encoder discontinuities.
 
@@ -533,26 +497,12 @@ permits wheel arming; disable
 `CONFIG_ORBO_WHEELS_CALIBRATED` explicitly when building an actual bare-board test
 image. Do not confuse either setting with an automatic arm command.
 
-## Results and troubleshooting
+## Troubleshooting
 
-Automatic bootloader entry was tested on 13 November 2026: after the initial
-bridge-assisted install, the helper reflashed all three images and restarted the
-application with B1 disconnected and no button presses. Normal logging and the
-busy-port refusal passed. ROS feedback passed after an initial discovery timeout;
-both observations are retained locally under
-`artifacts/test-evidence/esp32s3-auto-bootloader-2026-11-13/`. Generated reports
-and hardware captures are ignored by Git; they are not repository deliverables.
-
-Earlier on 13 November 2026, the wheel-disabled image passed flash verification, live ROS message
-exchange, rejection/software-session tests, three agent restarts, and power-cycle
-recovery. USB logs were clean. A subsequent 30-second telemetry run **failed the
-100 ms delivery budget**: 3 of 129 health messages were late, up to 326 ms, with
-two session recreations and `ORBO_BUS` (6). The board stayed disarmed and its
-sequence numbers remained increasing. Timing/connection stability remains
-unresolved; do not interpret the suite as entirely passing or increase safety
-timeouts to hide the failure. Later raised-wheel tests are recorded above; ground
-driving and full ros2_control/Nav2 operation have not been qualified. See the
-[final report](../../artifacts/test-evidence/esp32s3-usb-fix-2026-11-13/final/board-validation.json).
+Health delivery can exceed the 100 ms budget and sessions can reconnect
+unexpectedly. Do not increase safety timeouts to hide timing or connection
+failures. Lifted-wheel checks do not qualify ground driving or full
+ros2_control/Nav2 operation.
 
 - Missing `rclpy` or message types: use Pixi, build interfaces, and source the
   overlay in every ROS terminal. Do not combine the IDF and Pixi environments.

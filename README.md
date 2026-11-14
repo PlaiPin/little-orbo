@@ -28,7 +28,7 @@ under the existing `orbo_description/meshes/v9` package path.
 For complete setup, launch, navigation, sensor inspection and troubleshooting
 instructions, see [SIMULATION_QUICKSTART.md](SIMULATION_QUICKSTART.md).
 
-The native Apple Silicon Pixi environment now runs Gazebo Harmonic with Orbo's
+The native Apple Silicon Pixi environment runs Gazebo Harmonic with Orbo's
 v9 model, wheel/caster contacts, lidar and an RGB camera in a furnished living
 room. Nav2 uses a supplied map and AMCL to navigate around the furniture.
 From this repository, start the room, then send goals in a second terminal:
@@ -192,13 +192,12 @@ is above; agent build and additional ROS observers are below.
 
 The current firmware `sdkconfig` enables wheel arming for a lifted-base bench
 at a 1.2 rad/s maximum; it still boots disarmed and keeps flippers disabled.
-The motor bus now runs at 115200 baud, with automatic torque-off migration of
-known XL430s from the former 1 Mbps profile. A 30-second drive and 30-second
-keyboard-input run passed without feedback errors or unexpected disarming.
+The motor bus runs at 115200 baud, with automatic torque-off migration of
+known XL430s from the former 1 Mbps profile.
 Use the [lifted-wheel test](firmware/orbo/README.md#current-lifted-wheel-test)
 for that image, or use [manual CLI/keyboard control](firmware/orbo/README.md#manual-cli-and-keyboard-wheel-control).
 Do not run the historical bare-board wheel-arm rejection test
-with wheel arming enabled, because that request can now enable torque.
+with wheel arming enabled, because that request can enable torque.
 
 For the flashed board, build the native Mac XRCE agent once:
 
@@ -280,29 +279,16 @@ No B1–GND bridge is needed once the automatic-entry firmware is installed. The
 [firmware README](firmware/orbo/README.md#6-firmware-build-flash-and-host-regression-tests)
 also covers initial installation and manual recovery. Opening CDC1 at 1200 baud
 is reserved for bootloader entry; use 115200 for normal logs.
-The automatic reflash was verified with B1 disconnected and no button presses;
-all three hashes matched and the application USB ports returned. Generated test
-reports and hardware captures remain local and are excluded from Git. See the
-local automatic flashing results in `artifacts/test-evidence/esp32s3-auto-bootloader-2026-11-13/`.
-
-**Bench status, 13 November 2026:** live ROS publishing/subscription, command
-rejections, software-only arm/stop, three agent restarts, and power-cycle recovery
-were tested. A subsequent timing check failed: three health samples exceeded
-100 ms, reaching 326 ms, with two session recreations. This remains unresolved;
-later raised-wheel tests passed at 1.2 rad/s. The reproduced motor-feedback
-CRC errors at 1 Mbps were addressed by the tested 115200-baud profile. Broader
-telemetry timing, ground driving, and full ros2_control/Nav2 qualification remain open.
-Generated validation captures remain local and are ignored by Git.
+Generated test reports and hardware captures remain local and are excluded from Git.
 
 ### Integrated ROS 2 base control on the Mac
 
-The native Pixi environment now includes the controller manager, differential-drive
+The native Pixi environment includes the controller manager, differential-drive
 controller and joint-state broadcaster. See the [Mac control-stack runbook](docs/engineering/runbooks/ros-control-macos.md)
 for the build, agent, controller, keyboard and live-RViz commands. This path uses
 measured wheel positions for odometry and nominal CAD dimensions for a lifted bench.
-The 30-second physical test of this new path is still pending battery charging.
-The host timing fix passed five consecutive software-only 30-second runs with
-unchanged watchdog limits. Pixi runs natively on macOS; Docker is not required.
+Qualify physical driving with raised-wheel tests before ground operation.
+Pixi runs natively on macOS; Docker is not required.
 After updating, restart existing Pixi shells, the agent, and ROS processes to pick
 up the UDP transport configuration. Run from the repository root:
 
@@ -313,16 +299,12 @@ pixi run --locked ros-test-control-repeat  # Five fresh 30-second runs, domain 9
 
 Neither command opens USB or needs the battery. The [control runbook](docs/engineering/runbooks/ros-control-macos.md#mac-transport-and-timing)
 explains the callback/dispatch fixes, Docker test-process cleanup, and Mac load
-limits. Physical driving still needs the raised-wheel rerun after charging.
+limits.
 
-The live description and preview now use the complete **v9 assembly**, including
+The live description and preview use the complete **v9 assembly**, including
 the v8 chassis, flippers and shells plus the v9 display mount. Use the runbook's
 internal preview to inspect beneath the shells. Flippers are fixed CAD references;
 their physical PWM configuration remains unresolved.
-
-Next: repeat the sustained encoder-odometry and fault/recovery tests with the
-charged battery, measure physical geometry and ground odometry, then deploy the
-same controller stack on the Pi. Sensor integration, localization and Nav2 follow that validation.
 
 ### Runtime and ROS source
 
@@ -373,7 +355,7 @@ The demo makes no network or hardware calls. It labels simulated action/playback
 | `firmware/orbo` | Production micro-ROS application, local command expiry, XL430 feedback/watchdogs and calibrated PWM |
 | `ros_ws/src` | Bounded shared embedded interfaces and Pi ROS packages |
 | `artifacts/test-evidence` | Ignored local captures; not part of the source distribution |
-| `docs/engineering` | Architecture contracts, status and operator instructions |
+| `docs/engineering` | Architecture contracts and operator instructions |
 
 Credentials load automatically from the Git-ignored project `.env`; copy the blank [.env.example](.env.example) to initialize it. OpenAI Live is the only voice integration and uses `OPENAI_API_KEY`; NEAR reasoning and vision use `NEARAI_API_KEY`. Deployed services read `/opt/orbo/.env` through systemd. Cloud processing, local execution, speech and contribution permissions are distinct and default to absent.
 
