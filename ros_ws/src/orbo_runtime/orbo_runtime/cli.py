@@ -114,7 +114,10 @@ class LocalService:
         if reasoning_enabled:
             from .providers import NearReasoner
 
-            self.reasoner = NearReasoner(model=config["near"]["model"])
+            self.reasoner = NearReasoner(
+                model=config["near"]["model"],
+                timeout=finite(config["near"].get("timeout_seconds", 40), 1, 120),
+            )
         self.coordinator = Coordinator(self.store, self.broker, self.reasoner)
         self.exports = Exports(self.store)
         from .economics import Ledger

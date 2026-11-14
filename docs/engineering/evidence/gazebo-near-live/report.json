@@ -1,0 +1,131 @@
+{
+  "passed": true,
+  "provenance": "synthetic",
+  "provider": "live NEAR, E2EE and provider_tee verification",
+  "voice_requested": true,
+  "voice": {
+    "seconds": 118.0,
+    "finalized": true,
+    "verified_delegations": 1,
+    "near": [
+      {
+        "evidence": [
+          {
+            "e2ee": true,
+            "live_verified": true,
+            "model": "z-ai/glm-5.3-flash",
+            "proof_sha256": "d7f4c1f7302690c6f58c69fd05bf8e84b396939725afa8c9bdc4f14f90682630",
+            "record_id": "1be3ff45-fec3-4043-b354-d404ffdb02db",
+            "response_id": "c02e16ca040c48c98319a36832f9accc",
+            "signature_kind": "provider_tee",
+            "task_revision": 1
+          }
+        ],
+        "live_service": true,
+        "revision": 1,
+        "runtime_near_enabled": true,
+        "task_id": "2dec9797-6b00-4804-a39e-99c90f474a61",
+        "truncated": false,
+        "verification": "recorded_at_inference_not_reverified",
+        "verified_response_count": 1
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "2dec9797-6b00-4804-a39e-99c90f474a61",
+        "episode_id": "39204db3-19ed-4e21-b6da-0c2d6b5d5154",
+        "state": "completed",
+        "revision": 1,
+        "result_released": true,
+        "provider_evidence": {
+          "evidence": [
+            {
+              "e2ee": true,
+              "live_verified": true,
+              "model": "z-ai/glm-5.3-flash",
+              "proof_sha256": "d7f4c1f7302690c6f58c69fd05bf8e84b396939725afa8c9bdc4f14f90682630",
+              "record_id": "1be3ff45-fec3-4043-b354-d404ffdb02db",
+              "response_id": "c02e16ca040c48c98319a36832f9accc",
+              "signature_kind": "provider_tee",
+              "task_revision": 1
+            }
+          ],
+          "live_service": true,
+          "revision": 1,
+          "runtime_near_enabled": true,
+          "task_id": "2dec9797-6b00-4804-a39e-99c90f474a61",
+          "truncated": false,
+          "verification": "recorded_at_inference_not_reverified",
+          "verified_response_count": 1
+        },
+        "provenance": "synthetic",
+        "physical_success": "requires_scene_review"
+      }
+    ],
+    "context_accepted": 1,
+    "generated_frames": 2801760,
+    "frames_after_context_acceptance": 809760,
+    "audibility": "not_tested",
+    "acoustic_echo": "not_tested",
+    "spoken_semantics": "requires_listener_review"
+  },
+  "tv_position_error_m": 0.030484942201028556,
+  "operations": [
+    {
+      "task_id": "2dec9797-6b00-4804-a39e-99c90f474a61",
+      "capability": "navigate",
+      "state": "completed",
+      "result": "{\"command_id\":\"84f3e5da-e3ed-479d-b998-8e8e25178943\",\"evidence\":\"simulation\",\"waypoint\":\"tv\"}"
+    },
+    {
+      "task_id": "2dec9797-6b00-4804-a39e-99c90f474a61",
+      "capability": "capture",
+      "state": "completed",
+      "result": "{\"record_id\":\"13d33b7a-86bb-471d-bc2f-29e0ef5b72c4\"}"
+    },
+    {
+      "task_id": "2dec9797-6b00-4804-a39e-99c90f474a61",
+      "capability": "infer",
+      "state": "completed",
+      "result": "{\"record_id\":\"1be3ff45-fec3-4043-b354-d404ffdb02db\"}"
+    }
+  ],
+  "observations": [
+    {
+      "boot": "f83faa24-6eaa-47a4-8307-07dd4d58f046",
+      "calibration_version": "gazebo-pinhole-320x240",
+      "captured_at": 1794694935.282332,
+      "clock_domain": "gazebo",
+      "environment": "gazebo-living-room",
+      "expires": 1794698535.2999098,
+      "frame_id": "camera_optical_frame",
+      "height": 240,
+      "id": "13d33b7a-86bb-471d-bc2f-29e0ef5b72c4",
+      "image_bytes": 14121,
+      "image_hash": "1250848d53bd7f0ca7709d4d5fea359126e5174ba5c76cccf846c538e218d40f",
+      "map_version": "living-room-map",
+      "permitted_uses": [
+        "private_memory"
+      ],
+      "pose": {
+        "frame_id": "map",
+        "x": 0.9850422990211528,
+        "y": -0.5602454288859633,
+        "yaw": 1.468920644249142
+      },
+      "pose_received_mono": 665339.969056125,
+      "quality": {
+        "exposure_mean_sample": 124.99,
+        "exposure_usable": true,
+        "focus_verified": false,
+        "visibility_verified": false
+      },
+      "received_mono": 665340.128746083,
+      "revision": 1,
+      "source_stamp_ns": 73600000000,
+      "task_id": "2dec9797-6b00-4804-a39e-99c90f474a61",
+      "viewpoint": "tv",
+      "width": 320
+    }
+  ]
+}

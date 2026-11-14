@@ -1,0 +1,60 @@
+{
+  "pipeline_passed": true,
+  "recognition_all_props_correct": false,
+  "ground_truth_sent_to_model": false,
+  "labeled_props": 3,
+  "labeled_props_matching": 2,
+  "results": [
+    {
+      "item": "bottle",
+      "expected_color": "red",
+      "expected_count": "one",
+      "observed_color": "red",
+      "observed_count": "one",
+      "correct": true
+    },
+    {
+      "item": "book",
+      "expected_color": "blue",
+      "expected_count": "one",
+      "observed_color": "blue",
+      "observed_count": "one",
+      "correct": true
+    },
+    {
+      "item": "box",
+      "expected_color": "brown",
+      "expected_count": "one",
+      "observed": "omitted",
+      "correct": false,
+      "visibility": "partially cropped by image edge"
+    }
+  ],
+  "background_review": {
+    "monitor": "correct category, dark screen",
+    "cabinet": "correct brown TV cabinet",
+    "table": "correct partially visible brown table",
+    "picture": "framed picture visible; green is approximate rendering color",
+    "shelf": "incorrect; green structure is the sofa"
+  },
+  "scope": "Manual scene comparison, one low-resolution synthetic view; not a representative accuracy benchmark.",
+  "timing_seconds": {
+    "request_interpretation": 31.401,
+    "navigation_from_interpretation_to_capture": 29.284,
+    "verified_vision": 18.066,
+    "voice_start_to_first_spoken_transcript": 86.067
+  },
+  "navigation_error_m": 0.030484942201028556,
+  "near_usage_tokens_successful_run": 3693,
+  "live_usage_seconds": 118,
+  "video": "Evidence replay from recorded ROS RGB frames and Gazebo body poses; actual generated provider audio; software audio queue timing reconstructed from receipt times; not a Gazebo UI screen recording.",
+  "audio": "Input is macOS Samantha synthetic speech. Output is actual GPT-Live audio, trimmed only for leading/trailing silence in spoken-response.wav. Provider transcript agrees with released description; physical audibility/AEC not tested.",
+  "earlier_attempt": {
+    "directory": "artifacts/gazebo-near-live/run-01",
+    "structured_task": "rejected Markdown-fenced JSON before parser fix",
+    "voice_task": "rejected Markdown-fenced JSON with reason array; no released result",
+    "audio": "all-zero PCM, not a spoken response",
+    "total_near_tokens": 4631
+  },
+  "verification": "NEAR SDK verified deployment and provider_tee response signatures during inference; a valid signature does not establish object accuracy. Saved plaintext is not an independent reconstruction of encrypted traffic."
+}

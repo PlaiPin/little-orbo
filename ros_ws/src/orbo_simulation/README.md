@@ -210,3 +210,85 @@ References: [Gazebo Harmonic](https://gazebosim.org/docs/harmonic/),
 [Jazzy gz_ros2_control](https://control.ros.org/jazzy/doc/gz_ros2_control/doc/index.html),
 [Gazebo sensors](https://gazebosim.org/docs/harmonic/sensors/),
 [Nav2 Jazzy](https://docs.nav2.org/jazzy/).
+
+## Live voice, navigation and NEAR vision
+
+The live simulation flow has completed using the production `LocalService`,
+`GazeboAdapter`, task coordinator, ROS camera, `VerifiedVision`, NEAR SDK and
+GPT-Live client delegation. The [saved report](../../../docs/engineering/evidence/gazebo-near-live/report.json)
+records completed navigate, capture and infer operations, a verified live finding,
+accepted result context, returned speech and finalized Live usage. The simulated
+body finished 0.030485 m from the TV goal.
+
+The request was synthesized locally: “Please go to the TV area and describe the
+visible objects and their colors.” GPT-Live transcribed and delegated it; NEAR
+interpreted the request, Nav2 navigated from the entrance, and NEAR described the
+actual 320 × 240 camera snapshot. The response was returned to Live and spoken.
+No physical robot, microphone, Commons upload or privacy-filter credential was used.
+
+**Integration passed; recognition was mixed.** Of three labeled props, the red
+bottle and blue book matched their expected colors and counts. The brown box was
+partly cropped and omitted. The model also misidentified the background sofa as a
+shelf. The [assessment](../../../docs/engineering/evidence/gazebo-near-live/assessment.json) preserves these
+errors; signature verification is not an accuracy guarantee. Request interpretation
+took 31.4 seconds, navigation about 29.3 seconds, and verified vision 18.1 seconds.
+The first spoken-result transcript arrived about 86.1 seconds after voice startup.
+This is a working integration, not an acceptable latency or accuracy benchmark.
+
+- [Exact camera image](../../../docs/engineering/evidence/gazebo-near-live/capture-02.png),
+  [ground truth](../../../docs/engineering/evidence/gazebo-near-live/ground-truth.json),
+  [vision prompt](../../../docs/engineering/evidence/gazebo-near-live/prompt-02.json), and
+  [complete model response with verification receipt](../../../docs/engineering/evidence/gazebo-near-live/response-02.json).
+- [Video with the actual returned audio](../../../docs/engineering/evidence/gazebo-near-live/interaction.mp4),
+  [spoken response](../../../docs/engineering/evidence/gazebo-near-live/spoken-response.wav),
+  [transcript](../../../docs/engineering/evidence/gazebo-near-live/transcript.json), and
+  [interaction screenshot](../../../docs/engineering/evidence/gazebo-near-live/interaction-screenshot.jpg).
+- [Earlier rejected replies](../../../docs/engineering/evidence/gazebo-near-live/earlier-rejected-responses.json)
+  document the initial failures rather than presenting only the successful run.
+
+The video is an evidence replay of recorded ROS frames and Gazebo body positions,
+with elapsed time and stage captions. It is not a recording of the Gazebo GUI.
+The screenshot captures the local evidence viewer. Input speech is synthetic;
+output speech comes from GPT-Live. Audio alignment uses local receipt times and a
+software playback queue because Live does not provide output playback timestamps.
+Physical audibility and echo cancellation remain untested.
+
+### Repeat the live flow
+
+Install the existing Pixi ROS workspace and set `NEARAI_API_KEY` and
+`OPENAI_API_KEY` in the ignored root `.env`. Do not run another simulation on test
+domain 100 / partition `little-orbo-embodied-test` concurrently.
+
+```bash
+pixi run --frozen bash tools/run-gazebo-near-live.sh \
+  --allow-cloud --allow-motion --voice --voice-only \
+  --output artifacts/gazebo-near-live/new-run
+```
+
+The output directory must not already exist. This creates a fresh simulation,
+spawns the checked-in bottle/book/box props, grants bounded simulation-only task
+permissions, streams a synthetic spoken request and records local evidence.
+The runner stops its simulator and runtime after the run. Omitting `--voice-only`
+first runs a structured navigation/description task; omitting both voice flags
+runs only that structured task. Each invocation is a new billed run, not an
+automatic retry. The archived run used `--frozen` because the checkout's Pixi
+lockfile is out of sync with its manifest; it used the existing installed ROS
+environment. `uv` checks use their frozen lockfile independently.
+
+To render a voice run into the annotated video, with no additional provider calls:
+
+```bash
+uv run --frozen --with pillow python tools/render-gazebo-live-video.py \
+  artifacts/gazebo-near-live/new-run
+```
+
+`near.timeout_seconds` now configures the provider and request interpretation
+budgets, bounded to 1–120 seconds; the Gazebo profile uses 120 seconds. Existing
+profiles without this key keep their previous defaults. Task and operation
+deadlines still apply. Verified vision accepts one whole-message JSON Markdown
+fence but still rejects surrounding prose and schema violations. Enum fields must
+remain scalar strings; the schema is not relaxed to accept arrays. Sofa, cabinet
+and picture are now supported bounded description categories. The live smoke test
+also requires nonzero PCM samples after result-context acceptance, since Live can
+stream all-zero audio while waiting. That check alone does not prove intelligible
+speech; the saved transcript and output audio support reviewing this run.

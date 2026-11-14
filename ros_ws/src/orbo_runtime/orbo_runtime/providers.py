@@ -3,10 +3,22 @@
 import asyncio
 import dataclasses
 import json
+import re
 
 
 from .contracts import Rejected, digest
 from .credentials import credential
+
+
+def parse_json_reply(content):
+    """Decode JSON with at most one whole-message Markdown fence.
+
+    Call only after response verification. Never extract JSON from surrounding
+    prose; callers still enforce their complete schema and authorization checks.
+    """
+    text = content.strip()
+    fenced = re.fullmatch(r"```(?:json)?[ \t]*\r?\n([\s\S]*?)\r?\n```", text)
+    return json.loads(fenced.group(1) if fenced else text)
 
 
 def serializable(value):

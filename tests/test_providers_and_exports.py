@@ -203,3 +203,33 @@ def test_export_requires_exact_review_revocation_and_permission_revision(tmp_pat
     with pytest.raises(Rejected):
         exports.preview("owner", export["export_id"])
     store.close()
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        '{"status":"unknown"}',
+        '```json\n{"status":"unknown"}\n```',
+        '```\n{"status":"unknown"}\n```',
+    ],
+)
+def test_structured_reply_accepts_only_whole_json_or_single_fence(text):
+    from orbo_runtime.providers import parse_json_reply
+
+    assert parse_json_reply(text) == {"status": "unknown"}
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        'Here is JSON: {"status":"unknown"}',
+        "```json\n{}\n```\nextra",
+        "```json\n{}\n```\n```json\n{}\n```",
+        "{} {}",
+    ],
+)
+def test_structured_reply_rejects_surrounding_content(text):
+    from orbo_runtime.providers import parse_json_reply
+
+    with pytest.raises(ValueError):
+        parse_json_reply(text)

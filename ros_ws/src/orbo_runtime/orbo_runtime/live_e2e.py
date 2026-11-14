@@ -309,6 +309,7 @@ class FileAudio:
         self.pcm, self.offset = pcm, 0
         self.generated_frames = 0
         self.after_release_frames = 0
+        self.non_silent_after_release_frames = 0
         self.released = False
         self.last_activity = time.monotonic()
 
@@ -327,6 +328,9 @@ class FileAudio:
         self.generated_frames += len(chunk) // 2
         if self.released:
             self.after_release_frames += len(chunk) // 2
+            self.non_silent_after_release_frames += sum(
+                chunk[i : i + 2] != b"\0\0" for i in range(0, len(chunk), 2)
+            )
 
     def check(self):
         pass
@@ -452,6 +456,7 @@ async def live_stage(config, *, factory=NearReasoner, transport=None, bridge_typ
             or not accepted
             or not resolved
             or not audio.after_release_frames
+            or not audio.non_silent_after_release_frames
             or len(proofs) != 1
         ):
             raise Rejected(
@@ -466,6 +471,7 @@ async def live_stage(config, *, factory=NearReasoner, transport=None, bridge_typ
             "context_accepted": accepted,
             "generated_frames": audio.generated_frames,
             "frames_after_context_acceptance": audio.after_release_frames,
+            "non_silent_frames_after_context_acceptance": audio.non_silent_after_release_frames,
             "audibility": "not_tested",
             "acoustic_echo": "not_tested",
             "spoken_semantics": "requires_listener_review",

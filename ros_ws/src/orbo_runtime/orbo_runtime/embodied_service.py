@@ -41,6 +41,9 @@ class EmbodiedService:
                 self.pose_source.snapshot,
                 frame_id=self.config["camera_frame"],
                 calibration_version=self.config["camera_calibration"],
+                clock_domain="gazebo"
+                if local.config["runtime"]["profile"] == "gazebo"
+                else "ros",
                 image_topic=self.config.get("image_topic", "/orbo/camera/image_raw"),
                 info_topic=self.config.get(
                     "camera_info_topic", "/orbo/camera/camera_info"
@@ -123,6 +126,7 @@ class EmbodiedService:
             if self.local.broker.adapter.simulated
             else "physical",
             usage_provenance="live_service",
+            timeout=self.local.config.get("near", {}).get("timeout_seconds", 45),
         )
 
     async def notify(self, owner, task):

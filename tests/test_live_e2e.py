@@ -375,3 +375,15 @@ async def test_report_redacts_errors_and_stops(config, tmp_path, monkeypatch):
     assert "secret-key" not in path.read_text()
     assert path.stat().st_mode & 0o777 == 0o600
     assert report["results"][0]["error_class"] == "RuntimeError"
+
+
+async def test_live_silent_pcm_after_context_does_not_prove_a_spoken_reply(config):
+    class SilentTransport(Transport):
+        async def receive(self):
+            event = await super().receive()
+            if event["type"] == "session.output_audio.delta":
+                event["delta"] = base64.b64encode(b"\0\0" * 100).decode()
+            return event
+
+    with pytest.raises(Rejected):
+        await e2e.live_stage(config, factory=Reasoner, transport=SilentTransport())

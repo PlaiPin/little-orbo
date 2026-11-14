@@ -11,6 +11,7 @@ goals = "ros_ws/src/orbo_simulation/config/goals.yaml"
 [near]
 enabled = false # Set true only for intended, permitted live provider tests.
 model = "z-ai/glm-5.3-flash"
+timeout_seconds = 120
 
 [embodied]
 enabled = true

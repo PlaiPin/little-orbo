@@ -1,0 +1,221 @@
+<sdf version="1.9">
+  <model name="vision_props">
+    <static>true</static>
+    <link name="bottle_body">
+      <pose>1.25 0.35 0.105 0 0 0</pose>
+      <collision name="bottle_body_collision">
+        <geometry>
+          <cylinder>
+            <radius>0.046</radius>
+            <length>0.21</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name="bottle_body_visual">
+        <geometry>
+          <cylinder>
+            <radius>0.046</radius>
+            <length>0.21</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>.85 .03 .025 1</ambient>
+          <diffuse>.85 .03 .025 1</diffuse>
+        </material>
+      </visual>
+    </link>
+    <link name="bottle_shoulder">
+      <pose>1.25 0.35 0.205 0 0 0</pose>
+      <collision name="bottle_shoulder_collision">
+        <geometry>
+          <sphere>
+            <radius>0.045</radius>
+          </sphere>
+        </geometry>
+      </collision>
+      <visual name="bottle_shoulder_visual">
+        <geometry>
+          <sphere>
+            <radius>0.045</radius>
+          </sphere>
+        </geometry>
+        <material>
+          <ambient>.85 .03 .025 1</ambient>
+          <diffuse>.85 .03 .025 1</diffuse>
+        </material>
+      </visual>
+    </link>
+    <link name="bottle_neck">
+      <pose>1.25 0.35 0.25 0 0 0</pose>
+      <collision name="bottle_neck_collision">
+        <geometry>
+          <cylinder>
+            <radius>0.021</radius>
+            <length>0.065</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name="bottle_neck_visual">
+        <geometry>
+          <cylinder>
+            <radius>0.021</radius>
+            <length>0.065</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>.85 .03 .025 1</ambient>
+          <diffuse>.85 .03 .025 1</diffuse>
+        </material>
+      </visual>
+    </link>
+    <link name="bottle_cap">
+      <pose>1.25 0.35 0.286 0 0 0</pose>
+      <collision name="bottle_cap_collision">
+        <geometry>
+          <cylinder>
+            <radius>0.024</radius>
+            <length>0.015</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name="bottle_cap_visual">
+        <geometry>
+          <cylinder>
+            <radius>0.024</radius>
+            <length>0.015</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>.12 .12 .12 1</ambient>
+          <diffuse>.12 .12 .12 1</diffuse>
+        </material>
+      </visual>
+    </link>
+    <link name="book_pages">
+      <pose>0.95 0.25 0.025 0 0 0</pose>
+      <collision name="book_pages_collision">
+        <geometry>
+          <box>
+            <size>.22 .16 .038</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="book_pages_visual">
+        <geometry>
+          <box>
+            <size>.22 .16 .038</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>.88 .86 .78 1</ambient>
+          <diffuse>.88 .86 .78 1</diffuse>
+        </material>
+      </visual>
+    </link>
+    <link name="book_cover_0.004">
+      <pose>0.95 0.25 0.004 0 0 0</pose>
+      <collision name="book_cover_0.004_collision">
+        <geometry>
+          <box>
+            <size>.235 .175 .008</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="book_cover_0.004_visual">
+        <geometry>
+          <box>
+            <size>.235 .175 .008</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>.02 .12 .85 1</ambient>
+          <diffuse>.02 .12 .85 1</diffuse>
+        </material>
+      </visual>
+    </link>
+    <link name="book_cover_0.047">
+      <pose>0.95 0.25 0.047 0 0 0</pose>
+      <collision name="book_cover_0.047_collision">
+        <geometry>
+          <box>
+            <size>.235 .175 .008</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="book_cover_0.047_visual">
+        <geometry>
+          <box>
+            <size>.235 .175 .008</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>.02 .12 .85 1</ambient>
+          <diffuse>.02 .12 .85 1</diffuse>
+        </material>
+      </visual>
+    </link>
+    <link name="book_spine">
+      <pose>0.836 0.25 0.025 0 0 0</pose>
+      <collision name="book_spine_collision">
+        <geometry>
+          <box>
+            <size>.008 .175 .046</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="book_spine_visual">
+        <geometry>
+          <box>
+            <size>.008 .175 .046</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>.02 .12 .85 1</ambient>
+          <diffuse>.02 .12 .85 1</diffuse>
+        </material>
+      </visual>
+    </link>
+    <link name="cardboard_box">
+      <pose>0.63 0.35 0.1 0 0 0</pose>
+      <collision name="cardboard_box_collision">
+        <geometry>
+          <box>
+            <size>.23 .20 .20</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="cardboard_box_visual">
+        <geometry>
+          <box>
+            <size>.23 .20 .20</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>.60 .36 .16 1</ambient>
+          <diffuse>.60 .36 .16 1</diffuse>
+        </material>
+      </visual>
+    </link>
+    <link name="box_tape">
+      <pose>0.63 0.35 0.201 0 0 0</pose>
+      <collision name="box_tape_collision">
+        <geometry>
+          <box>
+            <size>.035 .20 .002</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="box_tape_visual">
+        <geometry>
+          <box>
+            <size>.035 .20 .002</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>.82 .67 .40 1</ambient>
+          <diffuse>.82 .67 .40 1</diffuse>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>

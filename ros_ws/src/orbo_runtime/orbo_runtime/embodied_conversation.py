@@ -420,7 +420,9 @@ class ConversationBackend:
         if not isinstance(content, str) or len(content.encode()) > 8000:
             raise Rejected("bounded structured interpretation required")
         try:
-            proposal = json.loads(content)
+            from .providers import parse_json_reply
+
+            proposal = parse_json_reply(content)
         except (ValueError, TypeError) as exc:
             raise Rejected("malformed interpretation") from exc
         if list(VALIDATOR.iter_errors(proposal)):

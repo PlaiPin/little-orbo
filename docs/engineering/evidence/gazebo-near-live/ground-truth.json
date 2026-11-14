@@ -1,0 +1,34 @@
+{
+  "provenance": "synthetic",
+  "expected_props": [
+    {
+      "item": "bottle",
+      "color": "red",
+      "count": "one",
+      "position": [
+        1.25,
+        0.35
+      ]
+    },
+    {
+      "item": "book",
+      "color": "blue",
+      "count": "one",
+      "position": [
+        0.95,
+        0.25
+      ]
+    },
+    {
+      "item": "box",
+      "color": "brown",
+      "count": "one",
+      "position": [
+        0.63,
+        0.35
+      ]
+    }
+  ],
+  "labels_sent_to_model": false,
+  "model_sha256": "92b9ecd051cdcd1945c5db0d80887e12a090934e968d047bf637f32ced25f60b"
+}

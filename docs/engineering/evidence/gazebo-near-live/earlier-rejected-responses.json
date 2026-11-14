@@ -1,0 +1,18 @@
+[
+  {
+    "call": 1,
+    "content": "```json\n{\n  \"identity\": \"not_applicable\",\n  \"matched_attributes\": [],\n  \"next_viewpoint\": null,\n  \"observation_ids\": [\"83244b69-379a-4093-ba8e-19ad8da763ec\"],\n  \"occluded\": false,\n  \"reason\": \"clear_view\",\n  \"revision\": 1,\n  \"status\": \"present\",\n  \"task_id\": \"0e516ed8-8b9c-4da2-aa23-00e67cc02d76\",\n  \"visible_details\": [\n    {\"item\": \"monitor\", \"color\": \"black\", \"count\": \"one\"},\n    {\"item\": \"book\", \"color\": \"blue\", \"count\": \"one\"},\n    {\"item\": \"bottle\", \"color\": \"red\", \"count\": \"one\"},\n    {\"item\": \"box\", \"color\": \"brown\", \"count\": \"two\"}\n  ]\n}\n```",
+    "response_id": "c4981bd272c445d0b2d9f9c3f162745f",
+    "provider_signature_verified_at_inference": true,
+    "accepted_as_finding": false,
+    "image": "earlier-capture-01.png"
+  },
+  {
+    "call": 3,
+    "content": "```json\n{\n  \"identity\": \"not_applicable\",\n  \"matched_attributes\": [],\n  \"next_viewpoint\": null,\n  \"observation_ids\": [\"454a50ce-8975-4499-8dbb-23980bc1f252\"],\n  \"occluded\": false,\n  \"reason\": [\"clear_view\"],\n  \"revision\": 1,\n  \"status\": \"present\",\n  \"task_id\": \"8a797a51-e443-4b20-9f53-bd8a928d2aac\",\n  \"visible_details\": [\n    {\"item\": \"book\", \"color\": \"blue\", \"count\": \"one\"},\n    {\"item\": \"bottle\", \"color\": \"red\", \"count\": \"one\"},\n    {\"item\": \"box\", \"color\": \"brown\", \"count\": \"one\"},\n    {\"item\": \"monitor\", \"color\": \"black\", \"count\": \"one\"},\n    {\"item\": \"shelf\", \"color\": \"green\", \"count\": \"one\"},\n    {\"item\": \"table\", \"color\": \"brown\", \"count\": \"one\"}\n  ]\n}\n```",
+    "response_id": "85a2b3769ade4117bc3a6001dd47ebf7",
+    "provider_signature_verified_at_inference": true,
+    "accepted_as_finding": false,
+    "image": "earlier-capture-03.png"
+  }
+]

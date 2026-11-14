@@ -50,6 +50,8 @@ Start with the Gazebo runtime using real providers, then the physical robot prof
 
 Recorded audio avoids microphone/speaker echo, but does not qualify physical AEC or prove audibility. Use the [audio deployment procedure](../audio/README.md) for physical full duplex. `frames_after_context_acceptance` counts output only after the matching result-context acknowledgment, excluding earlier queued audio; it still does not prove that the result's meaning was spoken correctly. A listener must verify the spoken result, uncertainty and interruptions on the real device. Image interpretation likewise needs independent scene labels. Reports deliberately keep these outcomes unestablished.
 
+The [live Gazebo execution record](../../ros_ws/src/orbo_simulation/README.md#live-voice-navigation-and-near-vision) includes actual navigation, camera capture, verified NEAR inference, GPT-Live speech, a video and recognition errors. The runner now rejects all-zero PCM as spoken-response evidence; nonzero audio alone still does not establish intelligibility.
+
 ## Task-to-Commons handoff
 
 The task report includes `task_id`, `episode_id` and provider evidence; the runtime Live report includes these under `tasks`. There is an intentional review boundary before export. Prepare `embodied_process` for the reported episode using `orbo request export.prepare`, preview/minimize with `export.preview` / `export.derive`, and approve the exact reviewed digest with `export.approve`. Follow the [Commons setup](../../integrations/trace_commons/README.md) to stage the approved trajectory and call `commons.review` for its contributor entry. Review the actual redacted body and recipient before using the returned envelope/body digests.

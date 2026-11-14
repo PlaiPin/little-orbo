@@ -569,3 +569,39 @@ async def test_stop_interrupts_live_speech_and_stops_robot(service, monkeypatch)
         assert stops == ['conversation interrupted']
     finally:
         local.embodied.live = None
+
+
+@pytest.mark.parametrize("timeout", [40, 120])
+async def test_configured_near_timeout_reaches_provider_and_conversation(
+    tmp_path, monkeypatch, timeout
+):
+    from orbo_runtime import providers
+
+    configured = {}
+
+    class ConfiguredReasoner:
+        def __init__(self, **kwargs):
+            configured.update(kwargs)
+
+    monkeypatch.setattr(providers, "NearReasoner", ConfiguredReasoner)
+    local = LocalService(
+        {
+            "runtime": {
+                "owner": "owner",
+                "profile": "simulated",
+                "database": str(tmp_path / "timeouts.db"),
+            },
+            "near": {"enabled": True, "model": "test", "timeout_seconds": timeout},
+            "embodied": {
+                "enabled": True,
+                "environment": "lab",
+                "map_version": "map",
+                "image_directory": str(tmp_path / "images"),
+            },
+        }
+    )
+    try:
+        assert configured == {"model": "test", "timeout": timeout}
+        assert local.embodied.backend().timeout == timeout
+    finally:
+        await local.close()

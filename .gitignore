@@ -39,16 +39,6 @@ credentials.env
 /artifacts/
 /deploy/containers/ros-jazzy.Dockerfile
 /deploy/live-validation/
-/docs/engineering/contracts/
-/docs/engineering/diagrams/
-/docs/engineering/hardware-inventory.md
-/docs/engineering/implementation-status.md
-/docs/engineering/near-integration-research.md
-/docs/engineering/near-source-baseline.json
-/docs/engineering/pending-validation.md
-/docs/engineering/runbooks/esp32s3-nano.md
-/docs/engineering/runbooks/live-validation.md
-/docs/engineering/software-handoff.md
 /integrations/trace_commons/fixtures/
 /tests/test_release_exclusions.py
 /tools/build-orbo-preview.py
@@ -56,17 +46,3 @@ credentials.env
 /tools/package-release.py
 /tools/validate-live.py
 /tools/verify-release.py
-
-# Local planning documents
-/embodied-export-hackathon-demo.md
-/embodied-trace-export-and-evaluation-design.md
-/master-implementation-phases.md
-/near-integration-blueprint.md
-/orbo-lab-implementation-plan.md
-/orbo-lab-proposal.md
-/orbo-ros2-control-and-navigation-plan.md
-/orbo-together-implementation-plan.md
-/orbo-together-proposal.md
-/robot-data-use-cases.md
-/robot-demo-specification.md
-/trace-commons-contribution-plan.md
