@@ -137,28 +137,110 @@ ros2 run orbo_runtime runtime demo --database "$orbo_demo_dir/demo.db"
 
 ## 5. Agent and direct-wheel checks
 
-### Terminal A: agent
+### Startup order: power, reset, one agent, feedback, motion
 
+The repeatable order is:
+
+1. Stop motion helpers and confirm disarming. Close old control/runtime launches.
+2. Stop old agents on **both the Mac and Pi**. A Pi agent and a Mac agent on
+   domain 42 can expose two MCU command subscribers, even after moving the USB
+   cable. The helper correctly refuses to arm in that situation.
+3. Keep the wheels lifted. Switch on the motor battery, connect ESP32 USB to the
+   Pi, then press **RESET/RST once with motor power already on**. Do not press BOOT.
+4. Start exactly one foreground agent on the Pi's CDC0 interface.
+5. Check DDS endpoint counts, synchronized health and valid wheel feedback.
+6. Run the direct-wheel test. Confirm stopped/disarmed feedback before starting
+   the base stack, then run its short and long tests sequentially.
+
+Motor initialization runs at ESP32 startup. If it fails, turning on motor power
+later does not retry initialization in this firmware. Reset with motor power on
+before diagnosing all-zero motor timestamps/counters. No reflash is needed for
+these tests. This does not mean every motor fault is fixed by resetting.
+
+### Stop competing processes before starting
+
+On the **Mac**, Ctrl-C any running agent or robot launch, then verify:
+
+```bash
+pgrep -fl '[M]icroXRCEAgent|[m]icro_ros_agent' || true
+```
+
+No agent should remain on the Mac. The earlier local test agent was stopped when
+that test finished; this check protects against starting another one afterward.
+
+On the **Pi, in your normal-user terminal**, stop/disable any previously installed
+Orbo services so they cannot restart alongside the foreground tests:
+
+```bash
+for unit in orbo-teleop orbo-navigation orbo-control orbo-runtime \
+            orbo-k1-runtime orbo-camera orbo-micro-ros-agent; do
+  if systemctl cat "$unit.service" >/dev/null 2>&1; then
+    sudo systemctl disable --now "$unit.service"
+  fi
+done
+pgrep -af '[m]icro_ros_agent|[M]icroXRCEAgent' || true
+```
+
+If an agent remains, stop it with Ctrl-C in its owning terminal and repeat the
+check. Do not start another copy. This procedure uses foreground ROS commands;
+there is no need to install or enable systemd units.
+
+### Terminal A: the single Pi agent
+
+Complete the battery/USB/reset step above, then open a ROS terminal using section 3.
 Identify the actual application **CDC0 transport** device:
 
 ```bash
 ls -l /dev/serial/by-id/
 ```
 
-Replace the placeholder and leave the agent running:
+For the board already identified in this setup, `if00` is CDC0 and `if02` is CDC1.
+Use the stable `if00` link below; update it if your listing differs. Leave this
+command running throughout both direct-wheel and base-stack tests:
 
 ```bash
-ros2 run micro_ros_agent micro_ros_agent serial \
-  --dev /dev/serial/by-id/YOUR_ACTUAL_CDC0_DEVICE -b 115200
+ORBO_CDC0=/dev/serial/by-id/usb-Espressif_Systems_Espressif_Device_123456-if00
+if pgrep -af '[m]icro_ros_agent|[M]icroXRCEAgent'; then
+  echo 'An agent is already running. Stop it before starting this one.'
+elif [ ! -c "$ORBO_CDC0" ]; then
+  echo 'CDC0 not found. Check the by-id listing and application USB mode.'
+else
+  ros2 run micro_ros_agent micro_ros_agent serial --dev "$ORBO_CDC0" -b 115200
+fi
 ```
 
 CDC1 is for logs; the ROM bootloader device is for flashing. Only one agent may
 open CDC0. `/etc/orbo/agent.env` is used by the optional service wrapper; direct
 `ros2 run` selects its device with `--dev`.
 
-### Terminal B: feedback and a short wheel test
+### Terminal B: verify one MCU endpoint before motion
 
-Open another ROS terminal using section 3:
+Open another ROS terminal using section 3. Run these checks **before** starting
+any wheel helper or base/control launch:
+
+```bash
+ros2 topic info /orbo/embedded/control_session --verbose --no-daemon --spin-time 3
+ros2 topic info /orbo/embedded/wheel_command --verbose --no-daemon --spin-time 3
+ros2 topic info /orbo/embedded/wheel_state --verbose --no-daemon --spin-time 3
+```
+
+Required counts at this point:
+
+| Topic | Publisher count | Subscription count |
+|---|---:|---:|
+| `/orbo/embedded/control_session` | 0 | 1 |
+| `/orbo/embedded/wheel_command` | 0 | 1 |
+| `/orbo/embedded/wheel_state` | 1 | Any observers |
+
+A `ros2 run` wrapper and its agent child can appear as two OS processes; the DDS
+endpoint counts above verify that only one MCU bridge is exposed. If there are
+two MCU endpoints, stop the other agent on the Pi/Mac/network and repeat the
+checks. Do not weaken the helper's single-subscriber check. Zero endpoints mean
+the agent/device/domain/discovery needs attention. `--no-daemon` avoids relying
+on a previously cached ROS graph. Counts change normally after the base stack
+starts; do not apply this pre-motion table to the running base stack.
+
+Then inspect current feedback:
 
 ```bash
 ros2 topic echo /orbo/embedded/health \
@@ -167,27 +249,54 @@ ros2 topic echo /orbo/embedded/wheel_state \
   --once --qos-reliability best_effort
 ```
 
-Check fresh synchronized health, `armed: false`, and valid wheel feedback. With
-wheels lifted and motor power on, run:
+Require `clock_synced: true`, `armed: false`, `valid: [true, true]`,
+`hardware_error: [0, 0]`, advancing motor timestamps and a plausible voltage.
+Record the starting `read_errors` counters; they must not increase during testing.
+`epoch: 0` and `last_command_sequence: 0` are normal before the first arm.
+`health.fault: 1` means disarmed; `fault: 6` can reflect a previous agent disconnect
+and is not, by itself, a motor-voltage diagnosis.
+
+If `hardware_error: [1, 1]` returns, stop the test: both motors report input-voltage
+errors. With invalid feedback, the existing `wheel_state.voltage` can be zero or
+retained rather than a fresh measurement. Do not interpret that as measured zero
+volts or repeatedly attempt to arm.
+
+### Terminal D: observe voltage and errors during both tests
+
+Open another ROS terminal using section 3 and leave this observer running:
 
 ```bash
-ros2 run orbo_runtime wheel_bench drive --left 0.6 --right 0.6 --seconds 3
+ORBO_TEST_DIR=$(mktemp -d /tmp/orbo-lifted-tests-XXXXXX)
+echo "Telemetry saved to $ORBO_TEST_DIR/wheel-state.yaml"
+ros2 topic echo /orbo/embedded/wheel_state \
+  --qos-reliability best_effort --flow-style | tee "$ORBO_TEST_DIR/wheel-state.yaml"
 ```
 
-Expect stopped/disarmed encoder feedback. Then optionally:
+Watch `voltage`, `valid`, `hardware_error`, `read_errors`, `armed` and measured
+`velocity_rad_s`. This observer sends no motion commands. Keep the printed file
+path for inspection afterward. The maintained helpers perform the admission,
+freshness and stop checks; an observer alone is not a motion safety controller.
+
+### Terminal B: the short fast direct-wheel test
+
+With all preflight checks passing and wheels lifted:
 
 ```bash
-ros2 run orbo_runtime wheel_bench keyboard --speed 0.6
+ros2 run orbo_runtime wheel_bench drive --left 1.2 --right 1.2 --seconds 3
 ```
 
-W/S drive, A/D turn, Space/X command zero, and Q exits. Exit and verify disarming
-before the next section. Do not run this direct-wheel owner alongside the base
-controller, application runtime, or legacy `Software/Teleoperate` program.
+This uses the existing 1.2 rad/s bench bound. Expect a completed drive and
+`Stopped and disarmed (encoder feedback).` Confirm valid feedback, zero measured
+speed, no hardware errors and unchanged read-error counters before proceeding.
+If the helper exits with a failure or stop is unconfirmed, do not continue to
+the next test. Do not run this direct-wheel owner alongside the base controller,
+application runtime, or legacy `Software/Teleoperate` program.
 
 ## 6. Complete lifted-wheel base stack
 
-Keep the agent running. Exit the direct-wheel helper. No systemd control,
-teleop, navigation, or runtime services may be active.
+Keep **the same agent in terminal A** and the observer in terminal D running.
+The direct-wheel helper must have exited and disarmed. Do not start another agent.
+No systemd control, teleop, navigation, or runtime services may be active.
 
 **Terminal B:** start the bench stack, leaving it running:
 
@@ -199,31 +308,44 @@ This resolves the installed CAD bench profile and starts the controllers and one
 velocity gate. It does not arm the MCU. The profile is for lifted wheels only;
 its nominal dimensions do not establish ground calibration.
 
-**Terminal C:** open another ROS terminal and run:
+**Terminal C:** open another ROS terminal using section 3, then run the short test:
 
 ```bash
 ros2 run orbo_runtime base_bench drive --linear 0.02 --seconds 3
 ```
 
-After the short test passes:
+Only after it succeeds, confirms stopped/disarmed feedback, and adds no errors:
 
 ```bash
 ros2 run orbo_runtime base_bench drive --linear 0.02 --seconds 30
 ```
 
-Optional interactive test, after the drive finishes:
-
-```bash
-ros2 run orbo_runtime base_bench keyboard --speed 0.6
-```
+The helper activates the required hardware/controllers and reports measured
+odometry. `0.02` is metres per second at the base command, approximately
+0.606 rad/s per wheel using this CAD profile. It is distinct from the direct
+helper's wheel-speed arguments in rad/s.
 
 The packaged helper preserves controller activation, fresh arm epochs, expiring
 leases, velocity bounds, competing-publisher rejection, measured feedback and
 odometry checks, and stop/disarm acknowledgment. It publishes through the gate
 and ros2_control. It does not replace these checks with a raw velocity publisher.
 
-Stop the helper and confirm disarming before Ctrl-C in terminal B. Leave the
-agent running only if another test needs it. An independent software stop is:
+### Shutdown and reference results
+
+After the final helper exits, verify in terminal C:
+
+```bash
+ros2 topic echo /orbo/embedded/wheel_state \
+  --once --qos-reliability best_effort
+ros2 topic echo /orbo/embedded/health \
+  --once --qos-reliability best_effort
+```
+
+Confirm `armed: false`, valid feedback, near-zero wheel velocities, no hardware
+errors and unchanged read-error counters. Then Ctrl-C the bench launch in B,
+the observer in D, and **finally the agent in A**. Do not reset/unplug the MCU or
+stop the agent as a substitute for an orderly stop while a motion helper runs.
+For unexpected motion use the power cutoff. An independent software stop is:
 
 ```bash
 ros2 topic pub --once --max-wait-time-secs 10 \
@@ -232,8 +354,24 @@ ros2 topic pub --once --max-wait-time-secs 10 \
   '{interface_version: 1, operation: 0}'
 ```
 
-Check the acknowledgment/health; a successful publish alone does not prove a
-physical stop. Use the power cutoff for unexpected motion.
+Check acknowledgment/health afterward; publishing alone does not prove physical
+cessation.
+
+The same lifted-wheel sequence passed locally through Pixi on 14 November 2026:
+
+| Test | Lowest left / right voltage | New read / hardware errors |
+|---|---|---|
+| Direct wheels, 1.2 rad/s, 3 s | 11.8 / 11.7 V | 0 / 0 |
+| Base stack, 0.02 m/s, 3 s | 11.8 / 11.9 V | 0 / 0 |
+| Base stack, 0.02 m/s, 30 s | 11.7 / 11.6 V | 0 / 0 |
+
+All samples were valid and all tests confirmed stopping/disarming. The long run's
+encoder-derived travel and odometry agreed at approximately 0.591 m. These are
+reference measurements from the Mac bench run, not voltage acceptance limits or
+a claim that the Pi repeat has passed. No firmware change was used. On the Mac,
+a temporary loopback-only DDS profile isolated the USB agent from a second MCU
+endpoint on the LAN. On the Pi, stop other agents and verify the endpoint counts
+above; do not assume moving the USB cable removes the other agent's DDS entities.
 
 ## 7. Camera
 
