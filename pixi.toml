@@ -20,6 +20,13 @@ ros-jazzy-joy = ">=3.3,<4"
 orbo-runtime = { path = ".", editable = true }
 pytest-asyncio = "==1.2.0"
 
+# Fast DDS 2.14 shared-memory recovery can block native Mac publishers.
+# Keep DDS reliability/QoS unchanged while using its UDP transport.
+[activation.env]
+FASTDDS_BUILTIN_TRANSPORTS = "UDPv4"
+# Jazzy LOCALHOST discovery injects SHM again, bypassing the setting above.
+ROS_AUTOMATIC_DISCOVERY_RANGE = "SUBNET"
+
 [tasks]
 ros-check = "python tools/check-ros-macos.py"
 ros-talker = "ros2 run demo_nodes_cpp talker"
