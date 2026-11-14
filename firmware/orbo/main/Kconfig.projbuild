@@ -1,0 +1,53 @@
+menu "Orbo production controller"
+config ORBO_DXL_TX
+    int "Dynamixel TX GPIO"
+    default 43
+config ORBO_DXL_RX
+    int "Dynamixel RX GPIO"
+    default 44
+config ORBO_DXL_BAUD
+    int "Dynamixel baud"
+    default 1000000
+config ORBO_LEFT_ID
+    int "Left XL430 ID"
+    default 1
+config ORBO_RIGHT_ID
+    int "Right XL430 ID"
+    default 2
+config ORBO_LEFT_SIGN
+    int "Calibrated left direction (+1 or -1)"
+    default 1
+config ORBO_RIGHT_SIGN
+    int "Calibrated right direction (+1 or -1)"
+    default -1
+config ORBO_MAX_MRAD_S
+    int "Engineering wheel bound in milliradians per second"
+    default 2000
+config ORBO_PROFILE_ACCEL
+    int "XL430 Profile Acceleration raw value"
+    default 40
+config ORBO_FLIPPER_LEFT_GPIO
+    int "Commissioned left PWM GPIO (-1 disabled)"
+    default -1
+config ORBO_FLIPPER_RIGHT_GPIO
+    int "Commissioned right PWM GPIO (-1 disabled)"
+    default -1
+config ORBO_FLIPPER_MIN_US
+    int "Measured minimum safe pulse (0 uncommissioned)"
+    default 0
+config ORBO_FLIPPER_MAX_US
+    int "Measured maximum safe pulse (0 uncommissioned)"
+    default 0
+config ORBO_FLIPPER_REST_US
+    int "Measured rest pulse (0 uncommissioned)"
+    default 0
+config ORBO_ROS_DOMAIN_ID
+    int "Isolated robot ROS domain"
+    default 42
+config ORBO_WHEELS_CALIBRATED
+    bool "Enable explicitly commissioned wheel profile"
+    default n
+config ORBO_FLIPPERS_CALIBRATED
+    bool "Enable explicitly commissioned flippers"
+    default n
+endmenu

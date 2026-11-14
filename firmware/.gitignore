@@ -1,0 +1,12 @@
+# Keep generated ESP-IDF output and downloaded components out of source control.
+build/
+build-*/
+managed_components/
+sdkconfig.old
+
+# Local caches and environment files. Keep sdkconfig and dependency locks tracked.
+__pycache__/
+*.pyc
+.DS_Store
+.env
+.env.*

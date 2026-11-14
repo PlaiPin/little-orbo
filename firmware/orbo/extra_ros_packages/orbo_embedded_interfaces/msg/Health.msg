@@ -1,0 +1,12 @@
+uint32 interface_version
+uint64 boot_id
+uint64 epoch
+uint64 mono_us
+uint64 epoch_ms
+bool armed
+bool clock_synced
+uint16 fault
+uint32 free_heap
+uint32 minimum_free_heap
+uint32 control_stack_watermark
+uint32 transport_stack_watermark
