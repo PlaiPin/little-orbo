@@ -1,0 +1,295 @@
+--- a/crates/trace-commons-contributor/src/daemon/ipc.rs
++++ b/crates/trace-commons-contributor/src/daemon/ipc.rs
+@@ -386,6 +386,7 @@
+     "legacy_invite_migrate",
+     "acknowledge_near_ai_notice",
+     "approve",
++    "approve_reviewed",
+     "automatic_grant",
+     "grant_automatic",
+     "grant_automatic_including_existing",
+@@ -7499,6 +7500,7 @@
+             }
+         }
+         "approve" => handle_approve(shared, req).await,
++        "approve_reviewed" => handle_approve(shared, req).await,
+         "include_past_sessions" => handle_include_past_sessions(shared, req).await,
+         "preview" => handle_preview(shared, req).await,
+         "preview_body" => handle_preview_body(shared, req).await,
+@@ -7635,6 +7637,32 @@
+ /// marker rather than a wrong byte count; only `handle_request_async`
+ /// resolves it completely.
+ async fn handle_approve(shared: &DaemonShared, req: &Request) -> Response {
++    // A distinct method fails closed against an older daemon that ignores
++    // unknown parameters. Reviewed approval cannot rebuild or change bytes.
++    let expected_digest = if req.method == "approve_reviewed" {
++        let digest = req
++            .params
++            .get("expected_envelope_digest")
++            .and_then(|v| v.as_str());
++        if digest.is_none_or(|d| {
++            d.len() != 71
++                || !d.starts_with("sha256:")
++                || !d[7..].bytes().all(|b| b.is_ascii_hexdigit())
++        }) || req
++            .params
++            .get("entry_id")
++            .and_then(|v| v.as_str())
++            .is_none()
++            || ["all", "project_id", "outcome", "correction", "filter"]
++                .iter()
++                .any(|k| req.params.get(k).is_some())
++        {
++            return Response::err(req.id, ERR_BAD_PARAMS, "exact-review-parameters-required");
++        }
++        digest
++    } else {
++        None
++    };
+     let all = req
+         .params
+         .get("all")
+@@ -7959,7 +7987,7 @@
+         redactions,
+         flagged,
+         hold_until,
+-    } = match approve_as_a_person(shared, &ids, &terms).await {
++    } = match approve_as_a_person_bound(shared, &ids, &terms, expected_digest).await {
+         Ok(batch) => batch,
+         Err(label) => return Response::err(req.id, ERR_UNAVAILABLE, label),
+     };
+@@ -8061,6 +8089,15 @@
+     ids: &[Uuid],
+     terms: &ApprovalTerms<'_>,
+ ) -> std::result::Result<ApprovedBatch, &'static str> {
++    approve_as_a_person_bound(shared, ids, terms, None).await
++}
++
++async fn approve_as_a_person_bound(
++    shared: &DaemonShared,
++    ids: &[Uuid],
++    terms: &ApprovalTerms<'_>,
++    expected_digest: Option<&str>,
++) -> std::result::Result<ApprovedBatch, &'static str> {
+     let ApprovalTerms {
+         cfg,
+         scopes,
+@@ -8081,7 +8118,10 @@
+         let queue = shared.queue.lock().expect("queue lock");
+         ids.iter()
+             .filter_map(|id| queue.all().iter().find(|e| e.entry_id == *id))
+-            .filter(|e| e.previewed_envelope_digest.is_none() || correction.is_some())
++            .filter(|e| {
++                expected_digest.is_none()
++                    && (e.previewed_envelope_digest.is_none() || correction.is_some())
++            })
+             .map(|e| (e.entry_id, e.clone()))
+             .collect()
+     };
+@@ -8203,6 +8243,16 @@
+     // again under the lock that approves (see the Never check below).
+     let policy = shared.policy.lock().expect("policy lock");
+     let mut queue = shared.queue.lock().expect("queue lock");
++    if let Some(expected) = expected_digest {
++        if ids.len() != 1
++            || queue.get(ids[0]).is_none_or(|e| {
++                e.state != QueueState::Pending
++                    || e.previewed_envelope_digest.as_deref() != Some(expected)
++            })
++        {
++            return Err("reviewed-envelope-changed");
++        }
++    }
+     // One instant for the whole batch, so every entry it approves is held
+     // for the same window and the one deadline reported is true of all of
+     // them. Taken here, under the lock that approves and after every
+@@ -12636,6 +12686,156 @@
+             queue.get(entry_id).unwrap().state,
+             QueueState::Pending,
+             "a refused call must approve nothing"
++        );
++    }
++
++    #[tokio::test]
++    async fn reviewed_approval_is_atomic_and_digest_bound() {
++        let s = shared();
++        let digest = format!("sha256:{}", "a".repeat(64));
++        let entry_id = seed_queue_entry(
++            &s,
++            super::super::queue::QueueEntry {
++                previewed_envelope_digest: Some(digest.clone()),
++                ..queue_entry_fixture()
++            },
++        );
++        // A stale owner review must not approve a subsequently replaced pin.
++        let r = handle_request_async(&s, &req("approve_reviewed", serde_json::json!({
++            "entry_id": entry_id.to_string(), "expected_envelope_digest": format!("sha256:{}", "b".repeat(64))
++        }))).await;
++        assert_eq!(r.error.unwrap().message, "reviewed-envelope-changed");
++        assert_eq!(
++            s.queue.lock().unwrap().get(entry_id).unwrap().state,
++            QueueState::Pending
++        );
++        // Exact match is accepted under the same queue lock as approval.
++        let r = handle_request_async(
++            &s,
++            &req(
++                "approve_reviewed",
++                serde_json::json!({
++                    "entry_id": entry_id.to_string(), "expected_envelope_digest": digest
++                }),
++            ),
++        )
++        .await;
++        assert!(r.error.is_none(), "{:?}", r.error);
++        assert_eq!(r.result.unwrap()["approved"], 1);
++    }
++
++    #[tokio::test]
++    async fn reviewed_approval_refuses_missing_digest_bulk_and_mutations() {
++        let s = shared();
++        let entry_id = seed_pinned_entry(&s);
++        for extra in [
++            serde_json::json!({}),
++            serde_json::json!({"all": true}),
++            serde_json::json!({"outcome": "worked"}),
++            serde_json::json!({"correction": "changed"}),
++        ] {
++            let mut params = serde_json::json!({"entry_id": entry_id.to_string()});
++            if !extra.as_object().unwrap().is_empty() {
++                params["expected_envelope_digest"] =
++                    serde_json::json!(format!("sha256:{}", "a".repeat(64)));
++            }
++            params
++                .as_object_mut()
++                .unwrap()
++                .extend(extra.as_object().unwrap().clone());
++            let r = handle_request_async(&s, &req("approve_reviewed", params)).await;
++            assert_eq!(r.error.unwrap().message, "exact-review-parameters-required");
++        }
++        assert_eq!(
++            s.queue.lock().unwrap().get(entry_id).unwrap().state,
++            QueueState::Pending
++        );
++    }
++
++    #[tokio::test]
++    async fn reviewed_approval_refuses_malformed_parameters() {
++        let s = shared();
++        let id = seed_pinned_entry(&s);
++        let digest = format!("sha256:{}", "a".repeat(64));
++        let valid =
++            serde_json::json!({"entry_id":id.to_string(), "expected_envelope_digest":digest});
++        for (key, value) in [
++            ("entry_id", serde_json::Value::Null),
++            ("expected_envelope_digest", serde_json::Value::Null),
++            ("expected_envelope_digest", serde_json::json!(17)),
++            (
++                "expected_envelope_digest",
++                serde_json::json!("sha256:short"),
++            ),
++            (
++                "expected_envelope_digest",
++                serde_json::json!(format!("sha256:{}", "z".repeat(64))),
++            ),
++            (
++                "expected_envelope_digest",
++                serde_json::json!(format!("sha512:{}", "a".repeat(64))),
++            ),
++            ("project_id", serde_json::json!("project")),
++            ("filter", serde_json::json!("idle_sessions")),
++            ("all", serde_json::json!(false)),
++        ] {
++            let mut params = valid.clone();
++            params[key] = value;
++            let response = handle_request_async(&s, &req("approve_reviewed", params)).await;
++            assert_eq!(
++                response.error.unwrap().message,
++                "exact-review-parameters-required"
++            );
++        }
++        assert_eq!(
++            s.queue.lock().unwrap().get(id).unwrap().state,
++            QueueState::Pending
++        );
++    }
++
++    #[tokio::test]
++    async fn reviewed_approval_never_builds_a_missing_preview() {
++        let s = shared();
++        let id = seed_queue_entry(&s, queue_entry_fixture());
++        let response = handle_request_async(&s, &req("approve_reviewed", serde_json::json!({
++            "entry_id":id.to_string(), "expected_envelope_digest":format!("sha256:{}", "a".repeat(64))
++        }))).await;
++        assert_eq!(response.error.unwrap().message, "reviewed-envelope-changed");
++        let queue = s.queue.lock().unwrap();
++        assert_eq!(queue.get(id).unwrap().state, QueueState::Pending);
++        assert!(queue.get(id).unwrap().previewed_envelope_digest.is_none());
++    }
++
++    #[tokio::test]
++    async fn reviewed_approval_does_not_revive_a_changed_queue_state() {
++        let s = shared();
++        let digest = format!("sha256:{}", "a".repeat(64));
++        let id = seed_queue_entry(
++            &s,
++            super::super::queue::QueueEntry {
++                previewed_envelope_digest: Some(digest.clone()),
++                ..queue_entry_fixture()
++            },
++        );
++        // A newer decision after review takes precedence even if the pin is unchanged.
++        s.queue
++            .lock()
++            .unwrap()
++            .set_state(id, QueueState::Refused, Some("dismissed".into()));
++        let response = handle_request_async(
++            &s,
++            &req(
++                "approve_reviewed",
++                serde_json::json!({
++                    "entry_id":id.to_string(), "expected_envelope_digest":digest
++                }),
++            ),
++        )
++        .await;
++        assert!(response.error.is_some());
++        assert_eq!(
++            s.queue.lock().unwrap().get(id).unwrap().state,
++            QueueState::Refused
+         );
+     }
+ 
+@@ -20762,7 +20962,7 @@
+             "pub async fn handle_request_async(shared",
+         ));
+         assert_eq!(sync.len(), 114, "synchronous dispatcher arms: {sync:?}");
+-        assert_eq!(asy.len(), 85, "asynchronous dispatcher arms: {asy:?}");
++        assert_eq!(asy.len(), 86, "asynchronous dispatcher arms: {asy:?}");
+ 
+         let dispatched: std::collections::BTreeSet<String> = sync.union(&asy).cloned().collect();
+         let advertised: std::collections::BTreeSet<String> =
+--- /dev/null
++++ b/docs/contributor-reviewed-approval.md
+@@ -0,0 +1,21 @@
++# Approve the exact reviewed envelope
++
++The daemon IPC method `approve_reviewed` accepts one `entry_id` and an
++`expected_envelope_digest` in `sha256:` plus 64 hexadecimal digits format.
++Use the exact digest returned with the reviewed preview. Existing approval
++scope, expiry, policy and upload checks still apply.
++
++The daemon checks the stored preview digest and Pending state under the same
++queue lock that approves the entry. A stale/missing pin returns
++`reviewed-envelope-changed`; the operation never implicitly builds a preview.
++Bulk selectors (`all`, `project_id`, `filter`) and content/outcome mutations
++(`correction`, `outcome`) are rejected, even when supplied as false or null.
++Missing/malformed required fields return `exact-review-parameters-required`.
++Other existing entry, policy and persistence failures retain their own labels.
++
++The ordinary `approve` method retains its existing semantics. A distinct method
++name makes an older daemon reject the new call rather than ignore a new field on
++`approve`. Clients must not fall back to ordinary approval after rejection.
++This is approval, not an upload receipt. A lost response is an uncertain outcome,
++not permission to retry automatically. This method alone adds no persistent
++revocation fence or recovery endpoint.

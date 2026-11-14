@@ -1,0 +1,369 @@
+--- /dev/null
++++ b/crates/trace-commons-ingest/fixtures/orbo-prepared-events.json
+@@ -0,0 +1,52 @@
++[
++  {
++    "event_id": "8ba9239a-fc0c-4d66-aae7-cd6a45ae57ce",
++    "event_type": "feedback",
++    "timestamp": "2027-01-15T08:00:00Z",
++    "redacted_content": "{\"manifest\":{\"disclosure\":{\"images\":false,\"includes_request_text\":true,\"limitations\":[\"No automatic PII removal\",\"Metadata and text may reveal private context\",\"Software acknowledgments are not independent physical observations\"],\"modalities\":[\"text\",\"event_metadata\"],\"raw_audio\":false,\"risk\":\"owner_review_required\"},\"episode\":{\"ended\":1800000001.25,\"id\":\"18338729-ce6a-4340-a221-cfdf181f9985\",\"owner\":\"synthetic-owner\",\"profile\":\"attention.v1\",\"provenance\":\"synthetic\",\"started\":1800000000.0,\"state\":\"completed\"},\"evaluation\":{\"ack_latency_seconds\":[1.25],\"complete_boundaries\":true,\"declared_outcome\":\"completed\",\"event_count\":4,\"gap_event_ids\":[],\"independent_observation_count\":0,\"interruption_count\":0,\"no_ack_count\":0,\"physical_success\":\"not_established\",\"provenance\":\"synthetic\",\"unknown_event_ids\":[]},\"purpose\":\"attention_timing\",\"recipient\":\"commons-test-recipient\",\"schema\":\"orbo.task-export.v1\"},\"record_type\":\"orbo_export_manifest\",\"source_export_digest\":\"4e80bea5286b3c5b7d7a89b2d86d135330084b80b0e9c02b78b754d1f38c5566\"}",
++    "structured_payload": {
++      "record_type": "trajectory_observation"
++    },
++    "side_effect": "none"
++  },
++  {
++    "event_id": "c5f28ad4-b6ad-4805-9624-9ed6f19eeab5",
++    "event_type": "feedback",
++    "timestamp": "2027-01-15T08:00:00Z",
++    "redacted_content": "{\"event\":{\"boot\":\"6c8ef690-3b24-45e2-bcf2-a9c6d7ddc377\",\"episode_id\":\"18338729-ce6a-4340-a221-cfdf181f9985\",\"id\":\"0f32b30b-d3b3-49f6-b885-0a753f4290e5\",\"kind\":\"episode.started\",\"mono\":0.0,\"payload\":{\"profile\":\"attention.v1\",\"provenance\":\"synthetic\"},\"seq\":1,\"utc\":1800000000.0},\"event_id\":\"0f32b30b-d3b3-49f6-b885-0a753f4290e5\",\"kind\":\"episode.started\",\"payload\":{\"profile\":\"attention.v1\",\"provenance\":\"synthetic\"},\"provenance\":\"synthetic\",\"record_type\":\"orbo_event\"}",
++    "structured_payload": {
++      "record_type": "trajectory_observation"
++    },
++    "side_effect": "none"
++  },
++  {
++    "event_id": "192ce314-71b2-4e55-8b9d-877618bce164",
++    "event_type": "feedback",
++    "timestamp": "2027-01-15T08:00:00Z",
++    "redacted_content": "{\"event\":{\"boot\":\"6c8ef690-3b24-45e2-bcf2-a9c6d7ddc377\",\"episode_id\":\"18338729-ce6a-4340-a221-cfdf181f9985\",\"id\":\"5c7fdfeb-e6d4-401b-98f6-b6e0f3cfe7d7\",\"kind\":\"attention.awaiting_ack\",\"mono\":0.0,\"payload\":{\"generation\":1,\"reminder_id\":\"synthetic-reminder\"},\"seq\":2,\"utc\":1800000000.0},\"event_id\":\"5c7fdfeb-e6d4-401b-98f6-b6e0f3cfe7d7\",\"kind\":\"attention.awaiting_ack\",\"payload\":{\"generation\":1,\"reminder_id\":\"synthetic-reminder\"},\"provenance\":\"synthetic\",\"record_type\":\"orbo_event\"}",
++    "structured_payload": {
++      "record_type": "trajectory_observation"
++    },
++    "side_effect": "none"
++  },
++  {
++    "event_id": "dbe11614-7859-42fd-a516-de51a25e3a02",
++    "event_type": "feedback",
++    "timestamp": "2027-01-15T08:00:01.250Z",
++    "redacted_content": "{\"event\":{\"boot\":\"6c8ef690-3b24-45e2-bcf2-a9c6d7ddc377\",\"episode_id\":\"18338729-ce6a-4340-a221-cfdf181f9985\",\"id\":\"7224268e-bf1d-42a8-865d-eb9eed66e73d\",\"kind\":\"attention.acknowledged\",\"mono\":1.25,\"payload\":{\"generation\":1,\"reminder_id\":\"synthetic-reminder\"},\"seq\":3,\"utc\":1800000001.25},\"event_id\":\"7224268e-bf1d-42a8-865d-eb9eed66e73d\",\"kind\":\"attention.acknowledged\",\"payload\":{\"generation\":1,\"reminder_id\":\"synthetic-reminder\"},\"provenance\":\"synthetic\",\"record_type\":\"orbo_event\"}",
++    "structured_payload": {
++      "record_type": "trajectory_observation"
++    },
++    "side_effect": "none"
++  },
++  {
++    "event_id": "0df2ab9d-ca90-419b-9ca9-dcb220af9132",
++    "event_type": "feedback",
++    "timestamp": "2027-01-15T08:00:01.250Z",
++    "redacted_content": "{\"event\":{\"boot\":\"6c8ef690-3b24-45e2-bcf2-a9c6d7ddc377\",\"episode_id\":\"18338729-ce6a-4340-a221-cfdf181f9985\",\"id\":\"34d100cb-2f81-47b2-a312-fe34d18436fb\",\"kind\":\"episode.ended\",\"mono\":1.25,\"payload\":{\"outcome\":\"completed\"},\"seq\":4,\"utc\":1800000001.25},\"event_id\":\"34d100cb-2f81-47b2-a312-fe34d18436fb\",\"kind\":\"episode.ended\",\"payload\":{\"outcome\":\"completed\"},\"provenance\":\"synthetic\",\"record_type\":\"orbo_event\"}",
++    "structured_payload": {
++      "record_type": "trajectory_observation"
++    },
++    "side_effect": "none"
++  }
++]
+--- a/crates/trace-commons-ingest/src/bin/trace-commons-ingest.rs
++++ b/crates/trace-commons-ingest/src/bin/trace-commons-ingest.rs
+@@ -9337,6 +9337,10 @@
+         )
+         .route("/v1/datasets/replay", get(dataset_replay_handler))
+         .route(
++            "/v1/datasets/task-evidence",
++            get(dataset_task_evidence_handler),
++        )
++        .route(
+             "/v1/datasets/replay/manifests",
+             get(replay_export_manifests_handler),
+         )
+@@ -44993,6 +44997,47 @@
+     run_dataset_replay_export_with_grant(state.as_ref(), &tenant, query, grant, now).await
+ }
+ 
++/// Opt-in event delivery for an explicit evaluation purpose, under the same
++/// exporter authentication, tenant policy, consent, risk and retention gates.
++/// Rich-content risk floors remain in force; this route never lowers them.
++async fn dataset_task_evidence_handler(
++    State(state): State<Arc<AppState>>,
++    headers: HeaderMap,
++    Query(mut query): Query<DatasetExportQuery>,
++) -> ApiResult<Json<TraceReplayDatasetExport>> {
++    let tenant = authenticate_with_tenant_access_grant(state.as_ref(), &headers).await?;
++    require_exporter(&tenant)?;
++    if query
++        .purpose
++        .as_deref()
++        .is_none_or(|p| p.trim().is_empty() || p.len() > 200)
++        || query.status != Some(TraceCorpusStatus::Accepted)
++        || !matches!(
++            query.privacy_risk,
++            Some(ResidualPiiRisk::Low | ResidualPiiRisk::Medium)
++        )
++        || parse_consent_scope_filter(query.consent_scope.as_deref())?
++            != Some(ConsentScope::DebuggingEvaluation)
++        || !(1..=10).contains(&query.limit.unwrap_or(1))
++    {
++        return Err(api_error(
++            StatusCode::BAD_REQUEST,
++            "explicit_bounded_task_evidence_scope_required",
++        ));
++    }
++    query.limit = Some(query.limit.unwrap_or(1));
++    let now = Utc::now();
++    let grant = create_one_shot_export_grant(
++        state.as_ref(),
++        &tenant,
++        TraceExportDatasetKind::ReplayDataset,
++        normalized_export_purpose(query.purpose.as_deref(), "orbo_task_evidence"),
++        query.limit,
++        now,
++    );
++    run_dataset_replay_export_with_events(state.as_ref(), &tenant, query, grant, now, true).await
++}
++
+ async fn worker_replay_export_handler(
+     State(state): State<Arc<AppState>>,
+     headers: HeaderMap,
+@@ -45039,6 +45084,17 @@
+     grant: TraceExportAccessGrant,
+     now: DateTime<Utc>,
+ ) -> ApiResult<Json<TraceReplayDatasetExport>> {
++    run_dataset_replay_export_with_events(state, tenant, query, grant, now, false).await
++}
++
++async fn run_dataset_replay_export_with_events(
++    state: &AppState,
++    tenant: &TenantAuth,
++    query: DatasetExportQuery,
++    grant: TraceExportAccessGrant,
++    now: DateTime<Utc>,
++    include_events: bool,
++) -> ApiResult<Json<TraceReplayDatasetExport>> {
+     let (consent_scope, tenant_policy, purpose) =
+         prepare_replay_export_execution(state, tenant, &query).await?;
+     let job = create_validated_export_job_slice(
+@@ -45049,13 +45105,19 @@
+             purpose: purpose.clone(),
+             requested_limit: query.limit,
+             grant: grant.clone(),
+-            metadata: export_job_request_metadata(
+-                query.limit,
+-                query.status,
+-                query.privacy_risk,
+-                consent_scope,
+-                None,
+-            ),
++            metadata: {
++                let mut metadata = export_job_request_metadata(
++                    query.limit,
++                    query.status,
++                    query.privacy_risk,
++                    consent_scope,
++                    None,
++                );
++                if include_events {
++                    metadata.insert("include_task_events".to_string(), "true".to_string());
++                }
++                metadata
++            },
+         },
+         now,
+     )?;
+@@ -45195,12 +45257,21 @@
+                 .await;
+             }
+         };
+-        items.push(TraceReplayDatasetItem::from_record(
++        let mut item = TraceReplayDatasetItem::from_record(
+             &record,
+             derived_by_submission.get(&record.submission_id),
+             &body_read.envelope,
+             body_read.object_ref_id,
+-        ));
++        );
++        if job
++            .metadata
++            .get("include_task_events")
++            .is_some_and(|v| v == "true")
++        {
++            item.events = Some(body_read.envelope.events.clone());
++            item.evidence_schema_version = Some("orbo.task-evidence.v1");
++        }
++        items.push(item);
+     }
+     if let Err(error) = label_witness_provenance(
+         state,
+@@ -80700,6 +80771,10 @@
+ 
+ #[derive(Debug, Serialize)]
+ struct TraceReplayDatasetItem {
++    #[serde(skip_serializing_if = "Option::is_none")]
++    evidence_schema_version: Option<&'static str>,
++    #[serde(skip_serializing_if = "Option::is_none")]
++    events: Option<Vec<trace_commons_protocol::trace_contribution::TraceContributionEvent>>,
+     submission_id: Uuid,
+     trace_id: Uuid,
+     schema_version: String,
+@@ -80738,6 +80813,8 @@
+             .clone()
+             .unwrap_or_else(|| fallback_replay_source_hash(record, envelope));
+         Self {
++            evidence_schema_version: None,
++            events: None,
+             submission_id: record.submission_id,
+             trace_id: record.trace_id,
+             schema_version: envelope.schema_version.clone(),
+--- a/crates/trace-commons-ingest/src/bin/trace_commons_ingest_internal/tests.rs
++++ b/crates/trace-commons-ingest/src/bin/trace_commons_ingest_internal/tests.rs
+@@ -104222,3 +104222,161 @@
+         );
+     }
+ }
++
++#[tokio::test]
++async fn orbo_task_evidence_requires_event_delivery() {
++    let temp = tempfile::tempdir().unwrap();
++    let state = test_state(temp.path().to_path_buf());
++    let mut envelope = low_risk_envelope().await;
++    envelope.consent.scopes = vec![ConsentScope::DebuggingEvaluation];
++    let submission_id = envelope.submission_id;
++    let expected_events = serde_json::to_value(&envelope.events).unwrap();
++    assert!(!envelope.events.is_empty());
++    let _ = test_submit(state.clone(), "token-a", envelope)
++        .await
++        .unwrap();
++    fn query() -> DatasetExportQuery {
++        DatasetExportQuery {
++            limit: Some(10),
++            purpose: Some("orbo_task_evidence_fixture".to_string()),
++            status: Some(TraceCorpusStatus::Accepted),
++            privacy_risk: Some(ResidualPiiRisk::Low),
++            consent_scope: Some("debugging-evaluation".to_string()),
++        }
++    }
++    let Json(legacy) = dataset_replay_handler(
++        State(state.clone()),
++        auth_headers("review-token-a"),
++        Query(query()),
++    )
++    .await
++    .unwrap();
++    assert!(
++        serde_json::to_value(legacy).unwrap()["items"][0]
++            .get("events")
++            .is_none(),
++        "legacy summary stays unchanged"
++    );
++    let Json(export) = dataset_task_evidence_handler(
++        State(state.clone()),
++        auth_headers("review-token-a"),
++        Query(query()),
++    )
++    .await
++    .unwrap();
++    assert_eq!(export.item_count, 1);
++    let encoded = serde_json::to_value(export).unwrap();
++    assert_eq!(encoded["items"][0]["events"], expected_events);
++    assert_eq!(
++        encoded["items"][0]["evidence_schema_version"],
++        "orbo.task-evidence.v1"
++    );
++    assert_eq!(
++        dataset_task_evidence_handler(
++            State(state.clone()),
++            auth_headers("token-a"),
++            Query(query())
++        )
++        .await
++        .unwrap_err()
++        .0,
++        StatusCode::FORBIDDEN
++    );
++    assert_eq!(
++        dataset_task_evidence_handler(
++            State(state.clone()),
++            auth_headers("review-token-a"),
++            Query(test_dataset_query())
++        )
++        .await
++        .unwrap_err()
++        .0,
++        StatusCode::BAD_REQUEST
++    );
++    let mut record = read_submission_record(temp.path(), "tenant-a", submission_id)
++        .unwrap()
++        .unwrap();
++    record.status = TraceCorpusStatus::Revoked;
++    write_submission_record(&state.root, &record).unwrap();
++    let Json(after) = dataset_task_evidence_handler(
++        State(state.clone()),
++        auth_headers("review-token-a"),
++        Query(query()),
++    )
++    .await
++    .unwrap();
++    assert_eq!(
++        after.item_count, 0,
++        "revoked evidence is not delivered again"
++    );
++    // The new surface must retain the server's rich-content/low-risk guardrail.
++    let guarded = test_state_with_export_guardrails(temp.path().join("guarded"));
++    let mut medium = query();
++    medium.privacy_risk = Some(ResidualPiiRisk::Medium);
++    assert_eq!(
++        dataset_task_evidence_handler(
++            State(guarded),
++            auth_headers("review-token-a"),
++            Query(medium)
++        )
++        .await
++        .unwrap_err()
++        .0,
++        StatusCode::BAD_REQUEST
++    );
++}
++
++#[tokio::test]
++async fn orbo_task_evidence_prepared_events_survive_authorized_delivery() {
++    let temp = tempfile::tempdir().unwrap();
++    let state = test_state(temp.path().to_path_buf());
++    let mut envelope = sample_envelope().await;
++    envelope.events = serde_json::from_slice(include_bytes!(concat!(
++        env!("CARGO_MANIFEST_DIR"),
++        "/fixtures/orbo-prepared-events.json"
++    )))
++    .unwrap();
++    envelope.consent.scopes = vec![ConsentScope::DebuggingEvaluation];
++    envelope.trace_card.allowed_uses = vec![TraceAllowedUse::Evaluation];
++    let submission = envelope.submission_id;
++    let expected = serde_json::to_value(&envelope.events).unwrap();
++    let _ = test_submit(state.clone(), "token-a", envelope)
++        .await
++        .unwrap();
++    let _ = review_decision_handler(
++        State(state.clone()),
++        auth_headers("review-token-a"),
++        AxumPath(submission),
++        Json(TraceReviewDecisionRequest {
++            decision: TraceReviewDecision::Approve,
++            reason: Some(
++                "Synthetic Orbo preservation fixture reviewed locally; no reward claim".into(),
++            ),
++            credit_points_pending: None,
++        }),
++    )
++    .await
++    .unwrap();
++    let Json(delivered) = dataset_task_evidence_handler(
++        State(state.clone()),
++        auth_headers("review-token-a"),
++        Query(DatasetExportQuery {
++            limit: Some(1),
++            purpose: Some("orbo.attention_timing.v1".into()),
++            status: Some(TraceCorpusStatus::Accepted),
++            privacy_risk: Some(ResidualPiiRisk::Medium),
++            consent_scope: Some("debugging-evaluation".into()),
++        }),
++    )
++    .await
++    .unwrap();
++    assert_eq!(delivered.item_count, 1);
++    assert_eq!(
++        serde_json::to_value(&delivered.items[0].events).unwrap(),
++        expected
++    );
++    let output = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
++        .join("../../target/orbo-delivered.json");
++    std::fs::create_dir_all(output.parent().unwrap()).unwrap();
++    std::fs::write(output, serde_json::to_vec_pretty(&delivered).unwrap()).unwrap();
++}
