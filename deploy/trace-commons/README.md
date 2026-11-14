@@ -77,7 +77,17 @@ The example explicitly disables discovery of unrelated coding-agent sessions, te
 
 Enroll with the intended instance's invite or signed grant using the supported contributor `login` flow. Set `TRACE_COMMONS_INVITE` through the owner's private environment and run `trace-commons-contributor --config-dir /var/lib/orbo/commons login --allowed-hosts YOUR_ISSUER_HOST --scopes debugging_evaluation` as `orbo`. The invite is consumed; run once. Without an invite/grant, upstream's default login uses NEAR AI and is **not** an instruction to enroll into your private instance. Headless device-code enrollment is available when supported by that instance (`login --code`, with `TRACE_COMMONS_DEVICE_CODE` kept private). Do not invent `config.json` credentials or reuse a consumer exporter token as contributor enrollment.
 
-Configure the contributor privacy-filter credential through upstream's account/settings flow. It is distinct from the runtime's NEAR reasoning key and the consumer's export token. Install `orbo-commons-contributor.service`, then start it. Set this fragment in the Orbo runtime's selected TOML profile:
+Configure the contributor privacy filter before starting its service. With the daemon stopped, preserve the enrolled `config.json` and set its `pii_filter` field to `"near-ai"`; preserve all identity and consent fields. In the private `daemon-settings.json`, add:
+
+```json
+"near_ai": {
+  "api_key": "LOCAL_PRIVACY_CLASSIFIER_KEY",
+  "base_url": "https://cloud-api.near.ai/v1",
+  "model": "openai/privacy-filter"
+}
+```
+
+This is a fragment of the existing settings object, not a replacement file. Keep both files owned by `orbo`, mode 0600. The daemon reads this persisted credential; exporting a key in an interactive shell does not configure a systemd daemon. This credential is distinct from the runtime's NEAR reasoning key and the consumer's export token. Install `orbo-commons-contributor.service`, then start it. Set this fragment in the Orbo runtime's selected TOML profile:
 
 ```toml
 [commons]
@@ -103,3 +113,14 @@ Add `--allow-network` to verify public `/health` and its exact build identity. R
 After a deliberately approved trace is actually accepted, set `COMMONS_EXPORT_TOKEN` privately and add `--submission-id UUID --digest REVIEWED_EXPORT_SHA256 --purpose embodied_process --privacy-risk low`. This checks the authenticated custom endpoint, exact selection acknowledgement, reconstruction and the exact reviewed package digest. It does not return trace content or tokens. Missing admission or incompatible delivery fails the check; public health alone cannot pass it. Exporter authorization must include the selected tenant, purpose and debugging-evaluation consent scope.
 
 Use the live E2E runner for the upstream task and review/approval stages. Consumer delivery is process evidence; image artifact transport and independent visual outcome scoring are not established by text/event delivery. Rewards and credits require separate authoritative receipts and reconciliation.
+
+## Local process smoke without provider keys
+
+After a native debug or release package build:
+
+```sh
+uv run --frozen python tools/smoke-commons-processes.py \
+  --release artifacts/commons-current-macos-arm64
+```
+
+The tool verifies package hashes, starts both real binaries against temporary state, requires the stamped server health identity, proves unauthenticated custom export is denied, checks authorized exact-selection acknowledgement for an empty dataset, and inspects the owner-private daemon IPC methods. It uses a generated local export token and an unenrolled dry-run contributor with all unrelated sources disabled. No provider/account credentials are inherited. Both processes are terminated and temporary state is removed on success, failure or timeout. Enrollment, trace upload, accepted delivery, privacy-model behavior and commercial rewards remain explicitly untested by this smoke; use the credentialed live runner for those applicable stages.

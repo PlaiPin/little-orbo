@@ -62,6 +62,7 @@ async def smoke(release):
                     env=server_env,
                     stdout=log,
                     stderr=subprocess.STDOUT,
+                    umask=0o077,
                 )
                 processes.append(server)
             with (directory / "daemon.log").open("wb") as log:
@@ -77,6 +78,7 @@ async def smoke(release):
                     env=env,
                     stdout=log,
                     stderr=subprocess.STDOUT,
+                    umask=0o077,
                 )
                 processes.append(daemon)
             origin = f"http://127.0.0.1:{port}"
