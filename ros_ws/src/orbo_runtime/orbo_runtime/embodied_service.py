@@ -27,7 +27,7 @@ class EmbodiedService:
         if hasattr(adapter, "node") and self.config.get("camera_enabled", False):
             from .observations import ROSFrameSource, ROSPoseSource
 
-            self.pose_source = ROSPoseSource(
+            self.pose_source = getattr(adapter, "pose_source", None) or ROSPoseSource(
                 adapter.node,
                 map_version=self.map_version,
                 waypoints=adapter.navigation.waypoints

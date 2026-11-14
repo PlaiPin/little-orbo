@@ -1,0 +1,11 @@
+# Install explicitly as /etc/systemd/system/orbo-runtime.service.d/embodied.conf
+# after copying the owner-edited profile and owner-only credentials. Not auto-installed.
+[Service]
+ExecStart=
+ExecStart=/opt/orbo/deploy/run-runtime.sh /etc/orbo/embodied.toml
+# Local motion is stopped first; allow bounded provider/Live finalization afterward.
+TimeoutStopSec=150
+LoadCredential=NEARAI_API_KEY:/etc/orbo/credentials/NEARAI_API_KEY
+LoadCredential=OPENAI_API_KEY:/etc/orbo/credentials/OPENAI_API_KEY
+# Optional principal-specific remote credential:
+# LoadCredential=ORBO_REMOTE_OWNER_PHONE_TOKEN:/etc/orbo/credentials/ORBO_REMOTE_OWNER_PHONE_TOKEN

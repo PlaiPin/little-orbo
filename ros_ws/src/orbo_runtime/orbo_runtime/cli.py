@@ -99,6 +99,12 @@ class LocalService:
         profile = config["runtime"]["profile"]
         if profile == "simulated":
             adapter = FakeRobot()
+        elif profile == "gazebo":
+            from .gazebo_adapter import GazeboAdapter
+
+            adapter = GazeboAdapter(
+                config["robot"]["goals"], map_version=config["embodied"]["map_version"]
+            )
         elif profile == "orbo":
             from .ros_adapter import OrboAdapter
 
@@ -663,6 +669,12 @@ async def serve(path):
         finally:
             probe.close()
     service = LocalService(config)
+    if config["runtime"]["profile"] == "gazebo":
+        try:
+            await service.broker.adapter.ready()
+        except BaseException:
+            await service.close()
+            raise
     server = await asyncio.start_unix_server(
         service.handle, str(socket_path), limit=65537
     )

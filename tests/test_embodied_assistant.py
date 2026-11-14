@@ -307,3 +307,37 @@ async def test_search_retains_earlier_similar_sighting_when_last_view_empty(syst
     assert result["coverage"] == ["front", "side"]
     assert result["findings"][0]["identity"] == "visual_similarity"
     assert "similar" in result["text"].lower()
+
+
+def test_gazebo_profile_binds_adapter_and_scope_without_fake_fallback(
+    tmp_path, monkeypatch
+):
+    from orbo_runtime import gazebo_adapter
+    from orbo_runtime.cli import LocalService
+
+    selected = []
+
+    def factory(goals, *, map_version):
+        selected.append((goals, map_version))
+        return Robot()
+
+    monkeypatch.setattr(gazebo_adapter, "GazeboAdapter", factory)
+    service = LocalService(
+        {
+            "runtime": {
+                "owner": "owner",
+                "profile": "gazebo",
+                "database": str(tmp_path / "state.db"),
+            },
+            "robot": {"goals": "surveyed-sim-goals.yaml"},
+            "embodied": {
+                "enabled": True,
+                "environment": "simulation",
+                "map_version": "sim-map",
+                "image_directory": str(tmp_path / "images"),
+            },
+        }
+    )
+    assert selected == [("surveyed-sim-goals.yaml", "sim-map")]
+    assert service.embodied.map_version == "sim-map"
+    service.store.close()

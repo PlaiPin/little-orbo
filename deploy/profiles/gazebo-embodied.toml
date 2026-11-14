@@ -1,0 +1,37 @@
+# Run from the repository root in the isolated Pixi ROS/Gazebo environment.
+[runtime]
+owner = "simulation-owner"
+profile = "gazebo"
+database = "artifacts/private/gazebo-journal.db"
+socket = "artifacts/private/gazebo-runtime.sock"
+
+[robot]
+goals = "ros_ws/src/orbo_simulation/config/goals.yaml"
+
+[near]
+enabled = false # Set true only for intended, permitted live provider tests.
+model = "z-ai/glm-5.3-flash"
+
+[voice]
+enabled = false
+
+[embodied]
+enabled = true
+environment = "gazebo-living-room"
+map_version = "living-room-map"
+image_directory = "artifacts/private/gazebo-images"
+camera_enabled = true
+camera_frame = "camera_optical_frame"
+camera_calibration = "gazebo-pinhole-320x240"
+image_topic = "/orbo_sim/camera/image_raw"
+camera_info_topic = "/orbo_sim/camera/camera_info"
+pose_topic = "/orbo_sim/amcl_pose"
+
+[live]
+enabled = false
+model = "gpt-live-1"
+voice = "marin"
+sample_rate = 24000
+idle_seconds = 60
+max_session_seconds = 900
+aec_qualified = false
