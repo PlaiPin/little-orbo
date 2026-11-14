@@ -62,7 +62,7 @@ class KeyboardCommand:
 
 
 class WheelPublisher:
-    def __init__(self, node):
+    def __init__(self, node, *, direct_wheels=True):
         self.node = node
         self.wheel = self.health = None
         self.wheel_received = self.health_received = -math.inf
@@ -84,7 +84,7 @@ class WheelPublisher:
                 self.on_status, QoSProfile(depth=20, reliability=ReliabilityPolicy.BEST_EFFORT)),
         ]
         self.sessions = node.create_publisher(ControlSession, SESSION_TOPIC, 10)
-        self.wheels = node.create_publisher(WheelCommand, WHEEL_TOPIC, 10)
+        self.wheels = node.create_publisher(WheelCommand, WHEEL_TOPIC, 10) if direct_wheels else None
 
     def on_wheel(self, message):
         self.wheel, self.wheel_received = message, time.monotonic()
@@ -145,22 +145,29 @@ class WheelPublisher:
                 not all(0 <= age < 150000 for age in ages) or
                 not all(math.isfinite(v) for v in list(wheel.position_rad) + list(wheel.velocity_rad_s))):
             raise RuntimeError('Invalid motor feedback; inspect wheel_state')
-        if self.sessions.get_subscription_count() != 1 or self.wheels.get_subscription_count() != 1:
-            raise RuntimeError('Expected exactly one firmware command subscriber')
-        if self.node.count_publishers(SESSION_TOPIC) != 1 or self.node.count_publishers(WHEEL_TOPIC) != 1:
-            raise RuntimeError('Another command publisher is running; stop it first')
+        self.check_graph()
         if armed and (not wheel.armed or wheel.epoch != self.epoch):
             raise RuntimeError(f'Firmware disarmed or session changed '
                                f'(armed={wheel.armed}, expected epoch={self.epoch}, '
                                f'observed epoch={wheel.epoch}); no automatic rearm')
+
+    def check_graph(self):
+        if self.sessions.get_subscription_count() != 1 or self.wheels.get_subscription_count() != 1:
+            raise RuntimeError('Expected exactly one firmware command subscriber')
+        if self.node.count_publishers(SESSION_TOPIC) != 1 or self.node.count_publishers(WHEEL_TOPIC) != 1:
+            raise RuntimeError('Another command publisher is running; stop it first')
 
     def connect_and_arm(self):
         until = time.monotonic() + 15
         print('Waiting for firmware telemetry and command subscriptions...', flush=True)
         while time.monotonic() < until:
             self.spin(0.05)
-            if self.wheel and self.health and self.sessions.get_subscription_count() and self.wheels.get_subscription_count():
-                break
+            if self.wheel and self.health:
+                try:
+                    self.check_graph()
+                    break
+                except RuntimeError:
+                    pass
         self.check()
         if self.wheel.armed:
             raise RuntimeError('Firmware is already armed; stop the current controller first')
