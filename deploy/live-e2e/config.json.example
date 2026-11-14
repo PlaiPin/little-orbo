@@ -1,0 +1,25 @@
+{
+  "stages": ["near", "live"],
+  "near_model": "z-ai/glm-5.3-flash",
+  "image": "scene.png",
+  "audio": "request.wav",
+  "live_backend": "near",
+  "live_seconds": 60,
+  "stage_seconds": 180,
+  "socket": "/run/orbo/runtime.sock",
+  "task": {
+    "kind": "describe",
+    "target": "Describe what is visible in the current view",
+    "purpose": "owner-requested live integration test",
+    "places": [],
+    "allowed_actions": ["capture", "infer", "report"],
+    "budget": {"seconds": 90, "observations": 1, "provider_calls": 1}
+  },
+  "commons": {
+    "export_id": "REPLACE_WITH_REVIEWED_EXPORT",
+    "entry_id": "REPLACE_WITH_REVIEWED_ENTRY",
+    "source_digest": "REPLACE_WITH_REVIEWED_PACKAGE_SHA256",
+    "privacy_risk": "low",
+    "submit": false
+  }
+}
