@@ -84,7 +84,6 @@ def stack(tmp_path):
     log = (tmp_path/'stack.log').open('w')
     process = subprocess.Popen(['ros2', 'launch', 'orbo_bringup', 'control.launch.py',
         'calibration:='+str(ROOT/'ros_ws/src/orbo_description/config/bench-cad.yaml')],
-        env={**os.environ, 'PYTHONPATH':str(ROOT/'packages')+os.pathsep+os.getenv('PYTHONPATH', '')},
         stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
     node = rclpy.create_node('synthetic_owner')
     controller = module.BasePublisher(node, .033, .1018)
