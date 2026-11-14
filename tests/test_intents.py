@@ -452,3 +452,31 @@ async def test_live_observed_quote_response_normalization_and_platform_fees(setu
     result = await swaps.quote("100", dry=False)
     assert result["quote"]["quoteRequest"]["deadline"].endswith(".000Z")
     assert result["quote"]["quote"]["minAmountOut"] == "10"
+
+
+async def test_firm_quote_implicit_account_and_service_extension_keep_owner_deadline(
+    setup,
+):
+    swaps, fixture = setup
+
+    def extended_service_deadline(result):
+        # Observed on the public API: execution fields may advertise a longer
+        # lifetime than the signed request. Local owner deadline still wins.
+        result["quote"]["depositAddress"] = "d" * 64
+        result["quote"]["deadline"] = "2027-01-18T08:00:00.000Z"
+        result["quote"]["timeWhenInactive"] = "2027-01-18T08:00:00.000Z"
+        result["signature"] = b58encode(
+            MANAGER.sign(quote_hash(result).encode()).signature
+        )
+
+    fixture.mutate = extended_service_deadline
+    row = await swaps.quote("100", dry=False)
+    assert row["quote"]["quote"]["depositAddress"] == "d" * 64
+    assert row["expires"] == NOW + POLICY["deadline_seconds"]
+    swaps.now = lambda: NOW + 301
+    signer = Signer()
+    with pytest.raises(Rejected, match="expired"):
+        await swaps.execute(
+            row["id"], row["approval_digest"], signer, allow_funded=True
+        )
+    assert signer.prepares == 0
