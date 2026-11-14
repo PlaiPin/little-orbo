@@ -7,7 +7,9 @@ Wants=network-online.target
 Type=simple
 User=orbo
 Group=orbo
-ExecStart=/opt/trace-commons/bin/trace-commons-contributor --config-dir /var/lib/orbo/commons daemon run
+Environment=ORBO_CREDENTIALS_CONFIG=/opt/orbo/deploy/credentials.service.toml
+LoadCredential=orbo.env:/etc/orbo/credentials.env
+ExecStart=/opt/orbo/.venv/bin/python -m orbo_runtime.commons_credentials contributor --binary /opt/trace-commons/bin/trace-commons-contributor --config-dir /var/lib/orbo/commons
 Restart=on-failure
 RestartSec=10
 TimeoutStopSec=120

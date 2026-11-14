@@ -9,7 +9,6 @@ import base64
 import hashlib
 import json
 import os
-from pathlib import Path
 import re
 import stat
 import struct
@@ -130,27 +129,47 @@ class NearSigner:
     own deposits; it cannot coordinate nonces with outside wallet processes.
     """
 
-    def __init__(self, sender, key_file, *, client=None, gas=30_000_000_000_000):
+    def __init__(
+        self, sender, key_file=None, *, values=None, client=None, gas=30_000_000_000_000
+    ):
         from nacl.signing import SigningKey
 
         self.sender = account(sender)
         self.gas = gas
         if type(gas) is not int or not 1 <= gas <= 30_000_000_000_000:
             raise Rejected("gas exceeds restricted transfer ceiling")
-        fd = os.open(Path(key_file), os.O_RDONLY | os.O_NOFOLLOW)
-        with os.fdopen(fd) as source:
-            info = os.fstat(source.fileno())
-            if (
-                not stat.S_ISREG(info.st_mode)
-                or info.st_mode & 0o077
-                or info.st_uid != os.getuid()
-            ):
-                raise Rejected("signer key must be an owner-only regular file")
-            value = json.load(source)
+        if key_file is not None and values is not None:
+            raise Rejected("choose one signer credential source")
+        if key_file is not None:
+            from .credentials import external_path
+
+            path = external_path(key_file)
+            fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(fd) as source:
+                info = os.fstat(source.fileno())
+                if (
+                    not stat.S_ISREG(info.st_mode)
+                    or info.st_mode & 0o077
+                    or info.st_uid != os.geteuid()
+                    or info.st_size > 16_384
+                ):
+                    raise Rejected("signer key must be an owner-only regular file")
+                contents = source.read(16_385)
+                if len(contents) > 16_384:
+                    raise Rejected("signer key file exceeds size limit")
+                value = json.loads(contents)
+        elif isinstance(values, dict):
+            # Only construct this mapping from the shared external credential
+            # resolver, or a deliberately injected signer in an offline test.
+            value = values
+        else:
+            raise Rejected("external signer credentials required")
+        if not isinstance(value, dict):
+            raise Rejected("invalid signer credential mapping")
         if value.get("account_id") != sender:
             raise Rejected("key account does not match approved sender")
         secret = value.get("private_key", "")
-        if not secret.startswith("ed25519:"):
+        if not isinstance(secret, str) or not secret.startswith("ed25519:"):
             raise Rejected("only Ed25519 keys are supported")
         raw = b58decode(secret.split(":", 1)[1])
         if len(raw) not in {32, 64}:

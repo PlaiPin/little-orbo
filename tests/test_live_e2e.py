@@ -11,6 +11,17 @@ from orbo_runtime import live_e2e as e2e
 from orbo_runtime.providers import VerifiedReply
 
 
+@pytest.fixture(autouse=True)
+def isolated_credentials(tmp_path, monkeypatch):
+    """Never inspect the operator's actual external secret file during tests."""
+    secret = tmp_path / "external.env"
+    secret.write_text("")
+    secret.chmod(0o600)
+    pointer = tmp_path / "credentials.toml"
+    pointer.write_text("[credentials]\nfile = " + json.dumps(str(secret)) + "\n")
+    monkeypatch.setenv("ORBO_CREDENTIALS_CONFIG", str(pointer))
+
+
 @pytest.fixture
 def config(tmp_path):
     image = tmp_path / "scene.png"
@@ -79,9 +90,8 @@ class Reasoner:
 
 
 def test_preflight_never_contacts_network(config, monkeypatch):
-    monkeypatch.delenv("CREDENTIALS_DIRECTORY", raising=False)
-    monkeypatch.delenv("NEARAI_API_KEY", raising=False)
-    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.setenv("NEARAI_API_KEY", "ignored-ambient-secret")
+    monkeypatch.setenv("OPENAI_API_KEY", "ignored-ambient-secret")
     result = e2e.preflight(config)
     assert not result["ready"]
     assert "credential:NEARAI_API_KEY" in result["missing"]

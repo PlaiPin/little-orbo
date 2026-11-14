@@ -5,31 +5,12 @@ import dataclasses
 from decimal import Decimal, InvalidOperation
 import io
 import json
-import os
-from pathlib import Path
-import stat
 import wave
 
 import httpx
 
 from .contracts import Rejected, digest
-
-
-def credential(name):
-    """Prefer systemd credentials, otherwise a deployment-injected environment value."""
-    directory = os.environ.get("CREDENTIALS_DIRECTORY")
-    if directory:
-        path = Path(directory) / name
-        if path.exists():
-            if path.stat().st_mode & (stat.S_IRWXG | stat.S_IRWXO):
-                raise Rejected("credential file must be owner-only")
-            value = path.read_text().strip()
-            if value:
-                return value
-    value = os.environ.get(name, "").strip()
-    if not value:
-        raise Rejected(f"missing credential: {name}")
-    return value
+from .credentials import credential
 
 
 def serializable(value):

@@ -37,7 +37,7 @@ uv run --frozen --extra intents orbo intents \
 
 `preflight` validates the policy without contacting a service. Use the same database for every run; do not rotate or delete it to bypass the cumulative cap or an unresolved transfer. It is created with owner-only permissions. One database and one dedicated signing key/account must have a single operator; do not share that key with another wallet sender or run it against separate databases. Process locking protects concurrent invocations against the same journal.
 
-Optionally inject `NEAR_INTENTS_API_KEY` from your local secret manager for authenticated partner access. Unauthenticated quotes are supported by the API with its corresponding fee schedule. Never put secrets in the policy or command-line arguments. Both the 1Click host and NEAR mainnet RPC host are fixed; redirects are rejected and response sizes/timeouts are bounded.
+Put `NEAR_INTENTS_API_KEY` in the shared external credentials file selected by the repository’s `deploy/credentials.toml` pointer (by default `$HOME/.config/orbo/credentials.env`) for authenticated partner access. Intents automatically reads that file through the shared credential resolver; an API key is optional for unauthenticated quotes with the corresponding fee schedule. Never put secrets in the policy, repository or command-line arguments. Both the 1Click host and NEAR mainnet RPC host are fixed; redirects are rejected and response sizes/timeouts are bounded.
 
 ## Quote, review and execute
 
@@ -52,7 +52,7 @@ uv run --frozen --extra intents orbo intents \
 
 Add `--firm` to request a deposit address for review. Inspect `quote`, `policy`, `expires`, `id` and `approval_digest`; a firm quote still does not sign or deposit anything. Platform fees are reflected in the signed output amounts; the owner-approved minimum output constrains net proceeds. Signature verification follows the official TypeScript SDK's signed-field selection and pinned manager public key. A manager-key rotation fails closed until reviewed and updated in code.
 
-For an explicitly approved funded test, install the NEAR account's Ed25519 key as an owner-only `0600` regular JSON file outside the repository, with `account_id`, `public_key` and `private_key` in standard NEAR key-file format. The account must have native gas balance and source token balance. Use a separately funded account: NEP-141's attached one yoctoNEAR requires a full-access key. The implementation permits only a single `ft_transfer` with one yoctoNEAR and at most 30 Tgas, checks source token balance and deposit-account storage registration, and never adds a storage-deposit or other contract action. Native gas expense is additional to the input-token cap.
+For an explicitly approved funded test, add `NEAR_SIGNER_ACCOUNT_ID`, `NEAR_SIGNER_PUBLIC_KEY` and `NEAR_SIGNER_PRIVATE_KEY` to that same external owner-only credentials file. Use the standard NEAR `ed25519:` public/private key encodings; the account must match the policy sender. Intents automatically loads and validates these values when executing or reconciling a deposit. Preflight reports only whether all signer fields are configured, never their values. Alternatively, pass `--key-file` to select an owner-only `0600` regular JSON file outside the repository containing `account_id`, `public_key` and `private_key`; this explicit file overrides the shared signer fields. Paths inside the repository are rejected even if ignored by Git. The account must have native gas balance and source token balance. Use a separately funded account: NEP-141's attached one yoctoNEAR requires a full-access key. The implementation permits only a single `ft_transfer` with one yoctoNEAR and at most 30 Tgas, checks source token balance and deposit-account storage registration, and never adds a storage-deposit or other contract action. Native gas expense is additional to the input-token cap.
 
 Only after reviewing the concrete quote, run:
 
@@ -60,8 +60,7 @@ Only after reviewing the concrete quote, run:
 uv run --frozen --extra intents orbo intents \
   --policy "$HOME/.config/orbo/intents-policy.json" \
   --database "$HOME/.local/state/orbo/intents.db" \
-  execute SWAP_ID --approve EXACT_APPROVAL_DIGEST --allow-funded \
-  --key-file /path/outside/repository/near-key.json
+  execute SWAP_ID --approve EXACT_APPROVAL_DIGEST --allow-funded
 ```
 
 `show SWAP_ID` reads the retained record. `cancel SWAP_ID` invalidates a quote only before a transfer has been prepared; it does not claim to cancel an on-chain transaction or refund money. Quote changes, policy changes, missing approval, expiry, invalid signatures, unsupported memo routes, absent storage registration and breached caps all fail before broadcasting.
@@ -74,10 +73,10 @@ The signed transaction and its hash are committed before the first broadcast. If
 uv run --frozen --extra intents orbo intents \
   --policy "$HOME/.config/orbo/intents-policy.json" \
   --database "$HOME/.local/state/orbo/intents.db" \
-  status SWAP_ID --key-file /path/outside/repository/near-key.json
+  status SWAP_ID
 ```
 
-`status` is a bounded single query, not an unbounded poll. The optional key allows an additional read-only query for the existing deposit's finalized outcome; it does not sign or broadcast. It remains usable after quote expiry. Without a key it queries 1Click settlement only. `SUCCESS`, `REFUNDED` and `FAILED` are recorded separately from NEAR deposit finality, with the returned settlement details. The returned original quote must pass signature verification and match the exact reviewed quote; mutable settlement status itself is a TLS-authenticated API observation, not a signed blockchain proof. A refund is recorded only when reported by the service, never inferred from timeout. A failed or permanently unknown transaction requires operator reconciliation; there is no automatic new-nonce replacement. Read-only receipts are stored in the separate swap journal, not conflated with provider-credit accounting.
+`status` is a bounded single query, not an unbounded poll. Configured signer credentials (or an explicit `--key-file`) allow an additional read-only query for the existing deposit's finalized outcome; this status operation does not sign or broadcast. It remains usable after quote expiry. Without configured signer credentials it queries 1Click settlement only. `SUCCESS`, `REFUNDED` and `FAILED` are recorded separately from NEAR deposit finality, with the returned settlement details. The returned original quote must pass signature verification and match the exact reviewed quote; mutable settlement status itself is a TLS-authenticated API observation, not a signed blockchain proof. A refund is recorded only when reported by the service, never inferred from timeout. A failed or permanently unknown transaction requires operator reconciliation; there is no automatic new-nonce replacement. Read-only receipts are stored in the separate swap journal, not conflated with provider-credit accounting.
 
 ## Testing and protocol references
 

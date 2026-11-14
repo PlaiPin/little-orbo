@@ -38,6 +38,10 @@ python3 tools/package-commons.py --verify artifacts/commons-release-linux-arm64
 
 This checks every packaged file without executing it. Transfer the manifest through a trusted channel; hashes detect corruption, not an attacker replacing both manifest and binaries. On the server, create a dedicated `tracecommons` system user and copy `bin/` to `/opt/trace-commons/bin/`. Install `trace-commons-ingest.service` under `/etc/systemd/system/` and place a root-owned, mode-0600 completed `ingest.env` at `/etc/trace-commons/ingest.env`. The service listens on loopback and creates its private data/cache directories through systemd. Do not expose port 3907 publicly.
 
+Both native service units use `/opt/orbo/.venv/bin/python -m orbo_runtime.commons_credentials`, so install the Orbo runtime Python package on the Commons host as well as on the robot. All user-supplied API credentials and database secrets live in the **single external file** described by the [deployment README](../README.md). The services use `LoadCredential=orbo.env:/etc/orbo/credentials.env` and the nonsecret pointer `/opt/orbo/deploy/credentials.service.toml`; systemd supplies an ephemeral per-service copy without granting the `tracecommons` user access to other services' state. Keep `/etc/orbo/credentials.env` root-owned, mode 0600. Do not put secrets in `ingest.env`, unit files, the repository, or daemon settings.
+
+The ingest service needs `DATABASE_URL`, `TRACE_COMMONS_LOGIN_RESOLVER_DATABASE_URL`, and `TRACE_NEAR_AI_PRIVACY_API_KEY` in that shared file, plus any configured issuer/operator secrets under their native `TRACE_COMMONS_*` names. The contributor receives only the selected privacy-classifier settings; it does not inherit ingest administrator, database, wallet or OpenAI secrets. Both services read the file automatically at launch; restart them after rotating credentials.
+
 Complete the example using the **pinned source's** `docs/operator/deployment.md`, `docs/operator/env-reference.md`, and `docs/operator/login-resolver-role.md` included in `source.tar.gz`. Required external dependencies are the managed EdDSA issuer, PostgreSQL migrations and least-privilege roles, tenant policy and access grants, enrollment/login configuration, and a functioning privacy filter. The environment template includes the pinned NEAR privacy classifier backend, endpoint, model and request limits; provide `TRACE_NEAR_AI_PRIVACY_API_KEY` for that classifier. Object storage/KMS and model/scoring configuration depend on the chosen operator deployment. The sample deliberately refuses to boot with placeholders or missing privacy filtering; it does not silently substitute test authorization or fake scoring.
 
 Configure HTTPS on the operator's reverse proxy and include `nginx.conf.example` inside its HTTPS `server` block. Publish the release's `source.tar.gz` at `/opt/trace-commons/public/source.tar.gz`. Create `/opt/trace-commons/public/source-offer.json` with:
@@ -75,19 +79,27 @@ sudo install -o orbo -g orbo -m 0600 \
 
 The example explicitly disables discovery of unrelated coding-agent sessions, telemetry and proxy body capture. Only files deliberately placed in the contributor staging folder are observed. Normalized trajectories remain manual-review-only in the patched watcher. Inspect existing settings before upgrades; do not reset an existing owner's choices.
 
-Enroll with the intended instance's invite or signed grant using the supported contributor `login` flow. Set `TRACE_COMMONS_INVITE` through the owner's private environment and run `trace-commons-contributor --config-dir /var/lib/orbo/commons login --allowed-hosts YOUR_ISSUER_HOST --scopes debugging_evaluation` as `orbo`. The invite is consumed; run once. Without an invite/grant, upstream's default login uses NEAR AI and is **not** an instruction to enroll into your private instance. Headless device-code enrollment is available when supported by that instance (`login --code`, with `TRACE_COMMONS_DEVICE_CODE` kept private). Do not invent `config.json` credentials or reuse a consumer exporter token as contributor enrollment.
+Put the intended instance's invite in `TRACE_COMMONS_INVITE` in the same external credential file. Enrollment is an explicit one-time operation; starting the daemon service never enrolls it. On the installed Linux host, run the wrapper with the same systemd credential source:
 
-Configure the contributor privacy filter before starting its service. With the daemon stopped, preserve the enrolled `config.json` and set its `pii_filter` field to `"near-ai"`; preserve all identity and consent fields. In the private `daemon-settings.json`, add:
-
-```json
-"near_ai": {
-  "api_key": "LOCAL_PRIVACY_CLASSIFIER_KEY",
-  "base_url": "https://cloud-api.near.ai/v1",
-  "model": "openai/privacy-filter"
-}
+```sh
+sudo systemd-run --wait --pipe --collect \
+  --property=User=orbo --property=Group=orbo --property=UMask=0077 \
+  --property=LoadCredential=orbo.env:/etc/orbo/credentials.env \
+  --setenv=ORBO_CREDENTIALS_CONFIG=/opt/orbo/deploy/credentials.service.toml \
+  /opt/orbo/.venv/bin/python -m orbo_runtime.commons_credentials login \
+  --binary /opt/trace-commons/bin/trace-commons-contributor \
+  --config-dir /var/lib/orbo/commons --issuer-host YOUR_ISSUER_HOST
 ```
 
-This is a fragment of the existing settings object, not a replacement file. Keep both files owned by `orbo`, mode 0600. The daemon reads this persisted credential; exporting a key in an interactive shell does not configure a systemd daemon. This credential is distinct from the runtime's NEAR reasoning key and the consumer's export token. Install `orbo-commons-contributor.service`, then start it. Set this fragment in the Orbo runtime's selected TOML profile:
+For local development, `uv run python -m orbo_runtime.commons_credentials login --binary PATH_TO_NATIVE_CONTRIBUTOR --config-dir OWNER_PRIVATE_DIRECTORY --issuer-host YOUR_ISSUER_HOST` discovers the repository's public credential pointer automatically. The wrapper requires the selected invite, passes only that enrollment credential, fixes consent to `debugging_evaluation`, and preserves existing enrollment. It cannot fall back to the default NEAR browser login. The native issuer consumes the invite; run once.
+
+For supported headless account linking, put the one-time `TRACE_COMMONS_DEVICE_CODE` in the shared file and replace `--issuer-host YOUR_ISSUER_HOST` with `--device-code`. This route requires the same-owner unenrolled contributor daemon already running. The native CLI reads the selected code from its environment; neither the code nor invite is placed in argv. Do not combine these options: native device-code login conflicts with issuer-host selection. Enrollment credentials are excluded from normal ingest and contributor service environments. Do not invent `config.json` credentials or reuse a consumer exporter token as contributor enrollment.
+
+The launcher reads `TRACE_NEAR_AI_PRIVACY_API_KEY` from the shared external file and selects the native protocol redactor's `TRACE_PRIVACY_FILTER_BACKEND=near-ai` support. It supplies the documented classifier endpoint/model defaults unless the shared file specifies `TRACE_NEAR_AI_PRIVACY_BASE_URL` or `TRACE_NEAR_AI_PRIVACY_MODEL`. No API key is written into contributor state, and no enrollment/device/queue files are copied or replaced.
+
+Leave enrolled `config.json`'s `pii_filter` field unset/null and `daemon-settings.json`'s `near_ai` field unset/null. Those older selectors require or override with a second persisted key source, so the launcher refuses them. If transitioning from the earlier setup, stop the daemon, remove only those fields while preserving enrollment, consent and all other settings, then restart. Both files remain owner-private, mode 0600. The effective privacy filter is still required by the launcher: a missing shared classifier key fails startup, and an invalid native filter configuration fails closed.
+
+Preview/review of an enrolled trace can send its prose to the configured NEAR privacy classifier. Use the explicit review permission and inspect the recipient before proceeding; selecting environment-backed credentials does not authorize a trace upload. The classifier credential remains distinct from the runtime's NEAR reasoning key and the consumer's export token. Install `orbo-commons-contributor.service`, then start it. Set this fragment in the Orbo runtime's selected TOML profile:
 
 ```toml
 [commons]
@@ -110,7 +122,7 @@ uv run --frozen python tools/check-commons-deployment.py \
 
 Add `--allow-network` to verify public `/health` and its exact build identity. Run as the contributor/runtime user with `--socket /var/lib/orbo/commons/daemon.sock` to also verify enrollment and the patched IPC methods. The report keeps setup completion, paused state and terms hold separate from health.
 
-After a deliberately approved trace is actually accepted, set `COMMONS_EXPORT_TOKEN` privately and add `--submission-id UUID --digest REVIEWED_EXPORT_SHA256 --purpose embodied_process --privacy-risk low`. This checks the authenticated custom endpoint, exact selection acknowledgement, reconstruction and the exact reviewed package digest. It does not return trace content or tokens. Missing admission or incompatible delivery fails the check; public health alone cannot pass it. Exporter authorization must include the selected tenant, purpose and debugging-evaluation consent scope.
+After a deliberately approved trace is actually accepted, put `COMMONS_EXPORT_TOKEN` in the same shared external credential file and add `--submission-id UUID --digest REVIEWED_EXPORT_SHA256 --purpose embodied_process --privacy-risk low`. This checks the authenticated custom endpoint, exact selection acknowledgement, reconstruction and the exact reviewed package digest. It does not return trace content or tokens. Missing admission or incompatible delivery fails the check; public health alone cannot pass it. Exporter authorization must include the selected tenant, purpose and debugging-evaluation consent scope.
 
 Use the live E2E runner for the upstream task and review/approval stages. Consumer delivery is process evidence; image artifact transport and independent visual outcome scoring are not established by text/event delivery. Rewards and credits require separate authoritative receipts and reconciliation.
 

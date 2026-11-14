@@ -480,3 +480,110 @@ async def test_firm_quote_implicit_account_and_service_extension_keep_owner_dead
             row["id"], row["approval_digest"], signer, allow_funded=True
         )
     assert signer.prepares == 0
+
+
+async def test_signer_mapping_validates_identity_without_a_separate_key_file(tmp_path):
+    values = json.loads(keyfile(tmp_path).read_text())
+    signer = NearSigner("owner.near", values=values)
+    try:
+        assert signer.public_key == values["public_key"]
+        assert signer.sender == "owner.near"
+    finally:
+        await signer.close()
+    with pytest.raises(Rejected, match="account"):
+        NearSigner("different.near", values=values)
+    with pytest.raises(Rejected, match="one signer"):
+        NearSigner("owner.near", keyfile(tmp_path), values=values)
+    with pytest.raises(Rejected, match="public identity"):
+        NearSigner("owner.near", values={**values, "public_key": "ed25519:invalid"})
+
+
+async def test_intents_preflight_reads_shared_credentials_without_disclosure(
+    tmp_path, monkeypatch
+):
+    from argparse import Namespace
+    from orbo_runtime import credentials
+    from orbo_runtime.intents import run
+
+    values = json.loads(keyfile(tmp_path).read_text())
+    shared = {
+        "NEAR_INTENTS_API_KEY": "fixture-partner-secret",
+        "NEAR_SIGNER_ACCOUNT_ID": values["account_id"],
+        "NEAR_SIGNER_PUBLIC_KEY": values["public_key"],
+        "NEAR_SIGNER_PRIVATE_KEY": values["private_key"],
+    }
+    calls = []
+
+    def lookup(name, required=True):
+        calls.append(name)
+        return shared.get(name)
+
+    monkeypatch.setattr(credentials, "credential", lookup)
+    path = tmp_path / "policy.json"
+    path.write_text(json.dumps(POLICY))
+    report = await run(
+        Namespace(policy=path, database=tmp_path / "swaps.db", command="preflight")
+    )
+    assert report["authenticated_api"] and report["signer_configured"]
+    assert not report["network_contacted"] and not report["funded_execution"]
+    assert set(calls) == set(shared)
+    assert "fixture-partner-secret" not in json.dumps(report)
+    assert values["private_key"] not in json.dumps(report)
+
+
+async def test_execute_resolves_shared_signer_and_rejects_partial_configuration(
+    tmp_path, monkeypatch
+):
+    from argparse import Namespace
+    from orbo_runtime import credentials
+    from orbo_runtime.intents import run
+
+    values = json.loads(keyfile(tmp_path).read_text())
+    shared = {
+        "NEAR_SIGNER_ACCOUNT_ID": values["account_id"],
+        "NEAR_SIGNER_PUBLIC_KEY": values["public_key"],
+        "NEAR_SIGNER_PRIVATE_KEY": values["private_key"],
+    }
+    monkeypatch.setattr(
+        credentials, "credential", lambda name, required=True: shared.get(name)
+    )
+    policy = tmp_path / "policy.json"
+    policy.write_text(json.dumps(POLICY))
+    args = Namespace(
+        policy=policy,
+        database=tmp_path / "swaps.db",
+        command="execute",
+        key_file=None,
+        swap_id="fixture-id",
+        approve="fixture-approval",
+        allow_funded=True,
+    )
+    seen = []
+
+    async def offline_execute(self, swap_id, approval, signer, *, allow_funded):
+        seen.append((swap_id, approval, signer.sender, signer.public_key, allow_funded))
+        return {"fixture_only": True}
+
+    monkeypatch.setattr(Swaps, "execute", offline_execute)
+    assert (await run(args))["fixture_only"]
+    assert seen == [
+        ("fixture-id", "fixture-approval", "owner.near", values["public_key"], True)
+    ]
+    del shared["NEAR_SIGNER_PRIVATE_KEY"]
+    with pytest.raises(Rejected, match="incomplete"):
+        await run(args)
+
+
+def test_explicit_signer_file_rejects_repository_and_oversized_content(tmp_path):
+    from pathlib import Path
+
+    repository_path = (
+        Path(__file__).resolve().parents[1] / "never-created-private-key.json"
+    )
+    with pytest.raises(Rejected, match="outside"):
+        NearSigner("owner.near", repository_path)
+    large = tmp_path / "large.json"
+    large.write_text(" " * 16_385)
+    large.chmod(0o600)
+    with pytest.raises(Rejected):
+        NearSigner("owner.near", large)

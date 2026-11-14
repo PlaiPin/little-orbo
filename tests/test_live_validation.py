@@ -12,10 +12,22 @@ from orbo_runtime import live_validation as live
 from orbo_runtime.providers import VerifiedReply
 
 
+@pytest.fixture(autouse=True)
+def external_credentials(tmp_path, monkeypatch):
+    """Isolate every test from the operator's real credential pointer/file."""
+    path = tmp_path / "external.env"
+    path.write_text("")
+    path.chmod(0o600)
+    pointer = tmp_path / "credentials.toml"
+    pointer.write_text("[credentials]\nfile = " + json.dumps(str(path)) + "\n")
+    monkeypatch.setenv("ORBO_CREDENTIALS_CONFIG", str(pointer))
+    return path
+
+
 @pytest.fixture
-def configured(tmp_path):
+def configured(tmp_path, external_credentials):
     directory = live.initialize(tmp_path.resolve() / "validation")
-    (directory / "credentials.env").write_text(
+    external_credentials.write_text(
         "".join(
             name + "=" + json.dumps("synthetic-private-" + name) + "\n"
             for name in live.FIELDS
@@ -25,6 +37,7 @@ def configured(tmp_path):
 
 
 def test_templates_are_private_idempotent_and_never_overwrite(configured):
+    assert not (configured / "credentials.env").exists()
     before = {p.name: p.read_bytes() for p in configured.iterdir() if p.is_file()}
     live.initialize(configured)
     assert {
@@ -65,7 +78,7 @@ def test_empty_files_block_run_even_when_environment_has_keys(
 
 
 def test_permissions_symlinks_and_hardlinks_are_rejected(configured, tmp_path):
-    path = configured / "credentials.env"
+    path = configured / "config.json"
     path.chmod(0o644)
     with pytest.raises(live.SetupError):
         live.load_setup(configured, "both", False)
@@ -76,7 +89,7 @@ def test_permissions_symlinks_and_hardlinks_are_rejected(configured, tmp_path):
         live.load_setup(configured, "both", False)
     other.unlink()
     path.unlink()
-    path.symlink_to(configured / "config.json")
+    path.symlink_to(tmp_path / "other-config")
     with pytest.raises(OSError):
         live.load_setup(configured, "both", False)
 
@@ -271,16 +284,27 @@ def test_default_directory_is_project_local():
     )
 
 
-def test_env_values_are_literal_and_never_executed(configured, tmp_path):
+def test_env_values_are_literal_and_never_executed(
+    configured, tmp_path, external_credentials
+):
     marker = tmp_path / "must-not-exist"
     value = "$(touch " + str(marker) + ")"
-    (configured / "credentials.env").write_text(
-        "NEARAI_API_KEY=" + json.dumps(value) + "\n"
-    )
-    assert live.read_credentials(configured)["NEARAI_API_KEY"] == value
+    external_credentials.write_text("NEARAI_API_KEY=" + json.dumps(value) + "\n")
+    assert live.read_credentials()["NEARAI_API_KEY"] == value
     assert not marker.exists()
-    (configured / "credentials.env").write_text(
-        "NEARAI_API_KEY=one\nNEARAI_API_KEY=two\n"
-    )
+    external_credentials.write_text("NEARAI_API_KEY=one\nNEARAI_API_KEY=two\n")
     with pytest.raises(live.SetupError):
-        live.read_credentials(configured)
+        live.read_credentials()
+
+
+def test_repository_local_secret_file_is_ignored(configured, external_credentials):
+    (configured / "credentials.env").write_text("NEARAI_API_KEY=old-local-secret\n")
+    external_credentials.write_text("")
+    _, _, values, missing = live.load_setup(configured, "near", False)
+    assert values == {} and missing == ["NEARAI_API_KEY"]
+
+
+def test_external_secret_permissions_fail_closed(configured, external_credentials):
+    external_credentials.chmod(0o644)
+    with pytest.raises(live.SetupError, match="External"):
+        live.load_setup(configured, "near", False)

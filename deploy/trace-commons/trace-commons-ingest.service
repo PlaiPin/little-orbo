@@ -8,8 +8,10 @@ Type=simple
 User=tracecommons
 Group=tracecommons
 EnvironmentFile=/etc/trace-commons/ingest.env
+Environment=ORBO_CREDENTIALS_CONFIG=/opt/orbo/deploy/credentials.service.toml
+LoadCredential=orbo.env:/etc/orbo/credentials.env
 ExecStartPre=/opt/trace-commons/bin/trace-commons-ingest --tls-selfcheck
-ExecStart=/opt/trace-commons/bin/trace-commons-ingest
+ExecStart=/opt/orbo/.venv/bin/python -m orbo_runtime.commons_credentials ingest --binary /opt/trace-commons/bin/trace-commons-ingest
 Restart=on-failure
 RestartSec=10
 TimeoutStopSec=120

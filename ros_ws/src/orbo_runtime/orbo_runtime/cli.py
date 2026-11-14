@@ -757,6 +757,7 @@ def main(args=None):
     req.add_argument("--args", default="{}")
     req.add_argument("--socket", default="/run/orbo/runtime.sock")
     sub.add_parser("diagnostics")
+    sub.add_parser("credentials", help="initialize/check external credentials (use --help)")
     sub.add_parser("live-e2e", help="opt-in live integration tests (use --help)")
     sub.add_parser("intents", help="explicit NEAR Intents quote/approval/execution (use --help)")
     analysis = sub.add_parser("analyze")
@@ -764,6 +765,10 @@ def main(args=None):
     arguments = list(sys.argv[1:] if args is None else args)
     # Delegate intact argv so the integration CLIs own their opt-in flags and
     # expose identical behavior through installed, ROS and module entry points.
+    if arguments and arguments[0] == "credentials":
+        from .credentials import main as credentials_main
+
+        return credentials_main(arguments[1:])
     if arguments and arguments[0] == "live-e2e":
         from .live_e2e import main as live_e2e_main
 

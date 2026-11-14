@@ -128,7 +128,8 @@ def test_upgrade_preserves_configuration_and_data_and_systemd_is_opt_in(installe
     (root / 'state').mkdir()
     preserved = [root / 'config' / name for name in
                  ('runtime.toml', 'booster-k1.toml', 'embodied.toml', 'camera.yaml', 'calibration.yaml', 'agent.env', 'camera.env')]
-    preserved += [root / 'state/journal.db', root / 'config/credentials/NEARAI_API_KEY']
+    preserved += [root / 'state/journal.db', root / 'config/credentials/NEARAI_API_KEY',
+                  root / 'config/credentials.env']
     for path in preserved:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text('EXISTING_OWNER_DATA')

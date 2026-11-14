@@ -13,6 +13,50 @@ credentialed service acceptance and physical robot qualification.
 | Local microphone/speaker commissioning | [Live audio](audio/README.md) |
 | Existing Pi camera stack | [Camera setup](ros2-camera/README.md) |
 
+## Shared external credentials
+
+The public [credentials.toml](credentials.toml) points to
+`~/.config/orbo/credentials.env`, outside the repository. Create the private blank
+template once, then fill it with a local editor:
+
+```sh
+uv run --frozen orbo credentials init
+uv run --frozen orbo credentials status
+```
+
+`init` never overwrites an existing file. `status` prints presence booleans only.
+The file must be owned by the executing user and mode 0600. It uses literal
+`KEY=value` lines with optional matching quotes and whole-line comments; it is
+not shell code and has no variable/command interpolation. Do not `source` it.
+Neither actual values nor private signer keys belong in the TOML or repository.
+
+Runtime providers, the Live E2E runner, optional accounting, remote credentials,
+and Intents automatically use this source. No shell exports of provider keys
+are needed or consulted. Select a different external path in the TOML, or set
+`ORBO_CREDENTIALS_CONFIG` to another public pointer file. Relative secret paths,
+symlinks and secret files inside the repository/deployment tree are rejected.
+Standalone wheel installations outside a checkout must select their pointer via
+`ORBO_CREDENTIALS_CONFIG`.
+
+The generated template contains `NEARAI_API_KEY`, `OPENAI_API_KEY`, Commons
+consumer/accounting tokens, the optional NEAR reporting and Intents API keys,
+and `NEAR_SIGNER_ACCOUNT_ID`, `NEAR_SIGNER_PUBLIC_KEY`,
+`NEAR_SIGNER_PRIVATE_KEY` for an optional dedicated funded signer. Commons native
+services use `TRACE_NEAR_AI_PRIVACY_API_KEY` and their applicable database/issuer
+credentials from the same source through the native launcher. Leave unused
+values blank. Nonsecret account, endpoint, route and spending choices stay in
+the ordinary runtime/Intents/server configuration.
+
+For systemd hosts, the single source is `/etc/orbo/credentials.env`, owned by
+root and mode 0600. Each supplied service uses
+`LoadCredential=orbo.env:/etc/orbo/credentials.env`; systemd makes a private
+readable copy for that service's UID. The public
+[service pointer](credentials.service.toml) selects this copy. This works with
+the units' home-directory protection and does not require a shared Unix group
+or per-key files. If changing the source location, update the unit's
+`LoadCredential` path. Restart the affected service after rotating credentials
+so systemd refreshes its copy.
+
 ## Raspberry Pi runtime
 
 On the intended Ubuntu 24.04 ARM64 Pi with ROS 2 Jazzy already installed, use
@@ -23,12 +67,12 @@ copies `embodied.toml` only when absent, and does not enable or start services.
 The default preserves the installed camera stack.
 
 Edit `/etc/orbo/embodied.toml` for the commissioned map, camera, calibration,
-devices and owner. Install the chosen credential files under
-`/etc/orbo/credentials/` with root-only read access, then copy
+devices and owner. Install the external `/etc/orbo/credentials.env` described
+above, then copy
 [orbo-embodied.conf.example](systemd/orbo-embodied.conf.example) to
 `/etc/systemd/system/orbo-runtime.service.d/embodied.conf`. Create that drop-in
-directory if necessary. The service's `LoadCredential` entries make the selected
-keys available to the runtime without putting them in the profile.
+directory if necessary. The service loads the public pointer and systemd's
+private copy automatically; the robot profile contains no secrets.
 
 `near.enabled` enables verified reasoning. `live.enabled` additionally requires
 NEAR and embodied support, the alternate chained voice profile disabled, and a
@@ -70,7 +114,7 @@ pixi run --locked orbo-sim embodied:=true
 
 Copy [gazebo-embodied.toml](profiles/gazebo-embodied.toml) to an ignored local
 location such as `.live-validation/gazebo-embodied.toml`. Enable NEAR in that copy
-and inject its key into the runtime process. In another terminal:
+and fill `NEARAI_API_KEY` in the external credentials file. In another terminal:
 
 ```sh
 pixi run --locked bash tools/run-embodied-runtime.sh .live-validation/gazebo-embodied.toml

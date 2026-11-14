@@ -442,9 +442,27 @@ class Swaps:
             return self.public(row)
 
 
+SIGNER_FIELDS = {
+    "account_id": "NEAR_SIGNER_ACCOUNT_ID",
+    "public_key": "NEAR_SIGNER_PUBLIC_KEY",
+    "private_key": "NEAR_SIGNER_PRIVATE_KEY",
+}
+
+
+def signer_values():
+    """Resolve signer material without exposing it in CLI reports."""
+    from .credentials import credential
+
+    return {
+        key: credential(name, required=False) for key, name in SIGNER_FIELDS.items()
+    }
+
+
 async def run(args):
+    from .credentials import credential
+
     policy = Policy(json.loads(Path(args.policy).read_text()))
-    api = OneClick(token=os.environ.get("NEAR_INTENTS_API_KEY"))
+    api = OneClick(token=credential("NEAR_INTENTS_API_KEY", required=False))
     swaps = Swaps(args.database, policy, api)
     signer = None
     try:
@@ -454,6 +472,7 @@ async def run(args):
                 "network": "mainnet",
                 "origin": "nep141:" + policy.body["origin_contract"],
                 "authenticated_api": bool(api.token),
+                "signer_configured": all(signer_values().values()),
                 "network_contacted": False,
                 "funded_execution": False,
             }
@@ -463,11 +482,18 @@ async def run(args):
             return swaps.cancel(args.swap_id)
         if args.command == "quote":
             return await swaps.quote(args.amount, dry=not args.firm)
-        if args.command in {"execute", "status"} and args.key_file:
-            signer = NearSigner(policy.body["sender"], args.key_file)
+        if args.command in {"execute", "status"}:
+            if args.key_file:
+                signer = NearSigner(policy.body["sender"], args.key_file)
+            else:
+                values = signer_values()
+                if any(values.values()):
+                    if not all(values.values()):
+                        raise Rejected("external signer credentials are incomplete")
+                    signer = NearSigner(policy.body["sender"], values=values)
         if args.command == "execute":
             if signer is None:
-                raise Rejected("owner-only signer key file required")
+                raise Rejected("external signer credentials or --key-file required")
             return await swaps.execute(
                 args.swap_id, args.approve, signer, allow_funded=args.allow_funded
             )
@@ -506,11 +532,14 @@ def main(argv=None):
         "--approve", required=True, help="exact reviewed approval_digest"
     )
     execute.add_argument("--allow-funded", action="store_true")
-    execute.add_argument("--key-file", required=True)
+    execute.add_argument(
+        "--key-file",
+        help="override shared credentials with an external owner-only NEAR JSON key file",
+    )
     status = commands.add_parser("status")
     status.add_argument("swap_id")
     status.add_argument(
-        "--key-file", help="optional signer identity to also query deposit finality"
+        "--key-file", help="optional external signer file overriding shared credentials"
     )
     try:
         print(json.dumps(asyncio.run(run(parser.parse_args(argv))), indent=2))

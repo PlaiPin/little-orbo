@@ -17,6 +17,7 @@ import uuid
 import wave
 
 from .contracts import Rejected, digest
+from .credentials import initialize as initialize_credentials, read_values
 from .providers import (
     FishSynthesizer,
     NearReasoner,
@@ -26,8 +27,12 @@ from .providers import (
 )
 
 PROJECT_ROOT = next(
-    (parent for parent in Path(__file__).resolve().parents
-     if (parent / "pyproject.toml").is_file()), Path.cwd()
+    (
+        parent
+        for parent in Path(__file__).resolve().parents
+        if (parent / "pyproject.toml").is_file()
+    ),
+    Path.cwd(),
 )
 DEFAULT_DIRECTORY = PROJECT_ROOT / ".live-validation"
 DEFAULT_CONFIG = {
@@ -94,9 +99,8 @@ def read_private(path):
 
 def initialize(directory):
     directory = private_directory(directory, create=True)
+    initialize_credentials()
     templates = {
-        "credentials.env": "# Local-only values. Do not commit or source this file.\n"
-        + "".join(name + '=""\n' for name in FIELDS),
         "config.json": json.dumps(DEFAULT_CONFIG, indent=2) + "\n",
     }
     for name, value in templates.items():
@@ -112,29 +116,15 @@ def initialize(directory):
     return directory
 
 
-def read_credentials(directory):
-    """Parse literal KEY=value entries, never shell expansion or execution."""
-    values = {}
-    for line in read_private(directory / "credentials.env").splitlines():
-        line = line.strip()
-        if not line or line.startswith("#"):
-            continue
-        name, separator, value = line.partition("=")
-        name, value = name.strip(), value.strip()
-        if not separator or name not in FIELDS or name in values:
-            raise SetupError(
-                "credentials.env requires unique named fields from the sample."
-            )
-        if value.startswith('"'):
-            value = json.loads(value)
-        elif value.startswith("'"):
-            if len(value) < 2 or not value.endswith("'"):
-                raise SetupError("Unclosed quoted credential value.")
-            value = value[1:-1]
-        if not isinstance(value, str):
-            raise SetupError("Credential values must be strings.")
-        values[name] = value
-    return values
+def read_credentials():
+    """Read the shared external secret source; never consult local/ambient keys."""
+    try:
+        values = read_values()
+    except Rejected:
+        raise SetupError(
+            "External credential file is unavailable or invalid."
+        ) from None
+    return {name: values[name] for name in FIELDS if name in values}
 
 
 def load_setup(directory, service, transcribe):
@@ -160,7 +150,7 @@ def load_setup(directory, service, transcribe):
         needed.extend(("FISH_API_KEY", "FISH_VOICE_ID"))
     if transcribe and service == "near":
         raise SetupError("Transcription requires the Fish-generated test audio.")
-    stored = read_credentials(directory)
+    stored = read_credentials()
     credentials, missing = {}, []
     for name in needed:
         value = stored.get(name, "").strip()
@@ -429,7 +419,7 @@ def main(argv=None):
         if args.command == "init":
             path = initialize(args.directory)
             print(
-                f"Created/preserved private templates at {path}. No network requests."
+                f"Created/preserved local config/reports at {path} and external credential template. No network requests."
             )
             return 0
         directory, config, credentials, missing = load_setup(
@@ -437,7 +427,8 @@ def main(argv=None):
         )
         if missing:
             print(
-                "Not ready. Fill these fields in credentials.env: " + ", ".join(missing)
+                "Not ready. Fill these fields in the configured external credential file: "
+                + ", ".join(missing)
             )
             return 2
         if args.command == "check" or not args.execute:
