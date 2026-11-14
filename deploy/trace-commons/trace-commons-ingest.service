@@ -1,0 +1,28 @@
+[Unit]
+Description=Orbo-compatible Trace Commons ingest
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=tracecommons
+Group=tracecommons
+EnvironmentFile=/etc/trace-commons/ingest.env
+ExecStartPre=/opt/trace-commons/bin/trace-commons-ingest --tls-selfcheck
+ExecStart=/opt/trace-commons/bin/trace-commons-ingest
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=120
+UMask=0077
+StateDirectory=trace-commons
+StateDirectoryMode=0700
+CacheDirectory=trace-commons
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+[Install]
+WantedBy=multi-user.target

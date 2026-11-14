@@ -1,0 +1,24 @@
+[Unit]
+Description=Owner-local Orbo Trace Commons contributor
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=orbo
+Group=orbo
+ExecStart=/opt/trace-commons/bin/trace-commons-contributor --config-dir /var/lib/orbo/commons daemon run
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=120
+UMask=0077
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/orbo/commons
+PrivateTmp=true
+PrivateDevices=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,17 @@
+# Include inside the operator's existing HTTPS server{} with TLS configured.
+# /opt/trace-commons/public/source-offer.json is generated for this release.
+location = /v1/source {
+    alias /opt/trace-commons/public/source-offer.json;
+    default_type application/json;
+}
+location = /orbo-commons-source.tar.gz {
+    alias /opt/trace-commons/public/source.tar.gz;
+    default_type application/gzip;
+}
+location / {
+    proxy_pass http://127.0.0.1:3907;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Proto https;
+    proxy_read_timeout 120s;
+    client_max_body_size 64m;
+}
