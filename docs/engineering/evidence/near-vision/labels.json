@@ -1,0 +1,38 @@
+{
+  "provenance": "synthetic_images_visually_inspected_before_inference",
+  "labels_sent_to_model": false,
+  "scenes": [
+    {
+      "id": "scene-01",
+      "image": "images/scene-01.png",
+      "expected_objects": [
+        {"name": "mug", "color": "red", "count": 1, "location": "left", "visibility": "fully visible"},
+        {"name": "book", "color": "blue", "count": 1, "location": "center", "visibility": "fully visible"},
+        {"name": "banana", "color": "yellow", "count": 1, "location": "right", "visibility": "fully visible"}
+      ],
+      "expected_relations": ["mug left of book", "banana right of book"],
+      "people_visible": false
+    },
+    {
+      "id": "scene-02",
+      "image": "images/scene-02.png",
+      "expected_objects": [
+        {"name": "mug", "color": "blue", "count": 1, "location": "behind and left of box", "visibility": "partially occluded"},
+        {"name": "cardboard box", "color": "brown", "count": 1, "location": "center", "visibility": "fully visible"},
+        {"name": "apple", "color": "green", "count": 1, "location": "right", "visibility": "fully visible"},
+        {"name": "remote control", "color": "black", "count": 1, "location": "foreground", "visibility": "fully visible"}
+      ],
+      "expected_relations": ["mug partially behind box", "apple right of box", "remote in front of box"],
+      "people_visible": false
+    },
+    {
+      "id": "scene-03",
+      "image": "images/scene-03.png",
+      "expected_objects": [
+        {"name": "cardboard box", "color": "brown", "count": 1, "location": "center", "visibility": "fully visible"}
+      ],
+      "hidden_contents": "cannot be determined from image",
+      "people_visible": false
+    }
+  ]
+}

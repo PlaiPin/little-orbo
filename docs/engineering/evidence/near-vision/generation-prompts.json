@@ -1,0 +1,18 @@
+{
+  "method": "built-in imagegen",
+  "preprocessing": "sips resize to 960x720; originals preserved",
+  "scenes": [
+    {
+      "id": "scene-01",
+      "prompt": "Use case: photorealistic-natural. Generate one landscape 1024x768 photorealistic synthetic robot-camera test photograph, eye-level slightly above a plain light wooden table. Exactly three movable objects, fully visible and separated: one red ceramic coffee mug with a handle on the left, one closed blue hardcover book lying flat in the middle, and one yellow banana lying on the right. Simple beige wall behind, soft daylight, realistic texture. No other objects, no people, no writing, no labels, no logos, no watermark. Keep all three objects clearly distinguishable. The image will be used for a visual object identification test; no answers should be written in pixels."
+    },
+    {
+      "id": "scene-02",
+      "prompt": "Use case: photorealistic-natural. Generate one landscape 1024x768 photorealistic synthetic robot-camera test photograph of a plain wooden tabletop against a neutral wall. Exactly four movable objects: one upright medium brown cardboard box in the center; one blue ceramic mug behind and to the left of the box, partly occluded by the box but with its blue rim, upper body and loop handle clearly visible on the left; one single green apple fully visible to the right of the box; one black television remote control with visible small buttons lying fully visible in the foreground. Normal soft indoor light, realistic texture, medium view showing the entire tabletop arrangement. No other objects, no people, no text, no labels, no logos, no watermark. Image for a robot visual recognition and occlusion test."
+    },
+    {
+      "id": "scene-03",
+      "prompt": "Use case: photorealistic-natural. Generate one landscape 1024x768 photorealistic synthetic robot-camera test photograph of a plain light wood table against a blank beige wall. Exactly one movable object: a plain brown cardboard shipping box centered on the table, completely closed and sealed with one strip of plain tan packing tape. Opaque box, no openings, no contents visible, no contents drawn on the box. No other objects, no people, no text, no labels, no logos, no watermark. Soft indoor daylight, realistic texture. This scene tests recognition and whether a vision model admits it cannot know what is hidden inside a closed box."
+    }
+  ]
+}

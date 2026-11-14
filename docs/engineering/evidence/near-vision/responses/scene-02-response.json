@@ -1,0 +1,150 @@
+{
+  "scene": "scene-02",
+  "image": "images/scene-02.png",
+  "image_sha256": "b8f713b95f547d2d661987be724d1db759ef9eaff661fca98dbe468d5894b568",
+  "image_bytes": 1034828,
+  "status": "verified_response_received",
+  "response_text": "{\n  \"objects\": [\n    {\n      \"name\": \"mug\",\n      \"color\": \"blue\",\n      \"count\": 1,\n      \"location\": \"left side of table, partially behind the cardboard box\",\n      \"visibility\": \"partially occluded by the box\"\n    },\n    {\n      \"name\": \"cardboard box\",\n      \"color\": \"brown\",\n      \"count\": 1,\n      \"location\": \"center of table\",\n      \"visibility\": \"fully visible, closed\"\n    },\n    {\n      \"name\": \"apple\",\n      \"color\": \"green\",\n      \"count\": 1,\n      \"location\": \"right side of table\",\n      \"visibility\": \"fully visible\"\n    },\n    {\n      \"name\": \"remote control\",\n      \"color\": \"black\",\n      \"count\": 1,\n      \"location\": \"front center of table, angled diagonally\",\n      \"visibility\": \"fully visible\"\n    }\n  ],\n  \"relationships\": [\n    \"The mug is to the left of the box and partly hidden behind it.\",\n    \"The apple is to the right of the box.\",\n    \"The remote control lies in front of the box.\",\n    \"The mug handle points toward the left wall.\"\n  ],\n  \"people_visible\": false,\n  \"hidden_contents\": \"The cardboard box is closed with flaps down; nothing about its contents can be determined from the image. The mug's interior contents cannot be seen from this angle.\",\n  \"uncertainties\": [\n    \"The contents of the closed cardboard box are unknown.\",\n    \"Whether the mug is empty or filled cannot be determined.\",\n    \"The box may slightly occlude more of the mug than is visible.\"\n  ]\n}",
+  "usage": {
+    "completion_tokens": 499,
+    "prompt_tokens": 1044,
+    "total_tokens": 1543,
+    "completion_tokens_details": {
+      "accepted_prediction_tokens": null,
+      "audio_tokens": null,
+      "reasoning_tokens": 142,
+      "rejected_prediction_tokens": null
+    },
+    "prompt_tokens_details": {
+      "audio_tokens": null,
+      "cache_write_tokens": null,
+      "cached_tokens": 0
+    },
+    "reasoning_tokens": 142
+  },
+  "verification": {
+    "provider": "near",
+    "provenance": "live_service",
+    "model": "z-ai/glm-5.3-flash",
+    "e2ee": true,
+    "signature_kind": "provider_tee",
+    "response_id": "e86751a12b1848beac12df6ae2d271ea",
+    "verified_at": 1794693683617,
+    "verification": {
+      "id": "e86751a12b1848beac12df6ae2d271ea",
+      "signature_kind": "provider_tee",
+      "signature": {
+        "kind": "provider_tee",
+        "signer": {
+          "signing_algo": "ed25519",
+          "signing_address": "5a0210f2442c79355784f9de021985429561da5bacc3a4424b01ac52b7e0caff"
+        },
+        "signed_text": "z-ai/glm-5.3-flash:0f917b70e6f67731082974cf65d65085fdcd4de2340b6934a9be69c642af8d69:acc2ddb475d7e0bb7bfcc365783f3cf9b997fd5fa5c13db6c68b72ce30d01fdd",
+        "signature": "44de11c129d62294f501637ed400471e2d09b8d8b5923d35a82d78a74678873e32c1f7850325642c5c684a58bc8219164907ae8f90714104e1d1547e5b5bd406"
+      },
+      "attestation_summaries": [
+        {
+          "signer": {
+            "signing_algo": "ed25519",
+            "signing_address": "5a0210f2442c79355784f9de021985429561da5bacc3a4424b01ac52b7e0caff"
+          },
+          "signing_public_key": "5a0210f2442c79355784f9de021985429561da5bacc3a4424b01ac52b7e0caff",
+          "tcb_status": "UpToDate",
+          "advisory_ids": [],
+          "deployment_provenance": "not_checked",
+          "gpu_evidence": "verified",
+          "runtime_measurements": {
+            "os_image_hash": "91fd5d69ccee3e5ea4f2aeb8c9b632c4358c4ecfc29ba1aa6fb1e402af209829",
+            "compose_hash": "c900dc7304663b73b623cd5d941fbdab6f02858017b371ae28de445a16d2e2d0"
+          },
+          "deployment_sha256": "83aba529521a2ba8f687bafaaa164468e6de5965b3f33287fa5fff618759293d"
+        },
+        {
+          "signer": {
+            "signing_algo": "ed25519",
+            "signing_address": "5a0210f2442c79355784f9de021985429561da5bacc3a4424b01ac52b7e0caff"
+          },
+          "signing_public_key": "5a0210f2442c79355784f9de021985429561da5bacc3a4424b01ac52b7e0caff",
+          "tcb_status": "UpToDate",
+          "advisory_ids": [],
+          "deployment_provenance": "not_checked",
+          "gpu_evidence": "verified",
+          "runtime_measurements": {
+            "os_image_hash": "91fd5d69ccee3e5ea4f2aeb8c9b632c4358c4ecfc29ba1aa6fb1e402af209829",
+            "compose_hash": "e8416a02d6f7ce47baaa52e3925b934fd30834b04fc9086b363db9b1d12c729d"
+          },
+          "deployment_sha256": "9f909724058db0149276f110ea9672f0392c6e2ff6d093d2c34fc4c1b2c0550d"
+        },
+        {
+          "signer": {
+            "signing_algo": "ed25519",
+            "signing_address": "5a0210f2442c79355784f9de021985429561da5bacc3a4424b01ac52b7e0caff"
+          },
+          "signing_public_key": "5a0210f2442c79355784f9de021985429561da5bacc3a4424b01ac52b7e0caff",
+          "tcb_status": "UpToDate",
+          "advisory_ids": [],
+          "deployment_provenance": "not_checked",
+          "gpu_evidence": "verified",
+          "runtime_measurements": {
+            "os_image_hash": "91fd5d69ccee3e5ea4f2aeb8c9b632c4358c4ecfc29ba1aa6fb1e402af209829",
+            "compose_hash": "a7de0bba194b6466c5c7b8dcfb907b6b60404ab2ba6de8b5d0cf63c2145d6868"
+          },
+          "deployment_sha256": "3674b64393cfdfa0c79442ccfa9aaae4cfd022fbe5142644629d847a8af36460"
+        }
+      ],
+      "retention": "SDK live-verification result; full deployment manifests and duplicated attestation objects omitted. Not a standalone TEE attestation replay bundle."
+    },
+    "message_digest": "e82bb93560f10f2be6d1b4696e63f8c59dc190144e72e212e123cbe87fed9974"
+  },
+  "parsed_response": {
+    "objects": [
+      {
+        "name": "mug",
+        "color": "blue",
+        "count": 1,
+        "location": "left side of table, partially behind the cardboard box",
+        "visibility": "partially occluded by the box"
+      },
+      {
+        "name": "cardboard box",
+        "color": "brown",
+        "count": 1,
+        "location": "center of table",
+        "visibility": "fully visible, closed"
+      },
+      {
+        "name": "apple",
+        "color": "green",
+        "count": 1,
+        "location": "right side of table",
+        "visibility": "fully visible"
+      },
+      {
+        "name": "remote control",
+        "color": "black",
+        "count": 1,
+        "location": "front center of table, angled diagonally",
+        "visibility": "fully visible"
+      }
+    ],
+    "relationships": [
+      "The mug is to the left of the box and partly hidden behind it.",
+      "The apple is to the right of the box.",
+      "The remote control lies in front of the box.",
+      "The mug handle points toward the left wall."
+    ],
+    "people_visible": false,
+    "hidden_contents": "The cardboard box is closed with flaps down; nothing about its contents can be determined from the image. The mug's interior contents cannot be seen from this angle.",
+    "uncertainties": [
+      "The contents of the closed cardboard box are unknown.",
+      "Whether the mug is empty or filled cannot be determined.",
+      "The box may slightly occlude more of the mug than is visible."
+    ]
+  },
+  "elapsed_seconds": 48.917,
+  "archival_transforms": [
+    "image path made bundle-relative",
+    "deployment manifests and duplicate attestation objects replaced with summaries and hashes; model answer, usage, signature and measured timing preserved"
+  ],
+  "source_record_sha256": "2a6161026a106b4b2a6e78de0d12e088b6c53e49b26c553b8cb7b975a2db49ff"
+}

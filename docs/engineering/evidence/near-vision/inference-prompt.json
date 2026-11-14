@@ -1,0 +1,4 @@
+{
+  "text": "Inspect this image for a robot. Describe only visible movable objects on the table. Do not count the table, wall, shadows, or attached packing tape as separate objects. Do not invent hidden objects. Return a JSON object with:\nobjects: a list of {name, color, count, location, visibility};\nrelationships: a list of short spatial statements;\npeople_visible: a boolean;\nhidden_contents: what can actually be determined about the contents of any closed container, or null if none;\nuncertainties: a list of important uncertainties.\nUse simple object names and be concise. No markdown fences.",
+  "labels_sent_to_model": false
+}

@@ -321,13 +321,20 @@ pixi run --locked ros-test-integrations
 
 Pixi installs `orbo-runtime` directly; no `PYTHONPATH` workaround is needed.
 The integration tests use synthetic inputs in domain 96. Physical driving and
-Pi peripheral/navigation acceptance remain separate. Old v05 meshes and generated
-evidence are excluded from source commits.
+Pi peripheral/navigation acceptance remain separate. Old v05 meshes and local
+generated reports are excluded from source commits. Curated synthetic evidence
+is included under `docs/engineering/evidence/`.
 
 For standalone OV5647 camera setup on the Pi, use the
 [ROS 2 camera setup guide](deploy/ros2-camera/README.md). Its script checks the
 working libcamera installation, builds `camera_ros`, and publishes `/camera/*`
 topics for an initial image test.
+
+The [NEAR synthetic vision evidence](docs/engineering/evidence/near-vision/README.md)
+contains the exact sample images, ground-truth labels, live model responses and
+verification receipts from the Mac recognition test, with offline checks and
+instructions to repeat it. The three-scene result does not qualify real-camera
+accuracy or robot latency.
 
 ### Python application development
 

@@ -15,6 +15,25 @@ The same CLI is available through `python -m orbo_runtime.live_e2e` and `uv run 
 
 ## Stages and evidence
 
+The [synthetic Mac vision evidence](../../docs/engineering/evidence/near-vision/README.md)
+includes the exact images, separate ground-truth labels, prompts, model answers,
+verification receipts and a hash manifest. Check it offline with
+`uv run --frozen --extra near python tools/vision-e2e.py --check-evidence`.
+For a new live run, use
+`uv run --frozen --extra near python tools/vision-e2e.py --allow-cloud`.
+It reads the checked-in fixture bundle and writes new results under ignored
+`artifacts/vision-e2e/`; archived results are preserved.
+Labels are hashed before inference and never sent to the model. Each scene gets
+one independent request with E2EE enabled and provider-TEE response verification;
+the test uses a 120-second timeout and records exact answers and usage.
+
+The three-scene smoke test identified all eight labeled objects, colors and
+counts, recognized a partially occluded mug, and declined to invent sealed-box
+contents. Request times including verification were approximately 9, 49 and 6
+seconds. The slow request exceeds the adapter's default 40-second timeout;
+robot latency is not qualified by this result. Synthetic recognition does not
+establish real-camera, video, low-light, localization or navigation accuracy.
+
 | Stage | Checks | Required flags |
 | --- | --- | --- |
 | `near` | One exact text response, one image response, E2EE and verified model TEE signatures | `--allow-cloud` |

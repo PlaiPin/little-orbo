@@ -1,0 +1,64 @@
+{
+  "schema": "orbo.synthetic-vision-evidence.v1",
+  "model": "z-ai/glm-5.3-flash",
+  "sdk": {
+    "name": "nearai-inference-sdk",
+    "version": "0.3.0"
+  },
+  "image_generation": "built-in imagegen; ground truth visually inspected before inference",
+  "image_preprocessing": "sips --resampleHeightWidth 720 960; exact submitted PNGs included",
+  "files": [
+    {
+      "path": "assessment.json",
+      "bytes": 2293,
+      "sha256": "d1b3e6a779e5cae7795c2c4277bd928c4e57333d9a81717f4b6edc8750a6fe15"
+    },
+    {
+      "path": "generation-prompts.json",
+      "bytes": 2408,
+      "sha256": "99b001647bae5804c87da176c256b53a9d174691b8023a1b1d8a23fe328f4b48"
+    },
+    {
+      "path": "images/scene-01.png",
+      "bytes": 839835,
+      "sha256": "4a44d76ec8abbe3195857064e1f358211f47df2e2a7cf4cb978cfff87cd778e9"
+    },
+    {
+      "path": "images/scene-02.png",
+      "bytes": 1034828,
+      "sha256": "b8f713b95f547d2d661987be724d1db759ef9eaff661fca98dbe468d5894b568"
+    },
+    {
+      "path": "images/scene-03.png",
+      "bytes": 881862,
+      "sha256": "5954675457b79a8781226fe70ccad353e67f3251760c58c09700be91f14d2ff6"
+    },
+    {
+      "path": "inference-prompt.json",
+      "bytes": 642,
+      "sha256": "571c5a130e7a695ebfd31f3399ce956e47ac305f1c88907f27452adca02a1587"
+    },
+    {
+      "path": "labels.json",
+      "bytes": 1708,
+      "sha256": "f24c430d9fd8db372de20ed7d25bd1f0de38ce29a1e4f7debda12ad366548a09"
+    },
+    {
+      "path": "responses/scene-01-response.json",
+      "bytes": 6888,
+      "sha256": "11047b18c7c479647d552dca59b3a8ea4d2a9120b284b19ed5a610fbcd0abb58"
+    },
+    {
+      "path": "responses/scene-02-response.json",
+      "bytes": 7690,
+      "sha256": "4dba228b82adda36bd0d1500210adddba542ae295ebeca47cb62a926f1fa4b5f"
+    },
+    {
+      "path": "responses/scene-03-response.json",
+      "bytes": 5969,
+      "sha256": "b98490ec088b3c3439135f3c77db4e3b2f6eef46245f4bb284cbb28a4280c03f"
+    }
+  ],
+  "original_labels_sha256": "f24c430d9fd8db372de20ed7d25bd1f0de38ce29a1e4f7debda12ad366548a09",
+  "verification_scope": "File hashes and Ed25519 signatures can be checked offline. Full attestation validation was performed live by the SDK; signed request/response hashes are not independently recomputed from these plaintext artifacts."
+}
