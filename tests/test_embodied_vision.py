@@ -541,3 +541,223 @@ async def test_release_fences_revised_task_and_revoked_recipient(setup):
         release_finding(
             memory, "owner", "lab", finding["id"], "openai", check_revision=lambda: None
         )
+
+
+async def test_evidence_deletion_scrubs_exports_children_reviews_and_allows_revoke_recovery(
+    setup,
+):
+    from orbo_runtime.commons import Commons
+    from orbo_runtime.traces import Exports
+
+    store, memory, _ = setup
+    observation = await capture(setup)
+    finding, _ = await inspect(setup, observation)
+    episode = store.episode("owner", profile="physical_task.v1", provenance="synthetic")
+    store.event(
+        episode,
+        "vision.finding",
+        {
+            "observation_id": observation["id"],
+            "finding_id": finding["id"],
+            "secret": "DELETE-ME",
+        },
+    )
+    store.end_episode(episode, "owner", "completed")
+    exports = Exports(store)
+    package = exports.prepare("owner", episode, "embodied_process", "consumer")
+    child = exports.derive(
+        "owner", package["export_id"], redactions=[["events", 1, "payload", "secret"]]
+    )
+    store.grant("owner", "contribute", "consumer", True, store.clock.utc() + 100)
+    exports.approve(
+        "owner", child["export_id"], child["sha256"], expires=store.clock.utc() + 90
+    )
+
+    class IPC:
+        async def call(self, method, arguments):
+            assert method == "orbo_revoke_reviewed"
+            return {
+                "schema": "orbo.revocation.v1",
+                "entry_id": arguments["entry_id"],
+                "fenced": True,
+            }
+
+    commons = Commons(store, IPC())
+    store.db.execute(
+        "INSERT INTO commons_reviews VALUES(?,?,?,?,?,?,?,?)",
+        (
+            "entry",
+            child["export_id"],
+            child["sha256"],
+            "envelope-digest",
+            "body-digest",
+            '{"secret":"DELETE-ME"}',
+            "approved",
+            "{}",
+        ),
+    )
+    memory.delete_observation("owner", "lab", observation["id"])
+    for export_id in (package["export_id"], child["export_id"]):
+        with pytest.raises(Rejected):
+            exports.preview("owner", export_id)
+    assert store.db.execute("SELECT revoked FROM approvals").fetchone()[0] == 1
+    assert (
+        store.db.execute("SELECT state FROM commons_reviews").fetchone()[0]
+        == "revoke_pending"
+    )
+    assert "DELETE-ME" not in str(
+        [tuple(row) for row in store.db.execute("SELECT content FROM exports")]
+    )
+    assert "DELETE-ME" not in str(
+        [tuple(row) for row in store.db.execute("SELECT body FROM commons_reviews")]
+    )
+    assert "DELETE-ME" not in str(
+        [tuple(row) for row in store.db.execute("SELECT payload FROM events")]
+    )
+    assert commons.recovery_queue("owner")[0]["entry_id"] == "entry"
+    result = await commons.recover("owner", child["export_id"], "entry")
+    assert result["local_state"] == "revoked"
+    assert result["already_delivered_copies_recalled"] is False
+
+
+async def test_reference_image_delete_cascades_findings_using_other_current_images(
+    setup,
+):
+    _, memory, _ = setup
+    reference_image = await capture(setup)
+    current_image = await capture(setup)
+    reference = memory.reference(
+        "owner",
+        "lab",
+        "red wrench",
+        observation_id=reference_image["id"],
+        attributes=["mark"],
+    )
+    finding, _ = await inspect(setup, current_image, reference_id=reference["id"])
+    baseline = memory.accept_baseline("owner", "lab", finding["id"], name="dependent")
+    memory.delete_observation("owner", "lab", reference_image["id"])
+    assert memory.image("owner", "lab", current_image["id"])
+    with pytest.raises(Rejected):
+        memory.get("finding", "owner", "lab", finding["id"])
+    with pytest.raises(Rejected):
+        memory.get("baseline", "owner", "lab", baseline["id"])
+
+
+async def test_deletion_scrubs_task_result_remote_and_voice_delivery_copies(setup):
+    from orbo_runtime.contracts import canonical
+    from orbo_runtime.embodied_tasks import TaskService
+    from orbo_runtime.live_voice import SCHEMA as LIVE_SCHEMA
+    from orbo_runtime.remote_tasks import RemoteTasks
+
+    store, memory, source = setup
+    tasks = TaskService(store)
+    store.grant("owner", "task.execute", "lab", True, store.clock.utc() + 100)
+    task = tasks.admit(
+        "owner",
+        "delete-test",
+        dict(
+            kind="describe",
+            environment="lab",
+            map_version="map-a",
+            purpose="owner inspection",
+            target="red wrench",
+            places=[],
+            allowed_actions=["capture", "infer", "report"],
+            budget=dict(seconds=90, observations=2, provider_calls=2),
+            destination="openai",
+            provenance="synthetic",
+        ),
+    )
+    obs = await ObservationService(memory, source).capture(
+        "owner", "lab", "map-a", task["id"], 1, "shelf"
+    )
+    record = memory.put(
+        "finding",
+        "owner",
+        "lab",
+        {
+            "task_id": task["id"],
+            "revision": 1,
+            "observation_ids": [obs["id"]],
+            "private": "DELETE-DELIVERY",
+        },
+    )
+    payload = canonical({"finding_ids": [record["id"]], "private": "DELETE-DELIVERY"})
+    store.db.execute(
+        "UPDATE embodied_tasks SET result=? WHERE id=?", (payload, task["id"])
+    )
+    store.db.execute(
+        "CREATE TABLE embodied_results(task_id TEXT, revision INTEGER, result TEXT)"
+    )
+    store.db.execute(
+        "INSERT INTO embodied_results VALUES(?,?,?)", (task["id"], 1, payload)
+    )
+    RemoteTasks(store, [], submit=None, get=None, cancel=None, release=None)
+    store.db.execute(
+        "INSERT INTO remote_task_bindings VALUES(?,?,?,?,?)",
+        (task["id"], "requester", "owner", "lab", "remote:requester"),
+    )
+    store.db.execute(
+        "INSERT INTO remote_task_deliveries VALUES(?,?,?,?,?,NULL)",
+        ("delivery", task["id"], 1, payload, store.clock.utc()),
+    )
+    store.db.execute(
+        "INSERT INTO remote_task_deliveries VALUES(?,?,?,?,?,NULL)",
+        (
+            "delivery-2",
+            task["id"],
+            1,
+            canonical({"finding_ids": [record["id"]], "private": "DELETE-DELIVERY-2"}),
+            store.clock.utc(),
+        ),
+    )
+    store.db.executescript(LIVE_SCHEMA)
+    store.db.execute(
+        "INSERT INTO live_sessions VALUES(?,?,?,?,?,?,?,?,?)",
+        (
+            "session",
+            "owner",
+            task["episode_id"],
+            "provider",
+            "open",
+            0,
+            0,
+            store.clock.utc(),
+            store.boot,
+        ),
+    )
+    store.db.execute(
+        "INSERT INTO live_deliveries VALUES(?,?,?,?,?,?,?,?,?)",
+        (
+            "live-delivery",
+            "session",
+            None,
+            task["id"],
+            1,
+            payload,
+            "result",
+            "submitted",
+            store.clock.utc(),
+        ),
+    )
+    store.db.execute(
+        "INSERT INTO live_fragments VALUES(?,?,?,?,?,?)",
+        ("session", "event", "assistant", 0, 100, "DELETE-DELIVERY"),
+    )
+    memory.delete_observation("owner", "lab", obs["id"])
+    assert store.db.execute("SELECT COUNT(*) FROM embodied_results").fetchone()[0] == 0
+    assert (
+        store.db.execute("SELECT state FROM embodied_tasks").fetchone()[0] == "unknown"
+    )
+    assert (
+        store.db.execute("SELECT state FROM live_deliveries").fetchone()[0] == "deleted"
+    )
+    assert store.db.execute("SELECT COUNT(*) FROM live_fragments").fetchone()[0] == 0
+    for table, column in (
+        ("embodied_tasks", "result"),
+        ("remote_task_deliveries", "content"),
+        ("live_deliveries", "content"),
+    ):
+        assert "DELETE-DELIVERY" not in str(
+            [tuple(row) for row in store.db.execute(f"SELECT {column} FROM {table}")]
+        )

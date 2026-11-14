@@ -283,17 +283,40 @@ class EvidenceMemory:
         ).fetchone()
         if row is None:
             raise Rejected("observation unavailable")
-        with self.store.transaction():
-            for record in self.store.db.execute(
-                "SELECT id,body FROM evidence_records WHERE owner=? AND environment=?",
-                (owner, environment),
-            ).fetchall():
-                if observation_id in json.loads(record["body"]).get(
-                    "observation_ids", []
-                ):
-                    self.store.db.execute(
-                        "DELETE FROM evidence_records WHERE id=?", (record["id"],)
+        from .evidence_privacy import scrub_derivatives
+
+        observation = self.store.db.execute(
+            "SELECT body FROM evidence_observations WHERE id=?", (observation_id,)
+        ).fetchone()
+        source = json.loads(observation["body"])
+        removed = {observation_id}
+        task_ids = {source["task_id"]} if source.get("task_id") else set()
+        records = self.store.db.execute(
+            "SELECT id,body FROM evidence_records WHERE owner=? AND environment=?",
+            (owner, environment),
+        ).fetchall()
+        changed = True
+        while changed:
+            changed = False
+            for record in records:
+                body = json.loads(record["body"])
+                if record["id"] not in removed and (
+                    observation_id in body.get("observation_ids", [])
+                    or any(
+                        body.get(field) in removed
+                        for field in ("reference_id", "finding_id", "baseline_id")
                     )
+                ):
+                    removed.add(record["id"])
+                    if body.get("task_id"):
+                        task_ids.add(body["task_id"])
+                    changed = True
+        with self.store.transaction():
+            self.store.db.executemany(
+                "DELETE FROM evidence_records WHERE id=?",
+                [(record_id,) for record_id in removed],
+            )
+            scrub_derivatives(self.store, owner, environment, removed, task_ids)
             self.store.db.execute(
                 "DELETE FROM evidence_observations WHERE id=?", (observation_id,)
             )
@@ -326,7 +349,15 @@ class EvidenceMemory:
                 ):
                     removed.add(record["id"])
                     changed = True
+        from .evidence_privacy import scrub_derivatives
+
         with self.store.transaction():
+            task_ids = {
+                json.loads(record["body"])["task_id"]
+                for record in records
+                if record["id"] in removed and json.loads(record["body"]).get("task_id")
+            }
+            scrub_derivatives(self.store, owner, environment, removed, task_ids)
             self.store.db.executemany(
                 "DELETE FROM evidence_records WHERE id=?",
                 [(value,) for value in removed],

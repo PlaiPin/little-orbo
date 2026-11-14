@@ -123,6 +123,9 @@ class ObservationService:
             check_revision()
         self.busy = True
         try:
+            if hasattr(self.source, "refresh"):
+                async with asyncio.timeout(self.timeout):
+                    await self.source.refresh()
             frame = self.source.snapshot()
             self._validate(frame, map_version, viewpoint)
             async with asyncio.timeout(self.timeout):
@@ -231,6 +234,26 @@ class ROSFrameSource(LatestFrame):
             ),
         ]
 
+    async def refresh(self):
+        with self.lock:
+            initial_stamp = self.latest.source_stamp_ns if self.latest else 0
+        provider = getattr(self.pose_provider, "__self__", self.pose_provider)
+        if hasattr(provider, "refresh"):
+            await provider.refresh()
+        # Wait for the next frame paired with the refreshed pose, not an old cached frame.
+        deadline = time.monotonic() + 1
+        while time.monotonic() < deadline:
+            with self.lock:
+                frame = self.latest
+            if (
+                frame is not None
+                and frame.source_stamp_ns > initial_stamp
+                and 0 <= time.monotonic() - frame.pose_received_mono <= 1.0
+            ):
+                return
+            await asyncio.sleep(0.01)
+        raise Rejected("camera/localization pairing unavailable")
+
     def on_info(self, message):
         if (
             message.header.frame_id == self.frame_id
@@ -290,3 +313,162 @@ class ROSFrameSource(LatestFrame):
                 pose["received_mono"],
             )
         )
+
+
+class ROSPoseSource:
+    """Fresh AMCL localization matched to surveyed poses, never a commanded goal.
+
+    Call select_current_view(True) only for a navigation-free describe task, then
+    reset it for named-place tasks. This changes the view label, never the pose.
+    """
+
+    def __init__(
+        self,
+        node,
+        waypoints,
+        *,
+        map_version,
+        topic="amcl_pose",
+        frame_id="map",
+        position_tolerance=0.15,
+        yaw_tolerance=math.radians(10),
+        max_age=1.0,
+        max_position_variance=0.04,
+        max_yaw_variance=0.03,
+        refresh_service="request_nomotion_update",
+        clock=None,
+    ):
+        from geometry_msgs.msg import PoseWithCovarianceStamped
+        from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy
+        from std_srvs.srv import Empty
+        from .contracts import SystemClock
+
+        self.node, self.clock = node, clock or SystemClock()
+        self.map_version = label(map_version, "map version")
+        self.frame_id = label(frame_id, "map frame")
+        if self.frame_id != "map":
+            raise Rejected("observation pipeline requires map frame")
+        if not isinstance(waypoints, dict) or not 1 <= len(waypoints) <= 32:
+            raise Rejected("one to 32 surveyed waypoints required")
+        self.waypoints = {}
+        for name, pose in waypoints.items():
+            label(name, "waypoint")
+            if not isinstance(pose, dict) or set(pose) != {"x", "y", "yaw"}:
+                raise Rejected("surveyed x/y/yaw pose required")
+            self.waypoints[name] = {
+                key: finite(value, -100000, 100000) for key, value in pose.items()
+            }
+        self.position_tolerance = finite(position_tolerance, 0.01, 0.5)
+        self.yaw_tolerance = finite(yaw_tolerance, 0.01, math.pi / 4)
+        self.max_age = finite(max_age, 0.05, 2.0)
+        self.max_position_variance = finite(max_position_variance, 0.00001, 0.25)
+        self.max_yaw_variance = finite(max_yaw_variance, 0.00001, 0.25)
+        self.lock, self.latest, self.last_stamp = threading.Lock(), None, 0
+        self.current_view = False
+        qos = QoSProfile(
+            depth=1,
+            reliability=ReliabilityPolicy.RELIABLE,
+            durability=DurabilityPolicy.TRANSIENT_LOCAL,
+        )
+        self.subscription = node.create_subscription(
+            PoseWithCovarianceStamped, topic, self.observe, qos
+        )
+        self.empty_type = Empty
+        self.refresh_client = (
+            node.create_client(Empty, refresh_service) if refresh_service else None
+        )
+
+    def select_current_view(self, enabled):
+        if type(enabled) is not bool:
+            raise Rejected("explicit current-view mode required")
+        with self.lock:
+            self.current_view = enabled
+
+    def observe(self, message):
+        now = self.clock.mono()
+        stamp = message.header.stamp.sec * 1_000_000_000 + message.header.stamp.nanosec
+        age = (self.node.get_clock().now().nanoseconds - stamp) / 1e9
+        pose, covariance = message.pose.pose, message.pose.covariance
+        q = pose.orientation
+        values = [pose.position.x, pose.position.y, q.x, q.y, q.z, q.w, *covariance]
+        valid = (
+            message.header.frame_id == self.frame_id
+            and stamp > 0
+            and 0 <= age <= self.max_age
+            and len(covariance) == 36
+            and all(math.isfinite(value) for value in values)
+            and all(
+                value >= 0 for value in (covariance[0], covariance[7], covariance[35])
+            )
+            and max(covariance[0], covariance[7]) <= self.max_position_variance
+            and covariance[35] <= self.max_yaw_variance
+            and abs(q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w - 1) <= 0.01
+        )
+        with self.lock:
+            if not valid:
+                self.latest = None
+                return
+            if stamp <= self.last_stamp:
+                return
+            self.last_stamp = stamp
+            self.latest = {
+                "pose": {
+                    "x": pose.position.x,
+                    "y": pose.position.y,
+                    "yaw": math.atan2(
+                        2 * (q.w * q.z + q.x * q.y), 1 - 2 * (q.y * q.y + q.z * q.z)
+                    ),
+                    "frame_id": self.frame_id,
+                },
+                "received_mono": now - age,
+                "map_version": self.map_version,
+                "source_stamp_ns": stamp,
+            }
+
+    def snapshot(self):
+        with self.lock:
+            if (
+                self.latest is None
+                or not 0
+                <= self.clock.mono() - self.latest["received_mono"]
+                <= self.max_age
+            ):
+                return None
+            result = dict(self.latest, pose=dict(self.latest["pose"]))
+            current_view = self.current_view
+        pose = result["pose"]
+        if current_view:
+            return dict(result, viewpoint="current")
+        matches = []
+        for name, target in self.waypoints.items():
+            distance = math.hypot(pose["x"] - target["x"], pose["y"] - target["y"])
+            yaw = abs(
+                math.atan2(
+                    math.sin(pose["yaw"] - target["yaw"]),
+                    math.cos(pose["yaw"] - target["yaw"]),
+                )
+            )
+            if distance <= self.position_tolerance and yaw <= self.yaw_tolerance:
+                matches.append((distance, name))
+        if not matches:
+            return None
+        matches.sort()
+        # Equal-distance aliases must not arbitrarily establish semantic coverage.
+        if len(matches) > 1 and abs(matches[0][0] - matches[1][0]) < 1e-6:
+            return None
+        return dict(result, viewpoint=matches[0][1])
+
+    async def refresh(self):
+        """Request a stationary AMCL update if stale; does not command movement."""
+        if self.snapshot() is not None:
+            return
+        if self.refresh_client is None or not self.refresh_client.service_is_ready():
+            raise Rejected("fresh localization unavailable")
+        future = self.refresh_client.call_async(self.empty_type.Request())
+        async with asyncio.timeout(2):
+            while not future.done():
+                await asyncio.sleep(0.01)
+            if future.cancelled() or future.exception() is not None:
+                raise Rejected("localization refresh failed")
+            while self.snapshot() is None:
+                await asyncio.sleep(0.01)

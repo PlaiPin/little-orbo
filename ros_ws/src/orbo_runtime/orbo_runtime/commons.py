@@ -153,7 +153,9 @@ class Commons:
             "SELECT state FROM commons_reviews WHERE entry_id=?", (entry_id,)
         ).fetchone()
         if previous and previous["state"] != "reviewed":
-            raise Rejected("recover the previous contribution; a new review requires a fresh entry")
+            raise Rejected(
+                "recover the previous contribution; a new review requires a fresh entry"
+            )
         # Review can disclose to the configured privacy service; this scope is separate from upload.
         self.store.db.execute(
             """INSERT INTO commons_reviews VALUES(?,?,?,?,?,?,?,?)
@@ -238,8 +240,8 @@ class Commons:
         )
         return {"state": state, "result": result, "delivery_established": False}
 
-    def linked(self, owner, export_id, entry_id):
-        self.exports.preview(owner, export_id)
+    def linked(self, owner, export_id, entry_id, *, allow_deleted=False):
+        self.exports.preview(owner, export_id, allow_deleted=allow_deleted)
         row = self.store.db.execute(
             "SELECT * FROM commons_reviews WHERE entry_id=? AND export_id=?",
             (entry_id, export_id),
@@ -347,7 +349,7 @@ class Commons:
         ]
 
     async def recover(self, owner, export_id, entry_id):
-        row = self.linked(owner, export_id, entry_id)
+        row = self.linked(owner, export_id, entry_id, allow_deleted=True)
         # Recovery is explicit and restart-safe; only cancellation is retryable.
         # Expired/revoked grants cannot leave an uncertain send authorized locally.
         try:
@@ -360,7 +362,7 @@ class Commons:
         return await self.status(owner, export_id, entry_id)
 
     async def revoke(self, owner, export_id, entry_id):
-        self.linked(owner, export_id, entry_id)
+        self.linked(owner, export_id, entry_id, allow_deleted=True)
         self.exports.revoke(owner, export_id)
         self.store.db.execute(
             "UPDATE commons_reviews SET state='revoke_pending' WHERE entry_id=?",

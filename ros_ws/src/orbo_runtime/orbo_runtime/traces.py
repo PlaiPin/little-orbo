@@ -193,13 +193,26 @@ class Exports:
                 "approval_required": True,
             }
 
-    def preview(self, owner, export_id):
+    def preview(self, owner, export_id, *, allow_deleted=False):
         row = self.store.db.execute(
             "SELECT x.* FROM exports x JOIN episodes e ON e.id=x.episode_id WHERE x.id=? AND e.owner=?",
             (export_id, owner),
         ).fetchone()
         if not row:
             raise Rejected("unknown owned export")
+        deletion_table = self.store.db.execute(
+            "SELECT 1 FROM sqlite_master WHERE name='deleted_evidence_exports'"
+        ).fetchone()
+        deleted = (
+            deletion_table
+            and self.store.db.execute(
+                "SELECT 1 FROM deleted_evidence_exports WHERE export_id=?", (export_id,)
+            ).fetchone()
+        )
+        if deleted:
+            if allow_deleted:
+                return dict(row)
+            raise Rejected("source evidence deleted; export permanently revoked")
         content = row["content"].encode()
         if hashlib.sha256(content).hexdigest() != row["digest"]:
             raise Rejected("stored export content changed")
@@ -230,7 +243,7 @@ class Exports:
 
     def revoke(self, owner, export_id):
         with self.store.transaction() as db:
-            self.preview(owner, export_id)
+            self.preview(owner, export_id, allow_deleted=True)
             db.execute(
                 "UPDATE approvals SET revoked=1 WHERE export_id=? AND owner=?",
                 (export_id, owner),
