@@ -1,0 +1,4 @@
+#pragma once
+#define CONFIG_ORBO_DXL_BAUD 115200
+#define CONFIG_ORBO_DXL_TX 43
+#define CONFIG_ORBO_DXL_RX 44

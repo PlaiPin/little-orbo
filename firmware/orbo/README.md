@@ -3,7 +3,7 @@
 This firmware publishes ROS 2 telemetry over native USB CDC0 and accepts bounded
 control messages. CDC1 carries text logs. It boots disarmed. The checked-in
 `sdkconfig` now enables wheel arming for the lifted-base XL430 bench, with a
-1.2 rad/s maximum, left ID 1/right ID 2, 1 Mbps, and signs +1/-1. Flippers remain
+1.2 rad/s maximum, left ID 1/right ID 2, 115200 baud, and signs +1/-1. Flippers remain
 disabled. The generic Kconfig defaults still disable both commissioning flags.
 Enabling wheel arming does not arm at boot or on reconnection and does not qualify
 ground driving, geometry, or navigation.
@@ -57,13 +57,142 @@ The subsequent 1.2 rad/s test (four times the previous command speed) passed all
 five motion phases on its second run, with settled speeds of 1.184–1.187 rad/s.
 Explicit stop and command expiry both stopped and disarmed the wheels. Its first
 run stopped on one left motor-feedback error during reverse; the repeat added no
-read errors. It also recorded a 329 ms health-delivery age; the 100 ms delivery
-qualification and intermittent feedback failure remain unresolved. See the
+read errors. These runs used the former 1 Mbps motor profile. They also recorded
+a 329 ms health-delivery age; broader delivery qualification remains unresolved.
+The reproduced motor CRC issue is addressed by the 115200-baud validation below. See the
 [1.2 rad/s evidence](../../artifacts/test-evidence/esp32s3-wheel-speed-1p2-2026-11-13/README.md).
 
 Do not run the old bare-board `check-rejections.py` against this wheel-enabled
 image: its wheel-arm rejection case can now enable torque. That script belongs
 to the wheel-disabled profile described in section 5.
+
+## Motor bus configuration and diagnostics
+
+The checked-in profile uses `CONFIG_ORBO_DXL_BAUD=115200`. At startup it checks
+configured motor IDs at that rate. If a known XL430 (model 1060) is still at the
+former 1 Mbps setting, it disables torque, reads back torque-off, requests baud
+register 8 = 2, and verifies model and saved baud at 115200. A partial migration
+can resume on the next boot. Motors already at 115200 receive no baud EEPROM
+writes. Other models are refused. A failed initialization does not permit arming.
+The motor baud setting persists across power cycles: older 1 Mbps firmware or
+raw diagnostic tools must be configured accordingly before they can communicate.
+The GPIOs, IDs, direction signs, 1.2 rad/s speed bound and feedback fault policy
+are unchanged. This baud is independent of the USB logging port's line coding.
+
+Warning logs on CDC1 now identify the motor ID and read register for bus errors,
+and distinguish hardware/watchdog/torque checks from encoder discontinuities.
+DYNAMIXEL status errors include their actual protocol error byte. During diagnosis
+we captured `ff ff fd 00 01 04 00 55 03 ab 0c`: a valid motor reply reporting
+incoming-request CRC error 0x03. This is distinct from a corrupted reply detected
+by the host's CRC checker. A 100 us inter-transaction gap did not eliminate the
+failure and was removed; it is not part of the final configuration.
+
+Protocol and baud definitions: [ROBOTIS Protocol 2.0](https://emanual.robotis.com/docs/en/dxl/protocol2/#error)
+and [XL430 baud register](https://emanual.robotis.com/docs/en/dxl/x/xl430-w250/#baud-rate8).
+A CRC error identifies a communication failure; it does not establish ESP32 CPU
+exhaustion or identify a specific electrical component without waveform capture.
+
+After rebuilding and automatic USB flashing on 13 November 2026, the 115200-baud
+profile completed the requested **30.02-second drive at [1.2, 1.2] rad/s**:
+585 commands, 1,912 captured wheel samples, no unexpected disarms, both read-error
+counters zero, and all feedback valid with zero hardware errors. Settled measured
+speeds averaged 1.1864/1.1861 rad/s. A separate terminal/PTY keyboard test supplied
+W/S/A/D, zero, and key-release timeout for 30 seconds; the session stayed armed
+for 31.29 seconds until intentional quit, with 1,825 wheel samples and zero read
+errors. Both runs ended with encoder-confirmed zero speed and disarm. Host
+sanitizer, baud-migration, and nine manual-publisher regression tests passed.
+The motors were raised off the ground; this does not qualify ground driving.
+Generated captures remain local and ignored by Git.
+
+## Manual CLI and keyboard wheel control
+
+The installed firmware accepts `orbo_embedded_interfaces/msg/WheelCommand` on
+`/orbo/embedded/wheel_command`, with `velocity_rad_s: [left, right]` in rad/s.
+It is not a `geometry_msgs/Twist` or `/cmd_vel` subscriber. Each message must
+include the current boot ID, an explicitly armed epoch, a strictly increasing
+sequence, and a fresh Unix-millisecond timestamp with bounded validity. Repeating
+one static YAML message with `ros2 topic pub -r` will not maintain motion.
+
+Keep the base lifted and motor power on. In terminal A, from the repository root:
+
+```bash
+./tools/run-xrce-agent-macos.sh /dev/cu.usbmodem1234561
+```
+
+In a fresh terminal B, outside ESP-IDF:
+
+```bash
+cd /Users/kpatch/startup/opendive/projects/little-orbo
+pixi run --locked bash
+source ros_ws/install/macos/local_setup.bash
+export ROS_DOMAIN_ID=42
+export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+```
+
+For a two-second command to both wheels, run:
+
+```bash
+python firmware/orbo/bench_tests/control_wheels.py drive --left 1.2 --right 1.2 --seconds 2
+```
+
+Use negative values for reverse, opposite signs for opposite wheel rotation, or
+zero for an idle wheel. The current limit is +/-1.2 rad/s per wheel; duration is
+bounded to 60 seconds. The helper discovers the board, checks feedback, requests
+one fresh arm, streams live WheelCommand messages at approximately 20 Hz with
+300 ms validity, then sends stop and checks disarmed/stopped feedback. A new
+helper invocation requests a new epoch. Do not run it alongside the test sequence
+or another command publisher. Ground/chassis direction has not been qualified.
+
+For manual keys instead of a timed drive:
+
+```bash
+python firmware/orbo/bench_tests/control_wheels.py keyboard
+```
+
+| Key | Wheel command |
+| --- | --- |
+| W | Both positive |
+| S | Both negative |
+| A | Left negative, right positive |
+| D | Left positive, right negative |
+| Space or X | Zero velocity; remain armed |
+| Q or Ctrl-C | Stop, disarm and exit |
+
+Keyboard mode arms once on startup and sends zero until a movement key arrives.
+Speed defaults to 1.2 rad/s; use `keyboard --speed 0.6` for half speed. Terminal
+input has no key-release events: tap/hold WASD, and after 350 ms without a movement
+key/repeat the requested velocity returns to zero. The initial keyboard-repeat
+delay can produce a brief pause when holding a key. Commands retain their own
+300 ms firmware expiry. Faults, stale feedback, conflicting publishers, or a
+changed boot/session stop the controller; it never automatically rearms after
+such a failure. Ctrl-Z also exits with a stop rather than suspending publication.
+
+For an explicit stop from a configured ROS terminal:
+
+```bash
+ros2 topic pub --once --max-wait-time-secs 10 \
+  /orbo/embedded/control_session orbo_embedded_interfaces/msg/ControlSession \
+  '{interface_version: 1, operation: 0}'
+```
+
+The manual helper's message sequencing, guards, key timeout, escape-sequence
+handling and terminal restoration are covered by host mocks using real ROS
+message classes. The earlier 1 Mbps timed drive reproduced a firmware `FEEDBACK (5)` stop after
+the left-wheel read-error counter rose from 0 to 1. The publisher's maximum send
+gap was 52.6 ms and the boot/session stayed unchanged. The subsequent diagnostic
+build identified incoming-request CRC errors. Both timed drive and live keyboard
+input passed after the 115200-baud change; see the motor-bus results above.
+
+On failure, the helper now captures `/orbo/embedded/actuator_status` and prints
+the original firmware fault, feedback counters/voltage, last accepted sequence,
+and maximum publication gap. The cleanup stop can change `health.fault` to
+`DISARMED (1)`; that later value does not identify the original cause. A transient
+invalid motor sample may have recovered by the next published WheelState while
+the controller remains disarmed. `EXPIRED (2)` means command validity elapsed,
+`FEEDBACK (5)` means feedback failed validation or freshness, and `BUS (6)` covers
+bus/transport faults. For the exact low-level cause, inspect CDC1 warning logs: the firmware now
+reports read register/error code, motor protocol errors, hardware/watchdog/torque
+validation failures and encoder discontinuities.
 
 ## 1. Set up Pixi and ROS 2 on the Mac
 

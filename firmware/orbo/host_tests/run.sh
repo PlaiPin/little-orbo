@@ -9,6 +9,12 @@ FLAGS=(-std=c11 -Wall -Wextra -Werror -fsanitize=address,undefined)
   "$ORBO_FIRMWARE/main/control.c" "$ORBO_FIRMWARE/host_tests/test_control.c" \
   -o "$ORBO_TEST_BUILD/control"
 "$ORBO_TEST_BUILD/control"
+"$ORBO_CC" "${FLAGS[@]}" \
+  -I"$ORBO_FIRMWARE/host_tests/bus_stubs" -I"$ORBO_FIRMWARE/host_tests/usb_stubs" \
+  -I"$ORBO_FIRMWARE/main" -I"$ORBO_FIRMWARE/../../Software/Teleoperate/firmware/main" \
+  "$ORBO_FIRMWARE/main/wheel_bus.c" "$ORBO_FIRMWARE/host_tests/test_wheel_bus.c" \
+  -o "$ORBO_TEST_BUILD/wheel-bus"
+"$ORBO_TEST_BUILD/wheel-bus"
 for tick in 1000 10000; do
   "$ORBO_CC" "${FLAGS[@]}" -DTEST_TICK_US="$tick" \
     -I"$ORBO_FIRMWARE/host_tests/usb_stubs" \

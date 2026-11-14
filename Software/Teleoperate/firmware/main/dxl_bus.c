@@ -7,6 +7,7 @@
 #include <string.h>
 #include "dxl_bus.h"
 #include "driver/gpio.h"
+#include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
@@ -125,6 +126,9 @@ static esp_err_t read_status(uint8_t id, uint8_t *out, size_t out_len)
     uint8_t error = pkt[8];
     size_t n_params = w - 9;
     if (error & 0x7F) {                     /* bit 7 only flags a hardware error; checked elsewhere */
+        ESP_LOGW("dxl_bus", "status id=%u error=0x%02x params=%u expected=%u",
+                 id,error,(unsigned)n_params,(unsigned)out_len);
+        ESP_LOG_BUFFER_HEX_LEVEL("dxl_bus",pkt,total,ESP_LOG_WARN);
         return ESP_FAIL;
     }
     if (n_params != out_len) {

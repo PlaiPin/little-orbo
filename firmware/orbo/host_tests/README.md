@@ -43,3 +43,27 @@ ambiguous-device rejection, and matching USB location across re-enumeration.
 These tests do not simulate USB enumeration, endpoint interrupts, or real RTOS
 scheduling. Rebuild and flash the ESP32, then check telemetry, absent-agent logs,
 agent restart, and a physical power cycle to validate those paths.
+
+Manual wheel publisher checks use the Pixi ROS overlay and mocked nodes (no
+hardware access):
+
+```sh
+pixi run --locked bash -c 'source ros_ws/install/macos/local_setup.bash && python firmware/orbo/host_tests/test_control_wheels.py'
+```
+
+They cover key direction/timeout, fragmented terminal escape sequences, terminal
+restoration after an exception, fresh message sequencing, explicit arm/stop,
+invalid velocities, and refusal on stale feedback, reboot, disarm, clock-delivery
+outliers or another command publisher. These checks do not qualify live keyboard
+response or physical stopping latency.
+
+Fault-reporting checks also verify that events from another boot/epoch are
+ignored, the original fault survives cleanup stop acknowledgements, and a cleanup
+stop is not mislabeled as the original failure.
+
+`test_wheel_bus.c` exercises the 115200-baud profile's migration from 1 Mbps using
+mock motors. It checks torque-off before EEPROM writes, verification after a
+lost write reply, partial migration recovery, no repeated EEPROM writes, and
+refusal for an unknown model, unavailable motor or torque that cannot be disabled.
+The host baud is restored on failures. These checks do not establish signal
+integrity on physical wiring.

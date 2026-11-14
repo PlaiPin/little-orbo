@@ -1,7 +1,9 @@
 #include "actuators.h"
 #include "dxl_bus.h"
+#include "wheel_bus.h"
 #include "driver/ledc.h"
 #include "esp_timer.h"
+#include "esp_log.h"
 #include <math.h>
 #include <string.h>
 
@@ -22,7 +24,7 @@ static int32_t signed_word(const uint8_t *b){
     int32_t value;memcpy(&value,&u,4);return value;
 }
 esp_err_t actuators_init(void){
-    esp_err_t result=dxl_bus_init(UART_NUM_1,CONFIG_ORBO_DXL_TX,CONFIG_ORBO_DXL_RX,CONFIG_ORBO_DXL_BAUD);
+    esp_err_t result=wheel_bus_init(ids);
     if(result!=ESP_OK)return result;
     // Startup never enables wheel torque; legacy UDP and text-command code is not linked.
     wheels_disable();
@@ -92,13 +94,20 @@ void wheels_sample(orbo_feedback_t *state){
     for(int i=0;i<2;i++){
         uint8_t values[18],health[7],watchdog=0;
         state->valid[i]=false;
+        uint16_t read_register=128;
         esp_err_t e=dxl_read(ids[i],128,values,18);
-        if(e==ESP_OK)e=dxl_read(ids[i],64,health,7);
-        if(e==ESP_OK)e=dxl_read(ids[i],98,&watchdog,1);
+        if(e==ESP_OK){read_register=64;e=dxl_read(ids[i],64,health,7);}
+        if(e==ESP_OK){read_register=98;e=dxl_read(ids[i],98,&watchdog,1);}
         uint64_t now=esp_timer_get_time();
-        if(e!=ESP_OK){state->read_errors[i]++;continue;}
+        if(e!=ESP_OK){
+            state->read_errors[i]++;
+            ESP_LOGW("wheel_feedback","id=%u reg=%u error=%s",ids[i],read_register,esp_err_to_name(e));
+            continue;
+        }
         state->hardware_error[i]=health[6];
         if(health[6] || watchdog==255 || (wheel_torque && health[0]!=1)){
+            ESP_LOGW("wheel_feedback","id=%u hardware=%u watchdog=%u torque=%u expected_torque=%u",
+                     ids[i],health[6],watchdog,health[0],wheel_torque);
             state->read_errors[i]++;previous_valid[i]=false;continue;
         }
         double pos=signed_word(values+4)*(TAU/4096.0)*signs[i];
@@ -106,6 +115,8 @@ void wheels_sample(orbo_feedback_t *state){
         if(previous_valid[i] && fabs(pos-previous_position[i]) >
            CONFIG_ORBO_MAX_MRAD_S/1000.0*(now-previous_time[i])/1000000.0+0.1){
             // Encoder reset/discontinuity: retained invalid until explicit prepare/rearm.
+            ESP_LOGW("wheel_feedback","id=%u position_jump=%.6f dt_us=%llu velocity=%.6f",
+                     ids[i],pos-previous_position[i],(unsigned long long)(now-previous_time[i]),vel);
             state->read_errors[i]++;continue;
         }
         state->position[i]=pos;state->velocity[i]=vel;

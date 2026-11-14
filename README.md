@@ -34,8 +34,12 @@ for environment troubleshooting and `pixi run orbo-preview` for the RViz model.
 
 The current firmware `sdkconfig` enables wheel arming for a lifted-base bench
 at a 1.2 rad/s maximum; it still boots disarmed and keeps flippers disabled.
+The motor bus now runs at 115200 baud, with automatic torque-off migration of
+known XL430s from the former 1 Mbps profile. A 30-second drive and 30-second
+keyboard-input run passed without feedback errors or unexpected disarming.
 Use the [lifted-wheel test](firmware/orbo/README.md#current-lifted-wheel-test)
-for that image. Do not run the historical bare-board wheel-arm rejection test
+for that image, or use [manual CLI/keyboard control](firmware/orbo/README.md#manual-cli-and-keyboard-wheel-control).
+Do not run the historical bare-board wheel-arm rejection test
 with wheel arming enabled, because that request can now enable torque.
 
 For the flashed board, build the native Mac XRCE agent once:
@@ -127,8 +131,9 @@ local automatic flashing results in `artifacts/test-evidence/esp32s3-auto-bootlo
 rejections, software-only arm/stop, three agent restarts, and power-cycle recovery
 were tested. A subsequent timing check failed: three health samples exceeded
 100 ms, reaching 326 ms, with two session recreations. This remains unresolved;
-later raised-wheel tests passed at 1.2 rad/s, while intermittent motor-feedback
-errors, ground driving, and the full ros2_control/Nav2 pipeline remain unqualified.
+later raised-wheel tests passed at 1.2 rad/s. The reproduced motor-feedback
+CRC errors at 1 Mbps were addressed by the tested 115200-baud profile. Broader
+telemetry timing, ground driving, and full ros2_control/Nav2 qualification remain open.
 See the [recorded results](artifacts/test-evidence/esp32s3-usb-fix-2026-11-13/final/board-validation.json).
 
 ### Python application development
