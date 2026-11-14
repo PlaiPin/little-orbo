@@ -36,6 +36,7 @@ ROS_AUTOMATIC_DISCOVERY_RANGE = "SUBNET"
 [tasks]
 ros-build-simulation = "colcon --log-base ros_ws/log/macos build --base-paths ros_ws/src --build-base ros_ws/build/macos --install-base ros_ws/install/macos --packages-select orbo_description orbo_simulation"
 orbo-sim = { cmd = "bash tools/run-orbo-sim.sh", depends-on = ["ros-build-simulation"] }
+orbo-sim-goal = "bash tools/run-orbo-sim.sh goal"
 orbo-sim-drive = "bash tools/run-orbo-sim.sh drive"
 ros-test-simulation = { cmd = "bash tools/run-orbo-sim.sh test", depends-on = ["ros-build-simulation"] }
 ros-check = "python tools/check-ros-macos.py"

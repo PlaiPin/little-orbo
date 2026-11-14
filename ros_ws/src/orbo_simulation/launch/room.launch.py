@@ -13,8 +13,10 @@ from launch.actions import (
     OpaqueFunction,
     RegisterEventHandler,
     EmitEvent,
+    IncludeLaunchDescription,
 )
 from launch.event_handlers import OnProcessExit
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.events import Shutdown
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
@@ -31,12 +33,35 @@ def setup(context):
         )
     share = Path(get_package_share_directory("orbo_simulation"))
     description = Path(get_package_share_directory("orbo_description"))
-    robot = xacro.process_file(str(share / "urdf/orbo.sim.urdf.xacro")).toxml()
+    sensors = LaunchConfiguration("sensors").perform(context).lower() == "true"
+    navigation = LaunchConfiguration("navigation").perform(context).lower() == "true"
+    world = LaunchConfiguration("world").perform(context)
+    if world not in ("room", "living_room"):
+        raise RuntimeError("world must be room or living_room")
+    if navigation and (not sensors or world != "living_room"):
+        raise RuntimeError("Nav2 requires sensors and the matching living_room map")
+    robot = xacro.process_file(
+        str(share / "urdf/orbo.sim.urdf.xacro"),
+        mappings={"sensors": str(sensors).lower()},
+    ).toxml()
     robot = robot.replace("package://orbo_description/", description.as_uri() + "/")
     gui = LaunchConfiguration("gui").perform(context).lower() == "true"
     # macOS cannot run Gazebo's GUI and server inside the same gz process.
-    command = ["gz", "sim", "-s", "-r", "-v", "2", str(share / "worlds/room.sdf")]
+    command = [
+        "gz",
+        "sim",
+        "-s",
+        "-r",
+        "-v",
+        "2",
+        str(share / f"worlds/{world}.sdf"),
+        "--render-engine-server-api-backend",
+        "opengl",
+    ]
     simulator = ExecuteProcess(cmd=command, output="screen")
+    clock_bridge = Node(
+        package="orbo_simulation", executable="clock_bridge", output="screen"
+    )
     viewer = []
     if gui:
         gui_command = [
@@ -46,7 +71,7 @@ def setup(context):
             "-v",
             "2",
             "--gui-config",
-            str(share / "config/gui.config"),
+            str(share / "config" / ("sensors.gui.config" if sensors else "gui.config")),
         ]
         if os.environ.get("ORBO_GZ_RUBY"):
             gui_command = [
@@ -123,7 +148,17 @@ def setup(context):
                 )
             ]
         # Wait for initialization before the GUI requests the initial world state.
-        return viewer
+        return viewer + (
+            [
+                IncludeLaunchDescription(
+                    PythonLaunchDescriptionSource(
+                        str(share / "launch/navigation.launch.py")
+                    )
+                )
+            ]
+            if navigation
+            else []
+        )
 
     return [
         simulator,
@@ -133,11 +168,30 @@ def setup(context):
                 on_exit=[EmitEvent(event=Shutdown(reason="Gazebo exited"))],
             )
         ),
-        Node(
-            package="ros_gz_bridge",
-            executable="parameter_bridge",
-            arguments=["/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock"],
-            output="screen",
+        clock_bridge,
+        RegisterEventHandler(
+            OnProcessExit(
+                target_action=clock_bridge,
+                on_exit=[EmitEvent(event=Shutdown(reason="Simulation clock exited"))],
+            )
+        ),
+        *(
+            [
+                Node(
+                    package="ros_gz_bridge",
+                    executable="parameter_bridge",
+                    namespace="orbo_sim",
+                    parameters=[{"use_sim_time": True}],
+                    arguments=[
+                        "/orbo_sim/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan",
+                        "/orbo_sim/camera/image_raw@sensor_msgs/msg/Image[gz.msgs.Image",
+                        "/orbo_sim/camera/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo",
+                    ],
+                    output="screen",
+                )
+            ]
+            if sensors
+            else []
         ),
         state,
         spawn,
@@ -152,6 +206,9 @@ def generate_launch_description():
     return LaunchDescription(
         [
             DeclareLaunchArgument("gui", default_value="true"),
+            DeclareLaunchArgument("world", default_value="living_room"),
+            DeclareLaunchArgument("sensors", default_value="true"),
+            DeclareLaunchArgument("navigation", default_value="true"),
             OpaqueFunction(function=setup),
         ]
     )

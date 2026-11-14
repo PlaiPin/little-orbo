@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="orbo">
+  <xacro:arg name="sensors" default="true"/>
   <xacro:arg name="physics" default="$(find orbo_simulation)/config/physics.yaml"/>
   <xacro:arg name="controllers" default="$(find orbo_simulation)/config/controllers.yaml"/>
   <xacro:property name="p" value="${xacro.load_yaml('$(arg physics)')}"/>
@@ -69,6 +70,41 @@
   <gazebo reference="front_caster">
     <mu1>${p['caster_friction']}</mu1><mu2>${p['caster_friction']}</mu2>
   </gazebo>
+  <!-- Hypothetical simulation sensors, not a claim about fitted hardware. -->
+  <xacro:if value="$(arg sensors)">
+    <link name="lidar_link">
+      <visual><geometry><cylinder radius="0.025" length="0.025"/></geometry>
+        <material name="lidar_black"><color rgba="0.08 0.1 0.12 1"/></material></visual>
+    </link>
+    <joint name="lidar_mount" type="fixed"><parent link="base_link"/><child link="lidar_link"/>
+      <origin xyz="0 0 0.24"/></joint>
+    <gazebo reference="lidar_link">
+      <sensor name="lidar" type="gpu_lidar">
+        <topic>/orbo_sim/scan</topic><gz_frame_id>lidar_link</gz_frame_id>
+        <update_rate>10</update_rate><always_on>true</always_on><visualize>false</visualize>
+        <lidar><scan><horizontal><samples>360</samples><resolution>1</resolution>
+          <min_angle>-${pi}</min_angle><max_angle>${pi}</max_angle>
+        </horizontal></scan><range><min>0.06</min><max>8.0</max><resolution>0.01</resolution></range></lidar>
+      </sensor>
+    </gazebo>
+    <link name="camera_link"/>
+    <joint name="camera_mount" type="fixed"><parent link="base_link"/><child link="camera_link"/>
+      <origin xyz="0.09 0 0.18"/></joint>
+    <link name="camera_optical_frame"/>
+    <joint name="camera_optical_joint" type="fixed"><parent link="camera_link"/><child link="camera_optical_frame"/>
+      <origin rpy="-${pi/2} 0 -${pi/2}"/></joint>
+    <gazebo reference="camera_link">
+      <sensor name="camera" type="camera">
+        <topic>/orbo_sim/camera/image_raw</topic><gz_frame_id>camera_optical_frame</gz_frame_id>
+        <update_rate>10</update_rate><always_on>true</always_on>
+        <camera><horizontal_fov>1.3962634</horizontal_fov>
+          <image><width>320</width><height>240</height><format>R8G8B8</format></image>
+          <clip><near>0.02</near><far>12</far></clip>
+          <camera_info_topic>/orbo_sim/camera/camera_info</camera_info_topic>
+        </camera>
+      </sensor>
+    </gazebo>
+  </xacro:if>
   <ros2_control name="OrboSimWheels" type="system">
     <hardware><plugin>gz_ros2_control/GazeboSimSystem</plugin></hardware>
     <joint name="left_wheel_joint">

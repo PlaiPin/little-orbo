@@ -1,7 +1,11 @@
 # Orbo in Gazebo
 
+For a step-by-step operator walkthrough, see the
+[simulation quickstart](../../../SIMULATION_QUICKSTART.md).
+
 Native Apple Silicon / macOS physics prototype: the v9 Orbo assembly drives in a
-4 × 4 m room with walls and two solid obstacles. Gazebo Harmonic uses DART for
+4 × 4 m living room with a sofa, coffee table, armchair, TV console, sideboard,
+plant, rug and wood floor. Gazebo Harmonic uses DART for
 gravity/contact physics, and `gz_ros2_control` runs the real ROS differential-drive
 controller against simulated wheel joints. No ESP32, USB, Pi or provider is used.
 
@@ -15,13 +19,32 @@ pixi run --locked orbo-sim
 ```
 
 This builds the description and simulation packages, opens **Orbo Gazebo**, starts
-physics, spawns the robot, and activates the joint-state and drive controllers.
-Allow several seconds for controller startup. Run only one room instance at a time.
+physics, spawns the robot, activates the drive controllers, and starts AMCL/Nav2.
+Allow about 20 seconds for startup; the goal client waits for activation.
+Run only one room instance at a time.
 Close Gazebo or press Ctrl-C in its terminal to stop the launch.
+The sensor-enabled viewer includes a live RGB camera inset.
 
 In a second terminal, from the same repository:
 
 ```bash
+pixi run --locked orbo-sim-goal tour
+pixi run --locked orbo-sim-goal named sofa
+pixi run --locked orbo-sim-goal goal 1.0 -0.55 1.57
+pixi run --locked orbo-sim-goal cancel
+```
+
+`tour` visits **tv → sofa → reading → entry**. Named poses are in
+`config/goals.yaml`; arbitrary goals use map coordinates in metres and yaw in
+radians. Goals inside furniture or too close to obstacles may fail planning.
+Ctrl-C in the goal terminal requests cancellation. `cancel` can also stop a goal
+from a separate terminal. The CLI reports success only when Nav2 returns success.
+
+For keyboard control, restart with navigation disabled:
+
+```bash
+pixi run --locked orbo-sim navigation:=false
+# Second terminal:
 pixi run --locked orbo-sim-drive keyboard
 ```
 
@@ -31,9 +54,11 @@ stops, and Q exits with a stop. Hold/repeat a key to move. Input expires after
 The operating system's initial key-repeat delay may briefly interrupt movement.
 Use one command publisher at a time.
 
-Alternatively, on a freshly started room:
+For the original square demo, start the original simple room:
 
 ```bash
+pixi run --locked orbo-sim world:=room navigation:=false sensors:=false
+# Second terminal:
 pixi run --locked orbo-sim-drive demo
 ```
 
@@ -51,6 +76,45 @@ For physics without a window:
 ```bash
 pixi run --locked orbo-sim gui:=false
 ```
+
+`gui:=false` hides the viewer; GPU lidar and camera still use Ogre2/OpenGL in the
+server. This was tested in a logged-in Mac desktop session, not a displayless CI
+machine. `sensors:=false navigation:=false` runs physics without sensor rendering.
+
+## Sensors and navigation
+
+| ROS topic | Data |
+| --- | --- |
+| `/orbo_sim/scan` | 360-ray planar lidar, 10 Hz, 0.06–8 m, `lidar_link` |
+| `/orbo_sim/camera/image_raw` | RGB8, 320 × 240, 10 Hz, ~80° horizontal field of view |
+| `/orbo_sim/camera/camera_info` | Pinhole calibration, `camera_optical_frame` |
+| `/orbo_sim/map` | Generated 2 cm occupancy map |
+| `/orbo_sim/amcl_pose` | Lidar localization estimate in `map` |
+| `/orbo_sim/drive_controller/odom` | Wheel encoder odometry |
+
+Lidar is mounted 0.24 m above the axle; the forward camera sits at
+`(0.09, 0, 0.18)` m relative to `base_link`. These are idealized sensors with no
+added noise, not measured hardware specifications. The camera provides RGB data;
+navigation currently uses lidar, not visual odometry or object recognition.
+
+AMCL starts at the known spawn pose and supplies `map → odom`; the wheel
+controller supplies `odom → base_link`. NavFn/A* plans around furniture and
+Regulated Pure Pursuit follows the path. Both costmaps consume live lidar.
+Commands pass through the velocity smoother and collision monitor before the
+drive controller. All stages use `TwistStamped` and simulation time; the monitor
+stops commands when lidar becomes stale. Manual driving publishes directly to the
+drive controller, so keep Nav2 disabled for manual sessions.
+
+`scripts/build_living_room.py` generates both `worlds/living_room.sdf` and
+`maps/living_room.{pgm,yaml}` from the same furniture geometry. The map conservatively
+includes furniture overhangs. Regenerate both after editing the layout:
+
+```bash
+pixi run --locked python ros_ws/src/orbo_simulation/scripts/build_living_room.py
+```
+
+This is navigation in a known map, not SLAM. Nav2 receives no Gazebo ground-truth
+pose; only the acceptance test uses ground truth to verify physical arrival.
 
 ## Mac compatibility
 
@@ -93,9 +157,12 @@ shell, ROS, or system configuration.
 
 The native controller publishes encoder-derived `/orbo_sim/drive_controller/odom`
 and `odom → base_link`; `robot_state_publisher` supplies the remaining transforms.
-The `/clock` bridge supplies simulation time to all three. Ground-truth body pose
+The `/clock` bridge supplies simulation time to the ROS stack. Ground-truth body pose
 is available through Gazebo and used independently by the acceptance test.
 Wheel slip during contact may make encoder odometry differ from body motion.
+The bridge uses Gazebo Transport subscription throttling to publish the actual
+simulation timestamp at up to 100 Hz. This avoids broadcasting the 1 kHz physics
+clock to every Nav2 node on the Mac; physics still advances in 1 ms steps.
 
 ## Isolation and verification
 
@@ -108,15 +175,18 @@ without the matching simulation domain/partition fails explicitly.
 pixi run --locked ros-test-simulation
 ```
 
-The opt-in integration test starts a fresh headless Gazebo process in **domain
-99**, partition `little-orbo-sim-test`, then cleans up its process group. Ordinary
-Python test runs skip this lane. It verifies:
+The opt-in integration tests start fresh Gazebo processes without the viewer in **domain
+99**, partition `little-orbo-sim-test`, then clean up their process groups. Ordinary
+Python test runs skip this lane. They verify:
 
 - Stable resting height and upright orientation.
 - Forward and reverse physical displacement, with independent encoder comparison.
 - Turning in place.
 - Actual body stop after command publication ceases.
 - Solid wall contact: the robot cannot drive through the east wall.
+- Lidar scan geometry and rate, nonblank RGB frames, camera calibration and frames.
+- All four named Nav2 goals, with independent physical position/yaw checks.
+- Nav2 goal cancellation followed by a stationary physical body.
 
 The first native run passed in 22.37 seconds. Forward body travel was 0.30157 m
 versus 0.30157 m encoder travel; reverse travel was 0.15210 m; turning was 0.90237
@@ -126,14 +196,27 @@ is kept locally in ignored `artifacts/test-evidence/gazebo-macos/physics-report.
 The square demo also completed all four sides. These results establish the
 implemented idealized scene, not real-robot calibration or stopping performance.
 
-## Next extension
+Navigation evidence, the camera capture and trajectory are saved under the same
+directory as `navigation-report.json`, `camera.png`, `trajectory.json` and
+`navigation.log`. The navigation report is reset to `passed: false` at the start
+of each run, and retains completed stages if a later check fails.
 
-This first milestone delivers room physics and manual/scripted driving. It does
-not yet add camera/lidar/IMU simulation, SLAM, AMCL/Nav2 goal execution, the broker
-and velocity-gate session protocol, or an ESP32 emulator. Sensor and navigation
-work should use this simulation-specific clock and namespace rather than enabling
-physical qualification flags. The existing hardware description and control
-launch remain separate.
+The native navigation acceptance run on 14 November 2026 completed all four
+goals in 196 seconds including startup, sensor and stopping checks. Physical
+position errors were 3.8 cm (TV), 4.6 cm (sofa), 4.1 cm (reading) and 14.0 cm
+(entry); the largest heading error was 0.271 rad. Acceptance bounds are 15 cm
+and 0.3 rad against Gazebo ground truth, including localization error. All sensor
+streams measured 10 Hz after startup; both action cancellation and CLI Ctrl-C
+had zero observed body drift in the subsequent one-second measurement window.
+
+## Remaining scope
+
+This milestone includes room physics, lidar/RGB sensors and AMCL/Nav2 goal
+execution. IMU simulation, SLAM, measured sensor noise, moving people, the broker
+and velocity-gate session protocol, and an ESP32 emulator remain future work.
+The existing hardware description and control launch remain separate.
 
 References: [Gazebo Harmonic](https://gazebosim.org/docs/harmonic/),
-[Jazzy gz_ros2_control](https://control.ros.org/jazzy/doc/gz_ros2_control/doc/index.html).
+[Jazzy gz_ros2_control](https://control.ros.org/jazzy/doc/gz_ros2_control/doc/index.html),
+[Gazebo sensors](https://gazebosim.org/docs/harmonic/sensors/),
+[Nav2 Jazzy](https://docs.nav2.org/jazzy/).

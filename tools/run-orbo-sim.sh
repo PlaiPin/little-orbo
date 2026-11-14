@@ -15,6 +15,10 @@ if [[ "${1:-}" == test ]]; then
   export ROS_DOMAIN_ID=99 GZ_PARTITION=little-orbo-sim-test ORBO_GAZEBO_TESTS=1
   exec python -m pytest -q tests/simulation "$@"
 fi
+if [[ "${1:-}" == goal ]]; then
+  shift
+  exec ros2 run orbo_simulation navigate "$@"
+fi
 if [[ "${1:-}" == drive ]]; then
   shift
   exec ros2 run orbo_simulation drive "$@"

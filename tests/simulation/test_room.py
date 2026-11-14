@@ -35,7 +35,16 @@ def test_physics_driving_and_wall_contact(tmp_path):
     report = {"capture_kind": "simulation", "physics": "DART", "checks": {}}
     with log_path.open("w") as log:
         process = subprocess.Popen(
-            ["ros2", "launch", "orbo_simulation", "room.launch.py", "gui:=false"],
+            [
+                "ros2",
+                "launch",
+                "orbo_simulation",
+                "room.launch.py",
+                "gui:=false",
+                "world:=room",
+                "navigation:=false",
+                "sensors:=false",
+            ],
             stdout=log,
             stderr=subprocess.STDOUT,
             start_new_session=True,
@@ -193,7 +202,7 @@ def test_physics_driving_and_wall_contact(tmp_path):
             node.destroy_node()
             rclpy.shutdown()
             try:
-                os.killpg(process.pid, signal.SIGINT)
+                process.send_signal(signal.SIGINT)
                 process.wait(timeout=15)
             except (ProcessLookupError, subprocess.TimeoutExpired):
                 try:

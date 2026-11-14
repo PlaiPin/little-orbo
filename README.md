@@ -20,25 +20,28 @@ motion handlers.
 
 ### Gazebo room simulation on the Mac
 
+For complete setup, launch, navigation, sensor inspection and troubleshooting
+instructions, see [SIMULATION_QUICKSTART.md](SIMULATION_QUICKSTART.md).
+
 The native Apple Silicon Pixi environment now runs Gazebo Harmonic with Orbo's
-v9 model, wheel/caster contacts and the ROS differential-drive controller in a
-simple room. From this repository, start the room, then use a second terminal
-for keyboard control:
+v9 model, wheel/caster contacts, lidar and an RGB camera in a furnished living
+room. Nav2 uses a supplied map and AMCL to navigate around the furniture.
+From this repository, start the room, then send goals in a second terminal:
 
 ```bash
 pixi run --locked orbo-sim
 # Second terminal:
-pixi run --locked orbo-sim-drive keyboard
+pixi run --locked orbo-sim-goal tour
 ```
 
-W/S drive, A/D turn, Space stops and Q exits. On a fresh room,
-`pixi run --locked orbo-sim-drive demo` drives a bounded square.
-`pixi run --locked ros-test-simulation` checks physical displacement, turns,
-command expiry and wall contact in an isolated headless instance.
+Use `orbo-sim-goal named sofa`, `orbo-sim-goal goal 1.0 -0.55 1.57`, or
+`orbo-sim-goal cancel` through `pixi run --locked`. For keyboard driving, start
+with `orbo-sim navigation:=false`, then run `orbo-sim-drive keyboard`.
+`pixi run --locked ros-test-simulation` checks sensors, goal arrival, cancellation,
+physical displacement, command expiry and wall contact in isolated instances.
 See the [simulation guide](ros_ws/src/orbo_simulation/README.md) for Mac rendering,
-assumed physics parameters and current scope. Sensors and Nav2 are the next
-extension; this first version provides manual/scripted driving. It does not
-communicate with the real robot.
+sensor topics, named goals and assumed physics parameters. It does not communicate
+with the real robot.
 
 ### MacBook ROS 2 / Pixi setup
 
