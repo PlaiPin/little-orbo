@@ -1010,6 +1010,9 @@ live = [
     { name = "sounddevice" },
     { name = "websockets" },
 ]
+local-commons = [
+    { name = "cryptography" },
+]
 near = [
     { name = "nearai-inference-sdk" },
 ]
@@ -1023,6 +1026,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "cryptography", marker = "extra == 'local-commons'", specifier = "==50.0.2" },
     { name = "httpx", specifier = "==0.28.1" },
     { name = "jsonschema", specifier = "==4.25.1" },
     { name = "nearai-inference-sdk", marker = "extra == 'near'", specifier = "==0.3.0" },
@@ -1032,7 +1036,7 @@ requires-dist = [
     { name = "sounddevice", marker = "extra == 'live'", specifier = "==0.5.3" },
     { name = "websockets", marker = "extra == 'live'", specifier = ">=15,<16" },
 ]
-provides-extras = ["near", "intents", "audio", "live"]
+provides-extras = ["local-commons", "near", "intents", "audio", "live"]
 
 [package.metadata.requires-dev]
 dev = [

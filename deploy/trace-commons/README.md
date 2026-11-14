@@ -1,5 +1,10 @@
 # Deploy the Orbo-compatible Trace Commons integration
 
+For a loopback instance that needs no external account or provider key, use the
+[synthetic local contribution/retrieval setup](local-development.md). It exercises
+the real contributor, local signing issuer, ingest and consumer. The production
+configuration below remains a separate qualification path.
+
 This setup builds the **pinned, patched contributor and open ingest server**, records executable provenance, supplies Linux services, and checks a deployed server's identity and exact evidence delivery. Nothing enrolls a device, changes consent, approves a trace, transfers funds, or deploys remotely automatically. These instructions target an operator-controlled instance that agrees to the `orbo.task-evidence.v1` contract and provenance-marked Feedback carrier.
 
 The upstream open build does **not** contain the proprietary production Score, settlement or payout adapters. A passing health check cannot establish admission, rewards, received credit, or applied usage. A production operator must supply those components if the intended deployment requires them. The packaged open server is useful for the supported ingest/review/export API; it must not be represented as the complete commercial rewards service.

@@ -1,5 +1,15 @@
 # Trace Commons patch integration
 
+**Local self-hosted flow verified:** the real native contributor,
+locally generated enrollment grant, PostgreSQL-backed signing issuer and patched
+ingest now pass the synthetic runtime export → exact daemon review/approval →
+signed upload → zero-credit server review → consumer digest reconstruction flow.
+No external account or provider key is needed for this development lane. See the
+[local setup and credential matrix](../../deploy/trace-commons/local-development.md).
+The semantic privacy classifier, production scoring/rewards, physical robot data
+and hosted deployment remain separate unperformed checks. Historical statements
+below about no deployment refer to their earlier handoff dates.
+
 The build applies patches to a pinned upstream source revision. `patches/series.json` is the authoritative application order: **two generic contributor fixes, followed by three Orbo extensions**. The generic patches are independent upstream review candidates; the Orbo patches are not part of those proposed PRs.
 
 The production integration remains pinned to `UPSTREAM_REVISION` (`8fcb9e6`, contributor 1.0.7). `PR_BASE_REVISION` records the separately inspected upstream review base (`279f104`, contributor 1.0.8). Reviewing against current upstream does not silently upgrade the Orbo deployment.
