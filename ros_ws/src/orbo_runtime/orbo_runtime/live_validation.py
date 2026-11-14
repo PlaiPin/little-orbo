@@ -117,12 +117,12 @@ def initialize(directory):
 
 
 def read_credentials():
-    """Read the shared external secret source; never consult local/ambient keys."""
+    """Read the shared credential file; never consult ambient provider keys."""
     try:
         values = read_values()
     except Rejected:
         raise SetupError(
-            "External credential file is unavailable or invalid."
+            "Shared credential file is unavailable or invalid."
         ) from None
     return {name: values[name] for name in FIELDS if name in values}
 
@@ -419,7 +419,7 @@ def main(argv=None):
         if args.command == "init":
             path = initialize(args.directory)
             print(
-                f"Created/preserved local config/reports at {path} and external credential template. No network requests."
+                f"Created/preserved local config/reports at {path} and shared credential template. No network requests."
             )
             return 0
         directory, config, credentials, missing = load_setup(
@@ -427,7 +427,7 @@ def main(argv=None):
         )
         if missing:
             print(
-                "Not ready. Fill these fields in the configured external credential file: "
+                "Not ready. Fill these fields in the configured shared credential file: "
                 + ", ".join(missing)
             )
             return 2

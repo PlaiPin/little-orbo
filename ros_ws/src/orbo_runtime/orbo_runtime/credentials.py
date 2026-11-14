@@ -1,4 +1,4 @@
-"""One external literal env file, selected by a public repository TOML pointer.
+"""One Git-ignored project .env, selected by a public repository TOML pointer.
 
 The file is never sourced as shell code. Services retrieve only their requested
 keys; native-service wrappers select the subset exported to a child process.
@@ -67,8 +67,8 @@ def config_file(path=None):
     raise Rejected("set ORBO_CREDENTIALS_CONFIG to the public credentials TOML")
 
 
-def external_path(path, config_path=None):
-    """Validate containment after resolution, retaining no-follow file semantics."""
+def credential_path(path, config_path=None):
+    """Resolve a pointer independently of cwd, retaining no-follow file semantics."""
     value = str(path)
     marker = "${CREDENTIALS_DIRECTORY}"
     if marker in value:
@@ -84,6 +84,12 @@ def external_path(path, config_path=None):
             raise Rejected("relative credential paths require a pointer configuration")
         result = Path(config_path).absolute().parent / result
     result = Path(os.path.abspath(result))
+    return result
+
+
+def external_path(path, config_path=None):
+    """Optional standalone wallet JSON files remain outside tracked source trees."""
+    result = credential_path(path, config_path)
     resolved = result.resolve()
     if any(resolved.is_relative_to(root) for root in _roots(config_path)):
         raise Rejected("credential file must be outside the repository/deployment tree")
@@ -107,7 +113,7 @@ def credential_file(path=None):
         raise Rejected(
             "invalid or unreadable credentials pointer configuration"
         ) from None
-    return external_path(document["credentials"]["file"], config)
+    return credential_path(document["credentials"]["file"], config)
 
 
 def parse_values(text):
@@ -174,9 +180,9 @@ def credential(name, *, required=True):
 
 
 def initialize(config_path=None):
-    """Create an empty private external template; never replace existing values."""
+    """Copy .env.example to the private .env; never replace existing values."""
     path = credential_file(config_path)
-    sample = config_file(config_path).parent / "credentials.env.example"
+    sample = path.with_name(".env.example")
     if sample.is_file():
         if sample.stat().st_size > LIMIT:
             raise Rejected("credential example exceeds limit")

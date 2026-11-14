@@ -38,7 +38,7 @@ python3 tools/package-commons.py --verify artifacts/commons-release-linux-arm64
 
 This checks every packaged file without executing it. Transfer the manifest through a trusted channel; hashes detect corruption, not an attacker replacing both manifest and binaries. On the server, create a dedicated `tracecommons` system user and copy `bin/` to `/opt/trace-commons/bin/`. Install `trace-commons-ingest.service` under `/etc/systemd/system/` and place a root-owned, mode-0600 completed `ingest.env` at `/etc/trace-commons/ingest.env`. The service listens on loopback and creates its private data/cache directories through systemd. Do not expose port 3907 publicly.
 
-Both native service units use `/opt/orbo/.venv/bin/python -m orbo_runtime.commons_credentials`, so install the Orbo runtime Python package on the Commons host as well as on the robot. All user-supplied API credentials and database secrets live in the **single external file** described by the [deployment README](../README.md). The services use `LoadCredential=orbo.env:/etc/orbo/credentials.env` and the nonsecret pointer `/opt/orbo/deploy/credentials.service.toml`; systemd supplies an ephemeral per-service copy without granting the `tracecommons` user access to other services' state. Keep `/etc/orbo/credentials.env` root-owned, mode 0600. Do not put secrets in `ingest.env`, unit files, the repository, or daemon settings.
+Both native service units use `/opt/orbo/.venv/bin/python -m orbo_runtime.commons_credentials`, so install the Orbo runtime Python package on the Commons host as well as on the robot. All user-supplied API credentials and database secrets live in the **Git-ignored project `.env`** described by the [deployment README](../README.md). The services use `LoadCredential=orbo.env:/opt/orbo/.env` and the nonsecret pointer `/opt/orbo/deploy/credentials.service.toml`; systemd supplies an ephemeral per-service copy without granting the `tracecommons` user access to other services' state. Keep `/opt/orbo/.env` root-owned, mode 0600. Do not put secrets in `ingest.env`, unit files, `.env.example`, other tracked files, or daemon settings.
 
 The ingest service needs `DATABASE_URL`, `TRACE_COMMONS_LOGIN_RESOLVER_DATABASE_URL`, and `TRACE_NEAR_AI_PRIVACY_API_KEY` in that shared file, plus any configured issuer/operator secrets under their native `TRACE_COMMONS_*` names. The contributor receives only the selected privacy-classifier settings; it does not inherit ingest administrator, database, wallet or OpenAI secrets. Both services read the file automatically at launch; restart them after rotating credentials.
 
@@ -79,12 +79,12 @@ sudo install -o orbo -g orbo -m 0600 \
 
 The example explicitly disables discovery of unrelated coding-agent sessions, telemetry and proxy body capture. Only files deliberately placed in the contributor staging folder are observed. Normalized trajectories remain manual-review-only in the patched watcher. Inspect existing settings before upgrades; do not reset an existing owner's choices.
 
-Put the intended instance's invite in `TRACE_COMMONS_INVITE` in the same external credential file. Enrollment is an explicit one-time operation; starting the daemon service never enrolls it. On the installed Linux host, run the wrapper with the same systemd credential source:
+Put the intended instance's invite in `TRACE_COMMONS_INVITE` in the same project `.env`. Enrollment is an explicit one-time operation; starting the daemon service never enrolls it. On the installed Linux host, run the wrapper with the same systemd credential source:
 
 ```sh
 sudo systemd-run --wait --pipe --collect \
   --property=User=orbo --property=Group=orbo --property=UMask=0077 \
-  --property=LoadCredential=orbo.env:/etc/orbo/credentials.env \
+  --property=LoadCredential=orbo.env:/opt/orbo/.env \
   --setenv=ORBO_CREDENTIALS_CONFIG=/opt/orbo/deploy/credentials.service.toml \
   /opt/orbo/.venv/bin/python -m orbo_runtime.commons_credentials login \
   --binary /opt/trace-commons/bin/trace-commons-contributor \
@@ -122,7 +122,7 @@ uv run --frozen python tools/check-commons-deployment.py \
 
 Add `--allow-network` to verify public `/health` and its exact build identity. Run as the contributor/runtime user with `--socket /var/lib/orbo/commons/daemon.sock` to also verify enrollment and the patched IPC methods. The report keeps setup completion, paused state and terms hold separate from health.
 
-After a deliberately approved trace is actually accepted, put `COMMONS_EXPORT_TOKEN` in the same shared external credential file and add `--submission-id UUID --digest REVIEWED_EXPORT_SHA256 --purpose embodied_process --privacy-risk low`. This checks the authenticated custom endpoint, exact selection acknowledgement, reconstruction and the exact reviewed package digest. It does not return trace content or tokens. Missing admission or incompatible delivery fails the check; public health alone cannot pass it. Exporter authorization must include the selected tenant, purpose and debugging-evaluation consent scope.
+After a deliberately approved trace is actually accepted, put `COMMONS_EXPORT_TOKEN` in the same project `.env` and add `--submission-id UUID --digest REVIEWED_EXPORT_SHA256 --purpose embodied_process --privacy-risk low`. This checks the authenticated custom endpoint, exact selection acknowledgement, reconstruction and the exact reviewed package digest. It does not return trace content or tokens. Missing admission or incompatible delivery fails the check; public health alone cannot pass it. Exporter authorization must include the selected tenant, purpose and debugging-evaluation consent scope.
 
 Use the live E2E runner for the upstream task and review/approval stages. Consumer delivery is process evidence; image artifact transport and independent visual outcome scoring are not established by text/event delivery. Rewards and credits require separate authoritative receipts and reconciliation.
 

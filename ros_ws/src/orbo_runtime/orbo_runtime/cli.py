@@ -757,7 +757,7 @@ def main(args=None):
     req.add_argument("--args", default="{}")
     req.add_argument("--socket", default="/run/orbo/runtime.sock")
     sub.add_parser("diagnostics")
-    sub.add_parser("credentials", help="initialize/check external credentials (use --help)")
+    sub.add_parser("credentials", help="initialize/check shared credentials (use --help)")
     sub.add_parser("live-e2e", help="opt-in live integration tests (use --help)")
     sub.add_parser("intents", help="explicit NEAR Intents quote/approval/execution (use --help)")
     analysis = sub.add_parser("analyze")

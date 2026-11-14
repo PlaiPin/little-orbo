@@ -1,4 +1,4 @@
-"""Launch native Commons services from Orbo's single external credential source.
+"""Launch native Commons services from Orbo's single shared credential source.
 
 The contributor's protocol redactor supports environment-selected privacy
 filtering independently of its persisted `pii_filter` selector. Keeping that

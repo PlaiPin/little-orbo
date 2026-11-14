@@ -6,4 +6,4 @@ ExecStart=/opt/orbo/deploy/run-runtime.sh /etc/orbo/embodied.toml
 # Local motion is stopped first; allow bounded provider/Live finalization afterward.
 TimeoutStopSec=150
 Environment=ORBO_CREDENTIALS_CONFIG=/opt/orbo/deploy/credentials.service.toml
-LoadCredential=orbo.env:/etc/orbo/credentials.env
+LoadCredential=orbo.env:/opt/orbo/.env

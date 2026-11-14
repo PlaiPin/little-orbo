@@ -81,16 +81,17 @@ def test_bad_assignments_fail_without_exposing_values(setup, content):
     assert content not in str(result.value)
 
 
-def test_repo_secret_and_symlink_into_repo_are_rejected(setup, tmp_path):
+def test_project_dotenv_is_loaded_but_symlink_is_rejected(setup, tmp_path):
     repo, config, _ = setup
-    in_repo = repo / "private.env"
+    in_repo = repo / ".env"
     put(in_repo, "KEY=inside\n")
-    for target in (in_repo, tmp_path / "redirect.env"):
-        if target != in_repo:
-            target.symlink_to(in_repo)
-        config.write_text("[credentials]\nfile = " + json.dumps(str(target)))
-        with pytest.raises(Rejected, match="outside"):
-            credentials.read_values()
+    config.write_text('[credentials]\nfile = ".env"\n')
+    assert credentials.read_values() == {"KEY": "inside"}
+    target = tmp_path / "redirect.env"
+    target.symlink_to(in_repo)
+    config.write_text("[credentials]\nfile = " + json.dumps(str(target)))
+    with pytest.raises(Rejected):
+        credentials.read_values()
 
 
 def test_public_permissions_and_symlinks_fail_closed(setup, tmp_path):
@@ -149,6 +150,7 @@ def test_default_pointer_discovery_is_independent_of_cwd(tmp_path, monkeypatch):
     found = credentials.config_file()
     assert found.name == "credentials.toml" and found.parent.name == "deploy"
     assert found.is_file()
+    assert credentials.credential_file() == found.parent.parent / ".env"
 
 
 def test_relative_external_pointer_resolves_from_config_not_cwd(
@@ -167,8 +169,8 @@ def test_relative_external_pointer_resolves_from_config_not_cwd(
 def test_initializer_copies_documented_example_and_refuses_populated_sample(setup):
     _, config, secret = setup
     source = Path(__file__).resolve().parents[1]
-    template = (source / "deploy/credentials.env.example").read_text()
-    sample = config.parent / "credentials.env.example"
+    template = (source / ".env.example").read_text()
+    sample = secret.parent / ".env.example"
     sample.write_text(template)
     assert credentials.initialize()["created"] is True
     assert secret.read_text() == template
@@ -182,7 +184,7 @@ def test_initializer_copies_documented_example_and_refuses_populated_sample(setu
     assert not secret.exists()
 
 
-@pytest.mark.parametrize("value", ["secrets.env", "$HOME/secret.env", ""])
+@pytest.mark.parametrize("value", ["$HOME/secret.env", ""])
 def test_unsupported_pointer_paths_are_rejected(setup, value):
     _, config, _ = setup
     config.write_text("[credentials]\nfile = " + json.dumps(value))

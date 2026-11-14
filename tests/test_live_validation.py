@@ -306,5 +306,5 @@ def test_repository_local_secret_file_is_ignored(configured, external_credential
 
 def test_external_secret_permissions_fail_closed(configured, external_credentials):
     external_credentials.chmod(0o644)
-    with pytest.raises(live.SetupError, match="External"):
+    with pytest.raises(live.SetupError, match="Shared credential file"):
         live.load_setup(configured, "near", False)

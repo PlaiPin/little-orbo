@@ -159,11 +159,11 @@ class NearSigner:
                     raise Rejected("signer key file exceeds size limit")
                 value = json.loads(contents)
         elif isinstance(values, dict):
-            # Only construct this mapping from the shared external credential
+            # Only construct this mapping from the shared credential
             # resolver, or a deliberately injected signer in an offline test.
             value = values
         else:
-            raise Rejected("external signer credentials required")
+            raise Rejected("shared signer credentials required")
         if not isinstance(value, dict):
             raise Rejected("invalid signer credential mapping")
         if value.get("account_id") != sender:

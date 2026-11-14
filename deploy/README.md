@@ -13,45 +13,41 @@ credentialed service acceptance and physical robot qualification.
 | Local microphone/speaker commissioning | [Live audio](audio/README.md) |
 | Existing Pi camera stack | [Camera setup](ros2-camera/README.md) |
 
-## Shared external credentials
+## Project credentials
 
-The public [credentials.toml](credentials.toml) points to
-`../orbo-local/credentials.env` beside the checkout, outside the repository. Both
-the folder and file are visible in a normal file browser. The committed
-[credentials.env.example](credentials.env.example) lists every supported key,
-grouped by integration, with blank values and instructions. From the repository
-root, copy it once and edit the external copy:
+Copy the committed [.env.example](../.env.example) to `.env` in the
+`little-orbo` project root, then fill in the keys you need:
 
 ```sh
-mkdir -p ../orbo-local
-cp -n deploy/credentials.env.example ../orbo-local/credentials.env
-chmod 700 ../orbo-local
-chmod 600 ../orbo-local/credentials.env
+cp -n .env.example .env
+chmod 600 .env
 ```
 
-Alternatively, the initializer copies the same example and sets permissions:
+Or initialize the same template with permissions set automatically:
 
 ```sh
 uv run --frozen orbo credentials init
 uv run --frozen orbo credentials status
 ```
 
-`init` never overwrites an existing file. `status` prints presence booleans only.
-The file must be owned by the executing user and mode 0600. It uses literal
-`KEY=value` lines with optional matching quotes and whole-line comments; it is
-not shell code and has no variable/command interpolation. Do not `source` it.
-Neither actual values nor private signer keys belong in the TOML or repository.
+Neither command overwrites existing values. `status` prints presence booleans
+only. `.env` is Git-ignored; `.env.example` is committed and contains only blank
+values grouped by integration. Keep private signer keys and real API keys in
+`.env`, never in the sample, TOML, command arguments or other tracked files.
 
-Runtime providers, the Live E2E runner, optional accounting, remote credentials,
-and Intents automatically use this source. No shell exports of provider keys
-are needed or consulted. Select a different external path in the TOML, or set
-`ORBO_CREDENTIALS_CONFIG` to another public pointer file. Relative paths in the
-TOML resolve against that file's directory, independently of the working
-directory. The default `../../orbo-local/credentials.env` is relative to
-`deploy/credentials.toml`. Symlinks and secret files inside the
-repository/deployment tree are rejected.
-Standalone wheel installations outside a checkout must select their pointer via
-`ORBO_CREDENTIALS_CONFIG`.
+Runtime providers, the Live E2E runner, accounting, remote credentials, and
+Intents automatically read this `.env`. Native Commons services and enrollment
+use the same source through their launcher. No provider-key exports or shell
+sourcing are needed. The parser accepts literal `KEY=value` lines, optional
+matching quotes and whole-line comments; it does not execute shell code or
+interpolate variables. The real file must be owned by the executing user and
+mode 0600; symlinks and hardlinks are rejected.
+
+The public [credentials.toml](credentials.toml) selects `../.env`, relative to
+that config file's directory, so resolution is independent of the shell's
+working directory. `ORBO_CREDENTIALS_CONFIG` can select a different public TOML
+pointer. Standalone wheel installations outside a checkout must select their
+pointer explicitly.
 
 The generated template contains `NEARAI_API_KEY`, `OPENAI_API_KEY`, Commons
 consumer/accounting tokens, the optional NEAR reporting and Intents API keys,
@@ -62,9 +58,9 @@ credentials from the same source through the native launcher. Leave unused
 values blank. Nonsecret account, endpoint, route and spending choices stay in
 the ordinary runtime/Intents/server configuration.
 
-For systemd hosts, the single source is `/etc/orbo/credentials.env`, owned by
+For systemd hosts, the single source is the deployed project’s `/opt/orbo/.env`, owned by
 root and mode 0600. Each supplied service uses
-`LoadCredential=orbo.env:/etc/orbo/credentials.env`; systemd makes a private
+`LoadCredential=orbo.env:/opt/orbo/.env`; systemd makes a private
 readable copy for that service's UID. The public
 [service pointer](credentials.service.toml) selects this copy. This works with
 the units' home-directory protection and does not require a shared Unix group
@@ -79,10 +75,12 @@ On the intended Ubuntu 24.04 ARM64 Pi with ROS 2 Jazzy already installed, use
 services first; the installer refuses an active stack. It installs locked Python
 extras and builds the ROS workspace. It preserves existing configuration/data,
 copies `embodied.toml` only when absent, and does not enable or start services.
-The default preserves the installed camera stack.
+The default preserves the installed camera stack. The installer copies `.env.example`
+but never copies a developer’s `.env`; provision that file on the target host.
+An existing target `.env` is preserved during upgrades.
 
 Edit `/etc/orbo/embodied.toml` for the commissioned map, camera, calibration,
-devices and owner. Install the external `/etc/orbo/credentials.env` described
+devices and owner. Provision the deployed project’s `/opt/orbo/.env` described
 above, then copy
 [orbo-embodied.conf.example](systemd/orbo-embodied.conf.example) to
 `/etc/systemd/system/orbo-runtime.service.d/embodied.conf`. Create that drop-in
@@ -129,7 +127,7 @@ pixi run --locked orbo-sim embodied:=true
 
 Copy [gazebo-embodied.toml](profiles/gazebo-embodied.toml) to an ignored local
 location such as `.live-validation/gazebo-embodied.toml`. Enable NEAR in that copy
-and fill `NEARAI_API_KEY` in the external credentials file. In another terminal:
+and fill `NEARAI_API_KEY` in the project `.env`. In another terminal:
 
 ```sh
 pixi run --locked bash tools/run-embodied-runtime.sh .live-validation/gazebo-embodied.toml

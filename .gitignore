@@ -19,6 +19,7 @@ sdkconfig.old
 
 .DS_Store
 .env.*
+!/.env.example
 
 # Local live-service credentials, configuration, locks and reports
 .live-validation/

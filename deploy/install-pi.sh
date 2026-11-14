@@ -62,7 +62,7 @@ usermod -a -G audio,dialout,video,input orbo
 install -d -m 0755 /opt/orbo /etc/orbo
 install -d -o orbo -g orbo -m 0700 /var/lib/orbo
 if [[ "$ORBO_SOURCE" != /opt/orbo ]]; then
-  rsync -a --exclude .git --exclude .sdk --exclude .venv --exclude .pixi --exclude artifacts \
+  rsync -a --include '/.env.example' --exclude .git --exclude .sdk --exclude .venv --exclude .pixi --exclude artifacts \
     --exclude .live-validation --exclude credentials.env \
     --exclude .env --exclude '.env.*' --exclude .DS_Store --exclude secrets --exclude '*.db' --exclude '*.db-*' \
     --exclude __pycache__ --exclude .pytest_cache --exclude .ruff_cache \

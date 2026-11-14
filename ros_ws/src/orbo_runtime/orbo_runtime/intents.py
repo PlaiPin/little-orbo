@@ -489,11 +489,11 @@ async def run(args):
                 values = signer_values()
                 if any(values.values()):
                     if not all(values.values()):
-                        raise Rejected("external signer credentials are incomplete")
+                        raise Rejected("shared signer credentials are incomplete")
                     signer = NearSigner(policy.body["sender"], values=values)
         if args.command == "execute":
             if signer is None:
-                raise Rejected("external signer credentials or --key-file required")
+                raise Rejected("shared signer credentials or --key-file required")
             return await swaps.execute(
                 args.swap_id, args.approve, signer, allow_funded=args.allow_funded
             )

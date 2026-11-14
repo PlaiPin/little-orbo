@@ -165,11 +165,15 @@ def test_default_preserves_camera_and_does_not_copy_private_or_generated_files(i
         private.parent.mkdir(parents=True, exist_ok=True)
         private.write_text('LOCAL_ONLY')
     (source / 'deploy/public.toml').write_text('public = true')
+    (source / '.env.example').write_text('PUBLIC_TEMPLATE')
+    (target / '.env').write_text('PRESERVED_TARGET_CREDENTIALS')
     result, calls = run()
     assert result.returncode == 42, result.stderr
     apt = next(call for call in calls if call[:2] == ['apt-get', 'install'])
     assert 'ros-jazzy-camera-ros' not in apt
     assert (target / 'deploy/public.toml').is_file()
+    assert (target / '.env.example').read_text() == 'PUBLIC_TEMPLATE'
+    assert (target / '.env').read_text() == 'PRESERVED_TARGET_CREDENTIALS'
     assert not any(p.read_bytes() == b'LOCAL_ONLY' for p in target.rglob('*') if p.is_file())
 
 
