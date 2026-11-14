@@ -143,9 +143,10 @@ async def test_near_uses_selected_image_and_closes(config):
 
 
 class Transport:
-    def __init__(self, *, output=True, delegate=True):
+    def __init__(self, *, output=True, delegate=True, audio_before_ack=False):
         self.events = asyncio.Queue()
         self.output, self.delegate = output, delegate
+        self.audio_before_ack = audio_before_ack
         self.closed = False
 
     async def connect(self):
@@ -176,6 +177,13 @@ class Transport:
             else:
                 await self.finish()
         elif event["type"] == "session.commentary.append":
+            if self.audio_before_ack:
+                await self.events.put(
+                    {
+                        "type": "session.output_audio.delta",
+                        "delta": base64.b64encode(b"\x01\0" * 100).decode(),
+                    }
+                )
             await self.events.put(
                 {
                     "type": "session.commentary.appended",
@@ -214,12 +222,19 @@ async def test_live_requires_delegation_context_audio_and_usage(config):
     result = await e2e.live_stage(config, factory=Reasoner, transport=transport)
     assert result["verified_delegations"] == 1
     assert result["context_accepted"] == 1
-    assert result["frames_after_backend"] == 100
+    assert result["frames_after_context_acceptance"] == 100
     assert result["audibility"] == "not_tested"
     assert transport.closed
 
 
-@pytest.mark.parametrize("options", [{"output": False}, {"delegate": False}])
+@pytest.mark.parametrize(
+    "options",
+    [
+        {"output": False},
+        {"delegate": False},
+        {"output": False, "audio_before_ack": True},
+    ],
+)
 async def test_session_start_alone_is_not_success(config, options):
     transport = Transport(**options)
     with pytest.raises(Rejected):
@@ -235,8 +250,12 @@ async def test_live_runtime_chain_uses_openai_release_and_real_provider_evidence
 
     async def call(config, method, args):
         calls.append((method, args))
-        if method == "task.text":
-            assert args["destination"] == "openai"
+        if method == "task.delegate":
+            context = args["context"]
+            assert context["complete_turn"] is False
+            assert context["delegation_id"] == "delegation"
+            assert context["offset_ms"] == 10
+            assert context["fragments"][0]["text"] == "Describe your capabilities"
             return {"task_id": "task"}
         if method == "task.get":
             return {
@@ -264,7 +283,7 @@ async def test_live_runtime_chain_uses_openai_release_and_real_provider_evidence
     result = await e2e.live_stage(config, transport=Transport())
     assert result["tasks"][0]["task_id"] == "task"
     assert result["tasks"][0]["provenance"] == "synthetic"
-    assert result["frames_after_backend"] == 100
+    assert result["frames_after_context_acceptance"] == 100
 
 
 async def test_task_rejects_fixture_and_records_cancellation(config):

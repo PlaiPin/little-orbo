@@ -8,6 +8,7 @@ owner-controlled task evidence. This runner never creates runtime grants.
 import argparse
 import asyncio
 import base64
+import dataclasses
 import hashlib
 import importlib.util
 import json
@@ -361,13 +362,14 @@ async def live_stage(config, *, factory=NearReasoner, transport=None, bridge_typ
         store.grant(
             owner, scope, target, True, store.clock.utc() + config["stage_seconds"] + 60
         )
-    calls, proofs, tasks = 0, [], []
+    calls, proofs, tasks, delegation_ids = 0, [], [], []
 
     async def backend(context):
         nonlocal calls
         if calls >= 1:
             raise Rejected("one NEAR delegation per live smoke run")
         calls += 1
+        delegation_ids.append(context.delegation_id)
         fragments = [
             item["text"] for item in context.fragments if item["role"] == "user"
         ]
@@ -376,12 +378,8 @@ async def live_stage(config, *, factory=NearReasoner, transport=None, bridge_typ
         if config.get("live_backend") == "runtime":
             selected = await runtime_call(
                 config,
-                "task.text",
-                {
-                    "text": " ".join(fragments),
-                    "key": "live-e2e:" + context.session_id,
-                    "destination": "openai",
-                },
+                "task.delegate",
+                {"context": dataclasses.asdict(context)},
             )
             if not selected.get("task_id"):
                 raise Rejected("Live task request did not admit a task")
@@ -467,7 +465,7 @@ async def live_stage(config, *, factory=NearReasoner, transport=None, bridge_typ
             "tasks": tasks,
             "context_accepted": accepted,
             "generated_frames": audio.generated_frames,
-            "frames_after_backend": audio.after_release_frames,
+            "frames_after_context_acceptance": audio.after_release_frames,
             "audibility": "not_tested",
             "acoustic_echo": "not_tested",
             "spoken_semantics": "requires_listener_review",
@@ -477,6 +475,7 @@ async def live_stage(config, *, factory=NearReasoner, transport=None, bridge_typ
             "live_exchange_failed_or_timed_out",
             {
                 "session_id": bridge.session_id,
+                "delegation_ids": delegation_ids,
                 "tasks": tasks,
                 "generated_frames": audio.generated_frames,
                 "frames_after_context_acceptance": audio.after_release_frames,
