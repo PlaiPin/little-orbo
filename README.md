@@ -5,6 +5,10 @@ ESP32-S3. Native Mac development uses the locked Pixi environment. The host Pyth
 runtime and all five ROS package sources are versioned; deployment archives,
 generated evidence and external service installations are separate.
 
+For installation and copy-and-paste hardware checks on the robot, use the
+[Raspberry Pi 5 quickstart](PI5_QUICKSTART.md). It uses the Pi's installed
+ROS 2 Jazzy and preserves the working camera stack; no Pixi is needed on the Pi.
+
 Start with the [runtime guide](packages/orbo_runtime/README.md),
 [ROS workspace guide](ros_ws/README.md), and [firmware README](firmware/orbo/README.md).
 Software-only checks do not establish physical driving, Pi peripheral operation,
