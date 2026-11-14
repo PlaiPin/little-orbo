@@ -94,9 +94,22 @@ class Broker:
         return self.acquire(owner)
 
     async def dispatch(
-        self, owner, episode_id, key, capability, parameters, epoch, duration=2
+        self,
+        owner,
+        episode_id,
+        key,
+        capability,
+        parameters,
+        epoch,
+        duration=2,
+        *,
+        supervisor=None,
     ):
-        finite(duration, 0.05, 30)
+        # Only a local supervised navigation task may outlive an ordinary command.
+        # Each motor packet still expires independently in the existing adapter.
+        if supervisor is not None and capability != "navigation.named_goal":
+            raise Rejected("supervision is restricted to named navigation")
+        finite(duration, 0.05, 600 if supervisor is not None else 30)
         spec = self.adapter.capabilities.get(capability)
         if not spec or (not spec.qualified and not self.adapter.simulated):
             raise Rejected("unqualified capability")
@@ -159,7 +172,9 @@ class Broker:
         try:
             self.check_lease(owner, epoch)
             async with asyncio.timeout(duration):
-                result = await self._dispatch_with_lease(owner, epoch, action)
+                result = await self._dispatch_with_lease(
+                    owner, epoch, action, supervisor
+                )
             if result.command_id != action.command_id:
                 raise Rejected("uncorrelated adapter result")
             self.result(result)
@@ -176,12 +191,33 @@ class Broker:
             raise
         return self.command(action.command_id)
 
-    async def _dispatch_with_lease(self, owner, epoch, action):
+    async def _dispatch_with_lease(self, owner, epoch, action, supervisor=None):
         async def guard():
+            next_renewal = self.store.clock.mono()
             while True:
                 self.check_lease(owner, epoch)
+                if supervisor is not None:
+                    if supervisor() is not True:
+                        raise Rejected("task supervision ended")
+                    if self.store.clock.mono() >= next_renewal:
+                        # Renewal never resurrects expired authority and does not
+                        # change epoch, so teleop cannot be silently preempted.
+                        with self.store.transaction() as db:
+                            self.check_lease(owner, epoch)
+                            db.execute(
+                                "UPDATE leases SET expires=? WHERE robot=? AND epoch=?",
+                                (
+                                    self.store.clock.utc() + 2,
+                                    self.adapter.robot_id,
+                                    epoch,
+                                ),
+                            )
+                        self.lease_deadline = self.store.clock.mono() + 2
+                        next_renewal = self.store.clock.mono() + 0.5
                 await asyncio.sleep(0.02)
 
+        if supervisor is not None and supervisor() is not True:
+            raise Rejected("task supervision ended")
         work = asyncio.create_task(self.adapter.dispatch(action))
         monitor = asyncio.create_task(guard())
         try:

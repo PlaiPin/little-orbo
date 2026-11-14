@@ -170,7 +170,8 @@ async def test_nav2_goal_lease_and_cancel_protocol(tmp_path):
             == "nav2_localization_feedback"
         )
         assert leases and all(m.enable_wheels and m.valid_for_ms <= 250 for m in leases)
-        task = asyncio.create_task(nav.dispatch(action(3)))
+        cancelled_action = action(3)
+        task = asyncio.create_task(nav.dispatch(cancelled_action))
         async with asyncio.timeout(2):
             while len(received) < 2:
                 await asyncio.sleep(0.01)
@@ -180,6 +181,11 @@ async def test_nav2_goal_lease_and_cancel_protocol(tmp_path):
         async with asyncio.timeout(2):
             while not cancelled:
                 await asyncio.sleep(0.01)
+        async with asyncio.timeout(2):
+            while nav.reconcile(cancelled_action.command_id).state == "unknown":
+                await asyncio.sleep(0.01)
+        assert nav.reconcile(cancelled_action.command_id).state == "cancelled"
+        assert nav.reconcile(cancelled_action.command_id).evidence == "controller_ack"
         assert adapter.stops == 2
     finally:
         executor.shutdown(timeout_sec=2)

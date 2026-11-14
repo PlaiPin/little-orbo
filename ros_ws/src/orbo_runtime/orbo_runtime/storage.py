@@ -47,6 +47,21 @@ CREATE TABLE IF NOT EXISTS exports(
 CREATE TABLE IF NOT EXISTS approvals(
  export_id TEXT PRIMARY KEY REFERENCES exports(id), digest TEXT NOT NULL,
  owner TEXT NOT NULL, revision INTEGER NOT NULL, expires REAL NOT NULL, revoked INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS embodied_tasks(
+ id TEXT PRIMARY KEY, episode_id TEXT NOT NULL REFERENCES episodes(id), owner TEXT NOT NULL,
+ environment TEXT NOT NULL, map_version TEXT NOT NULL, revision INTEGER NOT NULL,
+ state TEXT NOT NULL, request TEXT NOT NULL, budget TEXT NOT NULL, used TEXT NOT NULL,
+ created REAL NOT NULL, deadline REAL NOT NULL, updated REAL NOT NULL, result TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS task_operations(
+ id TEXT PRIMARY KEY, task_id TEXT NOT NULL REFERENCES embodied_tasks(id),
+ revision INTEGER NOT NULL, operation_key TEXT NOT NULL, capability TEXT NOT NULL,
+ parameters TEXT NOT NULL, state TEXT NOT NULL, deadline REAL NOT NULL,
+ command_id TEXT REFERENCES commands(id), result TEXT NOT NULL,
+ UNIQUE(task_id,revision,operation_key));
+CREATE TABLE IF NOT EXISTS semantic_places(
+ id TEXT PRIMARY KEY, owner TEXT NOT NULL, environment TEXT NOT NULL,
+ map_version TEXT NOT NULL, name TEXT NOT NULL, body TEXT NOT NULL,
+ UNIQUE(owner,environment,map_version,name));
 CREATE TABLE IF NOT EXISTS records(
  provider TEXT NOT NULL, account TEXT NOT NULL, external_id TEXT NOT NULL,
  kind TEXT NOT NULL, digest TEXT NOT NULL, body TEXT NOT NULL,
@@ -227,5 +242,13 @@ class Store:
             )
             self.db.execute(
                 "UPDATE reminders SET state='unknown',generation=generation+1,ack_token=NULL,ack_until=NULL WHERE state='delivering'"
+            )
+            self.db.execute(
+                "UPDATE task_operations SET state='unknown' WHERE state IN ('admitted','working')"
+            )
+            self.db.execute(
+                "UPDATE embodied_tasks SET state='unknown',updated=? "
+                "WHERE state IN ('accepted','working')",
+                (self.clock.utc(),),
             )
             self.event(None, "runtime.recovered", {"uncertain_commands": len(rows)})

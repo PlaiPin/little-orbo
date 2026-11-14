@@ -345,8 +345,11 @@ class OrboAdapter:
         self._snapshot()
         if self.teleoperation and command_id in self.teleoperation.results:
             return self.teleoperation.results[command_id]
-        if self.navigation and command_id in self.navigation.results:
-            return self.navigation.results[command_id]
+        if self.navigation and (
+            command_id in self.navigation.results
+            or command_id in self.navigation.pending_results
+        ):
+            return self.navigation.reconcile(command_id)
         key = uuid.UUID(command_id).int & ((1 << 64) - 1)
         with self.lock:
             observed = self.statuses.get(key)

@@ -50,10 +50,11 @@ class Navigation:
         self.active_goal = None
         self.stopping = False
         self.results = {}
+        self.pending_results = {}
         adapter.capabilities["navigation.named_goal"] = Capability(
             "navigation.named_goal",
             ("wheels",),
-            30,
+            600,
             ("controller_ack",),
             True,
         )
@@ -66,6 +67,10 @@ class Navigation:
     def _feedback(self, message):
         observation = message.feedback
         pose = observation.current_pose
+        stamp_ns = pose.header.stamp.sec * 1_000_000_000 + pose.header.stamp.nanosec
+        age_ns = self.adapter.node.get_clock().now().nanoseconds - stamp_ns
+        if pose.header.frame_id != "map" or not 0 <= age_ns <= 2_000_000_000:
+            return
         values = [
             pose.pose.position.x,
             pose.pose.position.y,
@@ -129,15 +134,17 @@ class Navigation:
         with self.observation_lock:
             self.feedback.clear()
             self.command_stamp_ns = 0
+            self.last_feedback_mono = time.monotonic()
         goal_stamp_ns = (
             goal.pose.header.stamp.sec * 1_000_000_000 + goal.pose.header.stamp.nanosec
         )
         send = self.client.send_goal_async(goal, feedback_callback=self._feedback)
         try:
             self.active_goal = await self.wait(send)
+            if self.active_goal.accepted:
+                result_future = self._remember_goal(action.command_id, self.active_goal)
             if not self.active_goal.accepted or self.stopping:
                 raise Rejected("navigation goal not admitted")
-            result_future = self.active_goal.get_result_async()
             # Planning can exceed the MCU's arm timeout. Wait for the current
             # goal's fresh collision-filtered command before granting motion.
             while not result_future.done():
@@ -155,8 +162,11 @@ class Navigation:
                 boot_id = health.boot_id
             while not result_future.done():
                 health = self.adapter._snapshot()
+                with self.observation_lock:
+                    feedback_age = time.monotonic() - self.last_feedback_mono
                 if (
-                    self.stopping
+                    feedback_age > 2
+                    or self.stopping
                     or time.monotonic() >= deadline
                     or health.boot_id != boot_id
                     or not health.armed
@@ -215,6 +225,7 @@ class Navigation:
             elif send.done():
                 late = send.result()
                 if late and late.accepted:
+                    self._remember_goal(action.command_id, late)
                     late.cancel_goal_async()
             else:
 
@@ -222,6 +233,7 @@ class Navigation:
                     if not future.cancelled() and future.exception() is None:
                         late = future.result()
                         if late and late.accepted:
+                            self._remember_goal(action.command_id, late)
                             late.cancel_goal_async()
 
                 send.add_done_callback(cancel_late)
@@ -231,3 +243,36 @@ class Navigation:
         self.stopping = True
         if self.active_goal:
             self.active_goal.cancel_goal_async()
+
+    def _remember_goal(self, command_id, goal):
+        if command_id not in self.pending_results:
+            self.pending_results[command_id] = goal.get_result_async()
+            if len(self.pending_results) > 128:
+                self.pending_results.pop(next(iter(self.pending_results)))
+        return self.pending_results[command_id]
+
+    def reconcile(self, command_id):
+        """Recover Nav2 terminal acknowledgment after local cancellation."""
+        if command_id in self.results:
+            return self.results[command_id]
+        future = self.pending_results.get(command_id)
+        if (
+            future is None
+            or not future.done()
+            or future.cancelled()
+            or future.exception()
+        ):
+            return ActionResult(command_id, "unknown", "none")
+        response = future.result()
+        state = {4: "completed", 5: "cancelled", 6: "failed"}.get(
+            response.status, "unknown"
+        )
+        result = ActionResult(
+            command_id,
+            state,
+            "controller_ack" if state != "unknown" else "none",
+            {"nav2_status": response.status, "physical_observation": False},
+        )
+        self.results[command_id] = result
+        self.pending_results.pop(command_id, None)
+        return result
