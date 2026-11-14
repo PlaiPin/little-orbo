@@ -27,7 +27,7 @@ SPEC.loader.exec_module(issuer)
 local = issuer.local
 
 
-async def run(directory):
+async def run(directory, *, privacy=None):
     config = local.read_config(directory)
     local.health(directory)
     state = directory / "contributor"
@@ -42,6 +42,8 @@ async def run(directory):
         )
     run_dir = directory / ("contribution-" + str(time.time_ns()))
     run_dir.mkdir(mode=0o700)
+    if privacy:
+        privacy["run_directory"] = str(run_dir)
     staging = run_dir / "staging"
     staging.mkdir(mode=0o700)
     original = (state / "daemon-settings.json").read_bytes()
@@ -62,7 +64,11 @@ async def run(directory):
     store.event(
         episode,
         "turn.started",
-        {"text": "Please run the synthetic reminder acknowledgment test."},
+        {
+            "text": privacy["request"]
+            if privacy
+            else "Please run the synthetic reminder acknowledgment test."
+        },
     )
     store.event(
         episode, "attention.awaiting_ack", {"generation": 1, "reminder_id": "synthetic"}
@@ -72,7 +78,13 @@ async def run(directory):
         episode, "attention.acknowledged", {"generation": 1, "reminder_id": "synthetic"}
     )
     store.event(
-        episode, "turn.completed", {"text": "The synthetic reminder was acknowledged."}
+        episode,
+        "turn.completed",
+        {
+            "text": privacy["response"]
+            if privacy
+            else "The synthetic reminder was acknowledged."
+        },
     )
     store.end_episode(episode, owner, "completed")
     exports = Exports(store)
@@ -98,6 +110,9 @@ async def run(directory):
             "image delivery",
         ],
     }
+    if privacy:
+        report["not_tested"].remove("NEAR privacy classifier")
+        report["not_tested"].append("server-side semantic privacy backstop")
     log = (run_dir / "daemon.log").open("ab")
     binary = Path(config["release"]) / "bin/trace-commons-contributor"
     process = subprocess.Popen(
@@ -108,6 +123,7 @@ async def run(directory):
             "RUST_LOG": "warn",
             "SSL_CERT_FILE": str(directory / "localhost.crt"),
             "TRACE_COMMONS_ALLOWED_HOSTS": "127.0.0.1",
+            **(privacy["environment"] if privacy else {}),
         },
         stdout=log,
         stderr=subprocess.STDOUT,
@@ -128,24 +144,105 @@ async def run(directory):
                 "complete_setup",
                 {"expected_scope": setup["scope"], "scopes": ["debugging_evaluation"]},
             )
-        for _ in range(60):
-            pending = await ipc.call("list_pending", {})
-            rows = [
-                row
-                for row in pending["pending"]
-                if row["session_hash"]
-                == "sha256:" + hashlib.sha256(content).hexdigest()
-            ]
-            if rows:
-                break
-            await asyncio.sleep(1)
-        else:
+
+        async def wait_entry(source):
+            for _ in range(60):
+                pending = await ipc.call("list_pending", {})
+                rows = [
+                    row
+                    for row in pending["pending"]
+                    if row["session_hash"]
+                    == "sha256:" + hashlib.sha256(source).hexdigest()
+                ]
+                if rows:
+                    return rows[0]["entry_id"]
+                await asyncio.sleep(1)
             local.write_private(
                 run_dir / "daemon-status.json", await ipc.call("status", {})
             )
             raise RuntimeError("synthetic trajectory was not queued")
-        entry = rows[0]["entry_id"]
-        preview = await commons.review(owner, export["export_id"], entry)
+
+        entry = await wait_entry(content)
+        if privacy:
+            raw_preview = await ipc.review(entry)
+            local.write_private(run_dir / "pii-native-preview.json", raw_preview)
+            decoded = json.dumps(json.loads(raw_preview["body"]), ensure_ascii=False)
+            assert all(value not in decoded for value in privacy["sensitive"]), (
+                "synthetic PII survived native redaction"
+            )
+            assert "🤖 Café" in decoded, "native redaction damaged Unicode context"
+            report["checks"]["native_semantic_pii_removal_and_unicode"] = "passed"
+            try:
+                await commons.review(owner, export["export_id"], entry)
+            except Rejected:
+                report["checks"]["changed_export_digest"] = (
+                    "rejected before native upload approval"
+                )
+            else:
+                raise RuntimeError(
+                    "redacted raw export unexpectedly preserved its digest"
+                )
+            raw_status = await ipc.call(
+                "orbo_entry_status",
+                {
+                    "entry_id": entry,
+                    "session_hash": "sha256:" + hashlib.sha256(content).hexdigest(),
+                    "offset": 0,
+                },
+            )
+            assert not raw_status["history"], "raw PII fixture was uploaded"
+            local.write_private(run_dir / "pii-not-uploaded.json", raw_status)
+            local.write_private(run_dir / "original-export.json", export)
+            # Exact-byte review requires a newly approved minimized package;
+            # silently accepting a model-mutated original would bypass the fence.
+            paths = [
+                ["events", i, "payload", "text"]
+                for i, event in enumerate(export["package"]["events"])
+                if isinstance(event["payload"].get("text"), str)
+            ]
+            export = exports.derive(owner, export["export_id"], redactions=paths)
+            try:
+                exports.approved_bytes(owner, export["export_id"])
+            except Rejected:
+                report["checks"]["minimized_export_requires_fresh_approval"] = "passed"
+            else:
+                raise RuntimeError("derived export inherited approval")
+            digest = export["sha256"]
+            exports.approve(
+                owner, export["export_id"], digest, expires=clock.utc() + 600
+            )
+            content = trajectory(export["package"])
+            local.write_private(staging / "minimized-task.jsonl", content)
+            local.write_private(run_dir / "approved-export.json", export)
+            report["source_digest"] = digest
+            entry = await wait_entry(content)
+        try:
+            preview = await commons.review(owner, export["export_id"], entry)
+        except Rejected as error:
+            if privacy:
+                report["blocked_stage"] = "minimized_export_review_before_upload"
+                report["failure_reason"] = str(error)
+                # The prepared-envelope cache is not proof of upload approval.
+                cached = state / f"daemon-approved-envelope-{entry}.json"
+                if cached.is_file():
+                    envelope = json.loads(cached.read_text())
+                    local.write_private(
+                        run_dir / "minimized-native-events.json", envelope["events"]
+                    )
+                status = await ipc.call(
+                    "orbo_entry_status",
+                    {
+                        "entry_id": entry,
+                        "session_hash": "sha256:" + hashlib.sha256(content).hexdigest(),
+                        "offset": 0,
+                    },
+                )
+                local.write_private(run_dir / "minimized-not-uploaded.json", status)
+                assert not status["history"], (
+                    "unreviewed minimized fixture was uploaded"
+                )
+                report["checks"]["minimized_not_uploaded"] = "passed"
+            raise
         local.write_private(run_dir / "reviewed-events.json", preview["body"].encode())
         report["checks"]["native_parser_redactor_and_exact_preview"] = "passed"
         approved = await commons.submit_reviewed(

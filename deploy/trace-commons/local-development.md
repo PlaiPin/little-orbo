@@ -115,6 +115,51 @@ credential store is still required; the working Mac path uses the ordinary
 contributor credential store. This is not a proof of Linux headless keyring setup.
 The test CA expires after 30 days; provision fresh isolated state for later runs.
 
+## Live privacy-filter test with synthetic data
+
+After setting `TRACE_NEAR_AI_PRIVACY_API_KEY` in the shared `.env`, run:
+
+```sh
+uv run --frozen --extra local-commons python tools/privacy-filter-e2e.py --allow-cloud
+```
+
+This is a separate, explicitly billed check. It sends invented contact details,
+a clean control and Unicode text to NEAR's `openai/privacy-filter` classification
+and redaction endpoints. A bounded loopback recorder forwards the native
+contributor's classifier responses unchanged and records synthetic request and
+response bodies without authentication headers. The real provider credential
+stays in the recorder; the contributor receives a temporary local proxy token.
+Native calls are limited to 80 requests and 256 KiB of serialized input.
+The existing local server continues to use its development gate; this does not
+qualify a server-side semantic privacy backstop or commercial rewards.
+
+The test checks personal-detail removal in the native preview, Unicode context,
+rejection of a model-mutated export before upload approval, fresh approval for
+an explicitly minimized derivative, and then attempts contribution/retrieval.
+Reports and raw synthetic responses are under ignored `artifacts/privacy-e2e/`;
+native preview and export artifacts are under `artifacts/local-commons/`.
+The daemon stops and its previous settings are restored even if a check fails.
+
+The live test exposed two blockers; **privacy-enabled contribution/retrieval
+does not currently pass**:
+
+- The gateway `/privacy/redact` response corrupts the Unicode example and leaves
+  fragments of the name and email. This reproduced for both batch and single
+  input. `/privacy/classify` returned correct codepoint spans, and native
+  contributor redaction correctly removed the names in ordinary message text.
+- Classifying serialized Orbo observations treats some generated event UUIDs as
+  secrets/account numbers. Redacting those identifiers can collapse distinct
+  events to the same placeholder, so reconstruction rejects `duplicate exported
+  event`. Removing the user text alone does not resolve this metadata problem.
+  Both affected fixtures remained pending with no submission IDs.
+
+The original classifier-free synthetic round trip still passes. Do not disable
+the exact-byte/digest checks to make the privacy test pass. The integration needs
+schema-aware handling of structural identifiers and a separately reviewed,
+stable minimized package before approving its final digest. User text still
+needs privacy filtering. The gateway Unicode bug requires a separate upstream
+fix; the contributor uses `/privacy/classify`, not `/privacy/redact`.
+
 ## Credentials by test scope
 
 | Scope | What the owner must provide |
