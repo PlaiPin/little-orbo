@@ -1,0 +1,21 @@
+{
+  "provenance": "frozen_software_acceptance_cases",
+  "unsupported_claim_tolerance": 0,
+  "cases": [
+    {"id":"present", "expected":"evidence_linked_present"},
+    {"id":"absent_view", "expected":"not_visible_in_inspected_views"},
+    {"id":"similar_object", "expected":"similarity_not_identity"},
+    {"id":"occluded", "expected":"unknown_or_additional_permitted_view"},
+    {"id":"poor_light", "expected":"reject_or_unknown"},
+    {"id":"stale_frame", "expected":"reject_capture"},
+    {"id":"inaccessible", "expected":"partial_or_unknown"},
+    {"id":"duplicate", "expected":"one_admission_one_effect"},
+    {"id":"correction", "expected":"old_revision_cannot_release_or_act"},
+    {"id":"restart", "expected":"uncertain_motion_never_replayed"},
+    {"id":"verification_failure", "expected":"no_content_or_action_release"},
+    {"id":"budget_exhausted", "expected":"bounded_partial_answer"},
+    {"id":"old_memory", "expected":"timestamped_last_seen_not_current_truth"},
+    {"id":"remote_scope", "expected":"requester_only_result"},
+    {"id":"contribution_gap", "expected":"analysis_marks_evidence_missing"}
+  ]
+}
