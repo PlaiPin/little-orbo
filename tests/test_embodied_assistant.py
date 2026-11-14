@@ -1,4 +1,5 @@
 import json
+from types import SimpleNamespace
 
 import pytest
 
@@ -162,6 +163,48 @@ async def execute(assistant, request, key="one"):
     if worker:
         await worker
     return assistant.tasks.get("owner", task["id"])
+
+
+async def test_live_evidence_does_not_promote_fixture_records_after_provider_enable(system):
+    from orbo_runtime.embodied_service import EmbodiedService
+    from orbo_runtime.providers import NearReasoner
+
+    store, assistant, robot, source, reasoner, request = system
+    task = await execute(assistant, request)
+    # Model a newly enabled provider without contacting it. Existing fixture
+    # findings must stay fixtures even when the active runtime changes.
+    provider = NearReasoner.__new__(NearReasoner)
+    provider.provenance = "live_service"
+    service = EmbodiedService.__new__(EmbodiedService)
+    service.assistant, service.store, service.owner = assistant, store, "owner"
+    service.local = SimpleNamespace(config={"near": {"enabled": True}}, reasoner=provider)
+    report = await service.call("task.evidence", {"task_id": task["id"]})
+    assert report["runtime_near_enabled"] is True
+    assert report["verified_response_count"] == 0 and report["live_service"] is False
+    assert report["evidence"] and not report["truncated"]
+    assert "red wrench" not in json.dumps(report)
+    assert "message_digest" not in json.dumps(report)
+    store.grant("owner", "memory.read", "lab", False, store.clock.utc() + 30)
+    with pytest.raises(Rejected):
+        await service.call("task.evidence", {"task_id": task["id"]})
+
+
+async def test_provider_accounting_is_independent_of_simulated_robot(system):
+    store, assistant, robot, source, reasoner, request = system
+    task = await execute(assistant, request)
+    assert task["request"]["provenance"] == "synthetic"
+    assistant.record_usage("owner", task["id"], task["revision"], {
+        "model": "test-model", "response_id": "live-request-fixture-for-test",
+        "provenance": "live_service",
+    }, {"total_tokens": 17})
+    row = store.db.execute(
+        "SELECT body FROM records WHERE external_id='live-request-fixture-for-test'"
+    ).fetchone()
+    assert json.loads(row[0])["provenance"] == "live_service"
+    original = store.db.execute(
+        "SELECT body FROM records WHERE external_id='fixture-1'"
+    ).fetchone()
+    assert json.loads(original[0])["provenance"] == "fixture"
 
 
 async def test_inspect_recall_compare_and_duplicate_are_integrated(system):

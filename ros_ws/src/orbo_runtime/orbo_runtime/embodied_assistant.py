@@ -53,7 +53,7 @@ class EmbodiedAssistant:
         """Account verified usage even when subsequent interpretation is rejected."""
         from .economics import Ledger
 
-        task = self.tasks.get(owner, task_id)
+        self.tasks.get(owner, task_id)
         Ledger(self.store).observe(
             "near",
             owner,
@@ -66,9 +66,7 @@ class EmbodiedAssistant:
                 "usage": usage,
                 "amount_known": False,
             },
-            provenance="fixture"
-            if task["request"]["provenance"] != "physical"
-            else "live_service",
+            provenance=proof.get("provenance", "fixture"),
         )
 
     async def _effect(

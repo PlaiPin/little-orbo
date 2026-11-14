@@ -2,8 +2,9 @@
 
 import asyncio
 import hashlib
+import json
 
-from .contracts import Rejected
+from .contracts import Rejected, digest
 from .embodied_assistant import EmbodiedAssistant
 from .evidence_memory import EvidenceMemory
 from .observations import LatestFrame, ObservationService
@@ -140,6 +141,61 @@ class EmbodiedService:
 
     async def call(self, method, args):
         tasks = self.assistant.tasks
+        if method == "task.evidence":
+            # Owner-local diagnostic metadata only: never raw images, prompts,
+            # model output or verification payloads. Existing records lacking
+            # explicit provider provenance cannot establish live qualification.
+            from .providers import NearReasoner
+
+            task = tasks.get(self.owner, args["task_id"])
+            self.store.permission(self.owner, "memory.read", task["environment"])
+            rows = self.store.db.execute(
+                "SELECT body FROM evidence_records WHERE owner=? AND environment=? "
+                "AND kind IN ('finding','comparison') "
+                "AND json_extract(body,'$.task_id')=? "
+                "AND json_extract(body,'$.revision')=? ORDER BY created LIMIT 101",
+                (self.owner, task["environment"], task["id"], task["revision"]),
+            ).fetchall()
+            evidence = []
+            for row in rows[:100]:
+                body = json.loads(row["body"])
+                proof = body.get("proof", {})
+                verification = proof.get("verification_sha256")
+                verified = (
+                    proof.get("provider") == "near"
+                    and proof.get("provenance") == "live_service"
+                    and proof.get("e2ee") is True
+                    and proof.get("signature_kind") == "provider_tee"
+                    and isinstance(proof.get("response_id"), str)
+                    and bool(proof["response_id"])
+                    and isinstance(proof.get("model"), str)
+                    and bool(proof["model"])
+                    and isinstance(verification, str)
+                    and len(verification) == 64
+                    and all(c in "0123456789abcdef" for c in verification)
+                )
+                evidence.append({
+                    "record_id": body["id"], "task_revision": body["revision"],
+                    "model": proof.get("model"), "e2ee": proof.get("e2ee", False),
+                    "signature_kind": proof.get("signature_kind"),
+                    "response_id": proof.get("response_id"),
+                    "proof_sha256": digest(proof),
+                    "live_verified": verified,
+                })
+            configured = self.local.config.get("near", {}).get("enabled", False)
+            live_adapter = (
+                isinstance(self.local.reasoner, NearReasoner)
+                and self.local.reasoner.provenance == "live_service"
+            )
+            count = sum(item["live_verified"] for item in evidence)
+            return {
+                "task_id": task["id"], "revision": task["revision"],
+                "runtime_near_enabled": configured,
+                "live_service": bool(configured and live_adapter and count),
+                "verified_response_count": count, "evidence": evidence,
+                "truncated": len(rows) > 100,
+                "verification": "recorded_at_inference_not_reverified",
+            }
         if method == "place.register":
             return tasks.places.register(
                 self.owner, self.environment, self.map_version, **args

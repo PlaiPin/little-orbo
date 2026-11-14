@@ -59,6 +59,9 @@ class NearReasoner:
     ):
         if not model or timeout <= 0 or timeout > 120:
             raise Rejected("invalid reasoning configuration")
+        # Provider provenance is independent of whether the robot is simulated.
+        # An injected SDK client is test evidence until separately established.
+        self.provenance = "live_service" if client is None else "fixture"
         if client is None:
             from nearai_inference_sdk import InferenceClient
 
@@ -101,6 +104,7 @@ class NearReasoner:
                 raise Rejected("response exceeds local limit")
             evidence = {
                 "provider": "near",
+                "provenance": self.provenance,
                 "model": self.model,
                 "e2ee": True,
                 "signature_kind": verified.signature_kind,

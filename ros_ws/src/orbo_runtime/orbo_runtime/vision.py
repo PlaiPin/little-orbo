@@ -12,7 +12,7 @@ import math
 
 from .contracts import Rejected, canonical, digest
 from .evidence_memory import label
-from .providers import VerifiedReply
+from .providers import NearReasoner, VerifiedReply
 
 
 FINDING_KEYS = {
@@ -263,6 +263,10 @@ class VerifiedVision:
                 }
                 if "verified_at" in proof:
                     accounting_proof["verified_at"] = proof["verified_at"]
+                accounting_proof["provenance"] = (
+                    "live_service" if isinstance(self.reasoner, NearReasoner)
+                    and self.reasoner.provenance == "live_service" else "fixture"
+                )
                 self.usage_recorder(
                     owner, task_id, revision, accounting_proof, reply.usage
                 )
@@ -285,6 +289,14 @@ class VerifiedVision:
             return (
                 result,
                 {
+                    "provider": "near",
+                    "e2ee": True,
+                    "provenance": (
+                        "live_service" if isinstance(self.reasoner, NearReasoner)
+                        and self.reasoner.provenance == "live_service" else "fixture"
+                    ),
+                    "verification_sha256": digest(proof["verification"])
+                    if proof.get("verification") else None,
                     "model": proof["model"],
                     "response_id": proof["response_id"],
                     "signature_kind": proof["signature_kind"],
