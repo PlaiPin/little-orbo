@@ -33,6 +33,34 @@ We built Orbo, a protocol that gives any robot the privacy of local AI at the pr
 
 ![Owner journey: set up, do work, review and contribute](diagrams/near-owner-journey.png)
 
+# Orbo Protocol
+
+The Orbo protocol is a set of rules for how a robot shares data with AI models. It works with any robot, not only Little Orbo.
+
+- **Two brains.** A conversation model (GPT-Live) hears, reasons and speaks. A private model (NEAR AI) looks at multi-modal data and reasons.
+- **Home data stay private.** Private data of your home go only to NEAR AI. The conversation model receives a short text answer: the action, the location, and the result.
+- **You approve what leaves.** No data is shared unless you review and approve it first.
+
+# BOM of Little Orbo
+
+<img src="docs/images/little-orbo-internals.jpeg" alt="Inside Little Orbo: Raspberry Pi 5, controller board, face display, battery and servo in a 3D-printed shell" width="480">
+
+- Raspberry Pi 5
+- ESP32 1.9 with display
+- Raspberry Pi Camera
+- Micro Servos x 2
+- Dynamixel
+- Buck Converter
+- Logic Converter
+- Battery 
+- and more
+
+# Little Orbo and Booster K1
+
+
+
+# Simulation
+
 
 # Little Orbo target system
 
