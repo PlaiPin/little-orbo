@@ -1,4 +1,35 @@
 ![Orbo leans in from the right. Privacy at home, at the price of cloud.](docs/orbo-banner-wide.png)
+
+# Who we are
+
+We are a team of robotics researcher and blockchain academic researchers working on robot economic agency since 2016
+
+**Our papers**
+
+- [Robot-Human Agreements and Financial Transactions Enabled by a Blockchain and Smart Contracts](https://dl.acm.org/doi/abs/10.1145/3173386.3177818), HRI 2018
+- [Unique Cipher-Acoustic Languages for Human-Robot Interactions](https://ieeexplore.ieee.org/abstract/document/8673114), HRI 2019
+- [Robonomics: The Study of Robot-Human Peer-to-Peer Financial Transactions and Agreements](https://dl.acm.org/doi/abs/10.1145/3371382.3380735), HRI 2020
+- [AutomataDAO: A Blockchain-Based Data Marketplace for Interactive Robot and IoT Data Exchanges Using Ethermint and State Channels](https://www.springerprofessional.de/en/automatadao-a-blockchain-based-data-marketplace-for-interactive-/18972930) (**on Cosmos**), Blockchain Technologies, Springer, 2021
+
+# The problem
+
+One of the biggest blockers of robots entering the home is the concern over privacy. 60% of users (surveyed among 83 users) brought up privacy concerns because a home robot will need a camera and will move around the home. However, hardware that a good vision model can cost more than the robot itself. So the choice is a cheaper robot where the data is trusted to be handled securely or robot that is twice as expensive for the luxury of privacy. 
+
+# Our solution
+
+We built Orbo, a protocol that gives any robot the privacy of local AI at the price of cloud inference. And to prove it, we built an open-source home robot, Little Orbo.
+
+# Architecture Diagram
+
+
+# NEAR integration diagram
+
+
+# User Flow
+
+
+
+
 # Little Orbo target system
 
 The target is Raspberry Pi 5 (8 GB), Ubuntu 24.04 ARM64 / ROS 2 Jazzy, and
