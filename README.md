@@ -25,7 +25,7 @@ We built Orbo, a protocol that gives any robot the privacy of local AI at the pr
   <tr>
     <td align="center">
       <img src="docs/videos/orbo-demo.gif" alt="Orbo demo: privacy at home at the price of cloud" width="480"><br>
-      <sub><b>The Orbo demo in two minutes</b></sub>
+      <sub><b>The Orbo demo</b></sub>
     </td>
   </tr>
 </table>
@@ -106,8 +106,16 @@ The Orbo protocol is a set of rules for how a robot shares data with AI models. 
 </table>
 
 
+# Testing in Simulation
 
-# Simulation
+<table>
+  <tr>
+    <td align="center">
+      <img src="docs/videos/orbo-isaacsim.gif" alt="Orbo in Isaac Sim" width="640"><br>
+      <sub><b>"Hey Orbo, are my keys on the couch?" in Isaac Sim</b></sub>
+    </td>
+  </tr>
+</table>
 
 
 # Little Orbo target system
