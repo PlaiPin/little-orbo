@@ -19,6 +19,17 @@ One of the biggest blockers of robots entering the home is the concern over priv
 
 We built Orbo, a protocol that gives any robot the privacy of local AI at the price of cloud inference. And to prove it, we built an open-source home robot, Little Orbo.
 
+# Demo
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="docs/videos/orbo-demo.gif" alt="Orbo demo: privacy at home at the price of cloud" width="480"><br>
+      <sub><b>The Orbo demo in two minutes</b></sub>
+    </td>
+  </tr>
+</table>
+
 
 # Architecture Diagram
 
@@ -43,7 +54,14 @@ The Orbo protocol is a set of rules for how a robot shares data with AI models. 
 
 # BOM of Little Orbo
 
-<img src="docs/images/little-orbo-internals.jpeg" alt="Inside Little Orbo: Raspberry Pi 5, controller board, face display, battery and servo in a 3D-printed shell" width="480">
+<table>
+  <tr>
+    <td align="center">
+      <img src="docs/images/little-orbo-internals.jpeg" alt="Inside Little Orbo: Raspberry Pi 5, controller board, face display, battery and servo in a 3D-printed shell" width="480"><br>
+      <sub><b>What's inside Little Orbo</b></sub>
+    </td>
+  </tr>
+</table>
 
 - Raspberry Pi 5
 - ESP32 1.9 with display
@@ -56,6 +74,36 @@ The Orbo protocol is a set of rules for how a robot shares data with AI models. 
 - and more
 
 # Little Orbo and Booster K1
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="docs/images/little-orbo-.jpeg" alt="Little Orbo v0 on the workbench" height="260"><br>
+      <sub><b>Orbo v0</b></sub>
+    </td>
+    <td align="center">
+      <img src="docs/images/booster-k1-bow.jpeg" alt="Booster K1 humanoid robot doing a bow" height="260"><br>
+      <sub><b>Booster K1 bowing</b></sub>
+    </td>
+    <td align="center">
+      <img src="docs/images/booster-k1-pizza.jpg" alt="Booster K1 humanoid robot with a pizza" height="260"><br>
+      <sub><b>Robots need pizza too</b></sub>
+    </td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="docs/videos/orbo-moving.gif" alt="Little Orbo spinns" width="380"><br>
+      <sub><b>Orbo on the move</b></sub>
+    </td>
+    <td align="center">
+      <img src="docs/videos/k1-walking.gif" alt="Booster K1 humanoid robot walking down a hallway" width="380"><br>
+      <sub><b>K1 out for a walk</b></sub>
+    </td>
+  </tr>
+</table>
 
 
 
