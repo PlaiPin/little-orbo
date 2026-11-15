@@ -112,11 +112,12 @@ The Orbo protocol is a set of rules for how a robot shares data with AI models. 
   <tr>
     <td align="center">
       <img src="docs/videos/orbo-isaacsim.gif" alt="Orbo in Isaac Sim" width="640"><br>
-      <sub><b>"Hey Orbo, are my keys on the couch?" in Isaac Sim</b></sub>
+      <sub><b>Test Simulation in Isaac Sim</b></sub>
     </td>
   </tr>
 </table>
 
+Orbo runs the full keys task in simulation. GPT-Live hears the request, Orbo drives to the couch, NEAR AI checks the camera frame in private, and Orbo answers: the keys are on the floor, not on the couch.
 
 # Little Orbo target system
 
