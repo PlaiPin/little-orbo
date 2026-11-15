@@ -1,3 +1,4 @@
+![Orbo leans in from the right. Privacy at home, at the price of cloud.](docs/orbo-banner-wide.png)
 # Little Orbo target system
 
 The target is Raspberry Pi 5 (8 GB), Ubuntu 24.04 ARM64 / ROS 2 Jazzy, and
