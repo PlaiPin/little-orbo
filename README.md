@@ -52,6 +52,47 @@ The Orbo protocol is a set of rules for how a robot shares data with AI models. 
 - **Home data stay private.** Private data of your home go only to NEAR AI. The conversation model receives a short text answer: the action, the location, and the result.
 - **You approve what leaves.** No data is shared unless you review and approve it first.
 
+# How we use NEAR
+
+Orbo uses three parts of NEAR. 
+
+| NEAR product | What Orbo uses it for | Status |
+|---|---|---|
+| **NEAR AI** | Private vision and reasoning on images of your home | Live, with saved proof |
+| **Trace Commons** | Sharing robot data that the owner has reviewed and approved | Built, tested locally |
+| **NEAR Intents** | Owner-approved token swaps | Built, not yet run with funds |
+
+## NEAR AI: the private brain
+
+When Orbo takes a picture of your home, the picture goes to NEAR AI and nowhere else.
+
+- **Encrypted end to end.** The request and the answer are encrypted between the robot and the model.
+- **Verified.** Each answer is signed by NEAR AI's secure hardware. Orbo checks the signature and rejects any answer that fails the check.
+- **Only a short answer leaves.** The conversation model (GPT-Live) never sees the picture. It receives a short text result: the action, the location, and what was found.
+
+We use the `z-ai/glm-5.3-flash` model on NEAR AI. The saved runs are in [`docs/engineering/evidence/gazebo-keys/`](docs/engineering/evidence/gazebo-keys/): four signed responses, each with its response ID and a passed signature check. The code is in [`providers.py`](ros_ws/src/orbo_runtime/orbo_runtime/providers.py) and [`vision.py`](ros_ws/src/orbo_runtime/orbo_runtime/vision.py).
+
+## Trace Commons: you own your data
+
+Robot companies pay for real-world data. With Orbo, the owner decides if any of it is shared.
+
+- Orbo keeps a private record of each task on the robot.
+- The owner reviews the exact data before it leaves, and approves it or keeps it local.
+- Approved data goes to Trace Commons. Nothing is sent without that approval.
+
+This flow runs end to end in a local test with synthetic data. It is not yet connected to a live Trace Commons server. We do not have the invite code to test it live. See [`integrations/trace_commons/`](integrations/trace_commons/README.md).
+
+## NEAR Intents: owner-approved swaps
+
+Orbo includes a command for token swaps through NEAR Intents.
+
+- The owner sets the limits first: which tokens, the maximum amount, and the minimum to receive.
+- Orbo gets a signed quote and shows it to the owner.
+- Orbo sends the transfer only after the owner approves that exact quote.
+
+The robot and the voice model cannot start a swap. Only the owner can. The code is complete and tested offline, and it has not yet been run with real funds, pending access to live Trace Commons server. See [`integrations/near_intents/`](integrations/near_intents/README.md).
+
+
 # BOM of Little Orbo
 
 <table>
