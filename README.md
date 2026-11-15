@@ -19,15 +19,19 @@ One of the biggest blockers of robots entering the home is the concern over priv
 
 We built Orbo, a protocol that gives any robot the privacy of local AI at the price of cloud inference. And to prove it, we built an open-source home robot, Little Orbo.
 
+
 # Architecture Diagram
+
+![Orbo architecture: GPT-Live conversation, Pi task coordinator, NEAR private vision and Trace Commons](diagrams/architecture.png)
 
 
 # NEAR integration diagram
 
+![NEAR integration: NEAR AI reasoning, Trace Commons contribution and credit](diagrams/near-stage-one.png)
 
 # User Flow
 
-
+![Owner journey: set up, do work, review and contribute](diagrams/near-owner-journey.png)
 
 
 # Little Orbo target system
