@@ -13,7 +13,7 @@ We are a team of robotics researcher and blockchain academic researchers working
 
 # The problem
 
-One of the biggest blockers of robots entering the home is the concern over privacy. 60% of users (surveyed among 83 users) brought up privacy concerns because a home robot will need a camera and will move around the home. However, hardware that a good vision model can cost more than the robot itself. So the choice is a cheaper robot where the data is trusted to be handled securely or robot that is twice as expensive for the luxury of privacy. 
+One of the biggest blockers of robots entering the home is the concern over privacy. 60% of users (surveyed among 83 users) brought up privacy concerns because a home robot will need a camera and will move around the home. However, hardware that can run a good vision model can cost more than the robot itself. So the choice is a cheaper robot where the data is trusted to be handled securely or robot that is twice as expensive for the luxury of privacy. 
 
 # Our solution
 
@@ -90,7 +90,7 @@ Orbo includes a command for token swaps through NEAR Intents.
 - Orbo gets a signed quote and shows it to the owner.
 - Orbo sends the transfer only after the owner approves that exact quote.
 
-The robot and the voice model cannot start a swap. Only the owner can. The code is complete and tested offline, and it has not yet been run with real funds, pending access to live Trace Commons server. See [`integrations/near_intents/`](integrations/near_intents/README.md).
+The robot and the voice model cannot start a swap. Only the owner can. The code is complete and tested offline, and it has not yet been run with real funds,because Orbo has no earnings to swap until Trace Commons payouts are live. See [`integrations/near_intents/`](integrations/near_intents/README.md).
 
 
 # BOM of Little Orbo
@@ -159,6 +159,8 @@ The robot and the voice model cannot start a swap. Only the owner can. The code 
 </table>
 
 Orbo runs the full keys task in simulation. GPT-Live hears the request, Orbo drives to the couch, NEAR AI checks the camera frame in private, and Orbo answers: the keys are on the floor, not on the couch.
+
+You can run this simulation on a Mac with no robot. See [Gazebo room simulation on the Mac](#gazebo-room-simulation-on-the-mac) below, or the full [simulation quick start](SIMULATION_QUICKSTART.md).
 
 # Little Orbo target system
 
